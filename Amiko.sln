@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amiko.Client", "Amiko.Clien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amiko.Server", "Amiko.Server\Amiko.Server.csproj", "{B0CA92D0-07BC-46F4-9790-89034022E976}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Amiko.Common", "Amiko.Common\Amiko.Common.csproj", "{A601A2A1-2081-4BA7-9B13-206D19953FD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{B0CA92D0-07BC-46F4-9790-89034022E976}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0CA92D0-07BC-46F4-9790-89034022E976}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0CA92D0-07BC-46F4-9790-89034022E976}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A601A2A1-2081-4BA7-9B13-206D19953FD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A601A2A1-2081-4BA7-9B13-206D19953FD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A601A2A1-2081-4BA7-9B13-206D19953FD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A601A2A1-2081-4BA7-9B13-206D19953FD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -33,16 +33,16 @@ namespace Amiko.Server.Controllers
                     var buffer = new byte[1024];
                     var response = await client.ReceiveAsync(buffer, CancellationToken.None);
 
-                    if (response.MessageType == WebSocketMessageType.Text)
+                    if (response.MessageType == WebSocketMessageType.Binary)
                     {
-                        _logger.Log(LogLevel.Information, Encoding.UTF8.GetString(buffer));
+                        _logger.Log(LogLevel.Information, $"Message received of size {buffer.Length}");
 
                         List<Task> tasks = [];
                         lock (_sockets)
                         {
                             foreach (var s in _sockets)
                             {
-                                Task t = s.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                                Task t = s.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
                                 tasks.Add(t);
                             }
                         }

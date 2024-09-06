@@ -1,4 +1,6 @@
-﻿using System.Net.WebSockets;
+﻿using Amiko.Common;
+using ProtoBuf;
+using System.Net.WebSockets;
 using System.Text;
 
 namespace Amiko.Client
@@ -23,14 +25,23 @@ namespace Amiko.Client
         {
             while (true)
             {
-                var buffer = new byte[1024];
-                var response = await sock.ReceiveAsync(buffer, CancellationToken.None);
-                buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: Need proper protocol
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                try
                 {
-                    Data.Text += $"> {Encoding.UTF8.GetString(buffer)}\n";
-                });
+                    var buffer = new byte[1024];
+                    await sock.ReceiveAsync(buffer, CancellationToken.None);
+                    buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: ew
+                    using MemoryStream ms = new(buffer);
+                    var prot = Serializer.Deserialize<Message>(ms);
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        Data.Text += $"{prot.Name}: {prot.Content}\n";
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await Task.Delay(100);
+                }
             }
         }
 
@@ -53,15 +64,22 @@ namespace Amiko.Client
         {
             var msg = Input.Text;
             Input.Text = string.Empty;
-            Data.Text += $"< {msg}\n";
+            Data.Text += $"> {msg}\n";
+
+            var prot = new Message()
+            {
+                Name = "Unnamed",
+                Content = msg
+            };
 
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    var encoded = Encoding.UTF8.GetBytes(msg);
-                    var buff = new ArraySegment<byte>(encoded, 0, encoded.Length);
-                    await sock.SendAsync(buff, WebSocketMessageType.Text, true, CancellationToken.None);
+                    using MemoryStream ms = new();
+                    Serializer.Serialize(ms, prot);
+                    Console.WriteLine(ms.ToArray().Length);
+                    await sock.SendAsync(ms.ToArray(), WebSocketMessageType.Binary, true, CancellationToken.None);
                     //SemanticScreenReader.Announce("Message sent");
                 }
                 catch (Exception ex)
