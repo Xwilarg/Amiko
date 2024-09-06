@@ -1,12 +1,10 @@
-name: Linux
+name: Dotnet Desktop
 
 on:
   push:
-    branches: [ master, v5 ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
-  schedule:
-    - cron: 1 1 * * *
 
 jobs:
   build:
