@@ -1,7 +1,6 @@
 ﻿using Amiko.Common;
 using ProtoBuf;
 using System.Net.WebSockets;
-using System.Text;
 
 namespace Amiko.Client
 {
@@ -49,7 +48,7 @@ namespace Amiko.Client
         {
             try
             {
-                await sock.ConnectAsync(new("ws://localhost:5000/ws"), CancellationToken.None);
+                await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
                 SendButton.IsEnabled = true;
                 Data.Text += "Connected\n";
                 //SemanticScreenReader.Announce("Connected");
