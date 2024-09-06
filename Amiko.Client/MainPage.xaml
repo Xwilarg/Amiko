@@ -16,7 +16,7 @@
                 x:Name="Data"
                 IsReadOnly="True"
                 MinimumHeightRequest="500" />
-            <Entry x:Name="Input" />
+            <Entry x:Name="Input" Completed="OnSendMessage" />
             <Button
                 x:Name="SendButton"
                 Clicked="OnSendMessage"

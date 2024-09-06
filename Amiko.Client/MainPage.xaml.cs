@@ -6,7 +6,10 @@ namespace Amiko.Client
 {
     public partial class MainPage : ContentPage
     {
-        ClientWebSocket sock;
+        /// <summary>
+        /// Handle connection with server
+        /// </summary>
+        private ClientWebSocket sock;
 
         public MainPage()
         {
