@@ -21,10 +21,10 @@
 		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>Amiko.Client</ApplicationTitle>
+		<ApplicationTitle>Amiko</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.amiko.client</ApplicationId>
+		<ApplicationId>eu.zirk.amiko</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
