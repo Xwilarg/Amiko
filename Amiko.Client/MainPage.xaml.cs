@@ -1,7 +1,6 @@
 ﻿using Amiko.Common;
 using ProtoBuf;
 using System.Net.WebSockets;
-using System.Xml.Linq;
 
 namespace Amiko.Client
 {
@@ -31,14 +30,22 @@ namespace Amiko.Client
         {
             MessageList.Children.Add(new MessageView(string.Empty, message, type));
 
-            MessageScroll.ScrollToAsync(MessageScroll, ScrollToPosition.End, true);
+            ScrollDown();
         }
 
         private void AddMessage(string name, string content, MessageType type)
         {
             MessageList.Children.Add(new MessageView(name, content, type));
 
-            MessageScroll.ScrollToAsync(MessageScroll, ScrollToPosition.End, true);
+            ScrollDown();
+        }
+
+        private void ScrollDown() // TODO: Use proper container instead
+        {
+            _ = new Timer((object? _obj) => {
+                MainThread.BeginInvokeOnMainThread(() =>
+            MessageScroll.ScrollToAsync(MessageList, ScrollToPosition.End, true));
+            }, null, 1, Timeout.Infinite);
         }
 
         private async Task ListenAsync()
