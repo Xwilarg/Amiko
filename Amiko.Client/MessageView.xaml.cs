@@ -13,7 +13,7 @@ public partial class MessageView : ContentView
             MessageType.Info => new Color(76, 235, 52),
             MessageType.Error => new Color(235, 52, 52),
             MessageType.User => new Color(237, 237, 237),
-            MessageType.Self => new Color(237, 237, 237),
+            MessageType.Self => new Color(84, 133, 255),
             _ => throw new NotImplementedException()
         };
         Content.TextColor = type switch
@@ -21,7 +21,7 @@ public partial class MessageView : ContentView
             MessageType.Info => new Color(76, 235, 52),
             MessageType.Error => new Color(235, 52, 52),
             MessageType.User => new Color(237, 237, 237),
-            MessageType.Self => new Color(84, 133, 255),
+            MessageType.Self => new Color(237, 237, 237),
             _ => throw new NotImplementedException()
         };
     }
