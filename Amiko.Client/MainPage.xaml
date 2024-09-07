@@ -17,7 +17,7 @@
 
             <Border BackgroundColor="Black">
                 <StackLayout HeightRequest="500">
-                    <ScrollView>
+                    <ScrollView x:Name="MessageScroll" VerticalOptions="FillAndExpand">
                         <VerticalStackLayout x:Name="MessageList" />
                     </ScrollView>
                 </StackLayout>

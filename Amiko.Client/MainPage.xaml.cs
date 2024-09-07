@@ -30,11 +30,15 @@ namespace Amiko.Client
         private void AddError(string message, MessageType type)
         {
             MessageList.Children.Add(new MessageView(string.Empty, message, type));
+
+            MessageScroll.ScrollToAsync(MessageScroll, ScrollToPosition.End, true);
         }
 
         private void AddMessage(string name, string content, MessageType type)
         {
             MessageList.Children.Add(new MessageView(name, content, type));
+
+            MessageScroll.ScrollToAsync(MessageScroll, ScrollToPosition.End, true);
         }
 
         private async Task ListenAsync()
@@ -79,6 +83,9 @@ namespace Amiko.Client
         private void OnSendMessage(object sender, EventArgs e)
         {
             var msg = Input.Text;
+
+            if (string.IsNullOrWhiteSpace(msg)) return;
+
             Input.Text = string.Empty;
             AddMessage(Username.Text, msg, MessageType.Self);
 
