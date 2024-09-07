@@ -18,20 +18,23 @@ namespace Amiko.Client
 
             Appearing += async (s, e) =>
             {
+                Username.Text = $"User {new Random().Next(0, 10000):0000}";
+
                 sock = new();
+                AddError("Connecting...", MessageType.Info);
                 await ConnectAsync();
                 _ = Task.Run(ListenAsync);
             };
         }
 
-        private void AddError(string message)
+        private void AddError(string message, MessageType type)
         {
-            MessageList.Children.Add(new MessageView(string.Empty, message));
+            MessageList.Children.Add(new MessageView(string.Empty, message, type));
         }
 
-        private void AddMessage(string name, string content)
+        private void AddMessage(string name, string content, MessageType type)
         {
-            MessageList.Children.Add(new MessageView(name, content));
+            MessageList.Children.Add(new MessageView(name, content, type));
         }
 
         private async Task ListenAsync()
@@ -48,7 +51,7 @@ namespace Amiko.Client
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        AddMessage(prot.Name, prot.Content);
+                        AddMessage(prot.Name, prot.Content, MessageType.User);
                     });
                 }
                 catch (Exception ex)
@@ -64,12 +67,12 @@ namespace Amiko.Client
             {
                 await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
                 SendButton.IsEnabled = true;
-                AddError("Connected");
+                AddError("Connected", MessageType.Info);
                 //SemanticScreenReader.Announce("Connected");
             }
             catch (Exception ex)
             {
-                AddError($"Error while connecting: {ex.Message}");
+                AddError($"Error while connecting: {ex.Message}", MessageType.Error);
             }
         }
 
@@ -77,11 +80,11 @@ namespace Amiko.Client
         {
             var msg = Input.Text;
             Input.Text = string.Empty;
-            AddMessage("Me", msg);
+            AddMessage(Username.Text, msg, MessageType.Self);
 
             var prot = new Message()
             {
-                Name = "Unnamed",
+                Name = Username.Text,
                 Content = msg
             };
 
@@ -97,7 +100,7 @@ namespace Amiko.Client
                 }
                 catch (Exception ex)
                 {
-                    AddError($"Error while sending message: {ex.Message}");
+                    AddError($"Error while sending message: {ex.Message}", MessageType.Error);
                 }
             });
         }

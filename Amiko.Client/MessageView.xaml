@@ -6,6 +6,7 @@
     <HorizontalStackLayout>
         <Label
             x:Name="Name"
+            Padding="10,0,0,0"
             Text="Test"
             WidthRequest="100" />
         <Label x:Name="Content" Padding="50,0,0,0" />
