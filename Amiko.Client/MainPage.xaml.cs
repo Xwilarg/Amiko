@@ -1,6 +1,7 @@
 ﻿using Amiko.Common;
 using ProtoBuf;
 using System.Net.WebSockets;
+using System.Xml.Linq;
 
 namespace Amiko.Client
 {
@@ -23,6 +24,16 @@ namespace Amiko.Client
             };
         }
 
+        private void AddError(string message)
+        {
+            MessageList.Children.Add(new MessageView(string.Empty, message));
+        }
+
+        private void AddMessage(string name, string content)
+        {
+            MessageList.Children.Add(new MessageView(name, content));
+        }
+
         private async Task ListenAsync()
         {
             while (true)
@@ -37,7 +48,7 @@ namespace Amiko.Client
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        Data.Text += $"{prot.Name}: {prot.Content}\n";
+                        AddMessage(prot.Name, prot.Content);
                     });
                 }
                 catch (Exception ex)
@@ -53,12 +64,12 @@ namespace Amiko.Client
             {
                 await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
                 SendButton.IsEnabled = true;
-                Data.Text += "Connected\n";
+                AddError("Connected");
                 //SemanticScreenReader.Announce("Connected");
             }
             catch (Exception ex)
             {
-                Data.Text += $"Error while connecting: {ex.Message}\n";
+                AddError($"Error while connecting: {ex.Message}");
             }
         }
 
@@ -66,7 +77,7 @@ namespace Amiko.Client
         {
             var msg = Input.Text;
             Input.Text = string.Empty;
-            Data.Text += $"> {msg}\n";
+            AddMessage("Me", msg);
 
             var prot = new Message()
             {
@@ -86,7 +97,7 @@ namespace Amiko.Client
                 }
                 catch (Exception ex)
                 {
-                    Data.Text += $"Error while sending message: {ex.Message}\n";
+                    AddError($"Error while sending message: {ex.Message}");
                 }
             });
         }

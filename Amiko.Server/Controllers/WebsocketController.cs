@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
-using System.Text;
 
 namespace Amiko.Server.Controllers
 {
@@ -40,7 +39,7 @@ namespace Amiko.Server.Controllers
                         List<Task> tasks = [];
                         lock (_sockets)
                         {
-                            foreach (var s in _sockets)
+                            foreach (var s in _sockets.Where(x => x != client))
                             {
                                 Task t = s.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
                                 tasks.Add(t);
