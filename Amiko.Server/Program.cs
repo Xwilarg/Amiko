@@ -1,3 +1,5 @@
+using Amiko.Server.Database;
+
 namespace Amiko.Server
 {
     public class Program
@@ -10,6 +12,7 @@ namespace Amiko.Server
 
             // Add services to the container.
 
+            builder.Services.AddDbContext<SqliteContext>();
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();

@@ -1,4 +1,7 @@
+using Amiko.Common;
+using Amiko.Server.Database;
 using Microsoft.AspNetCore.Mvc;
+using ProtoBuf;
 using System.Net.WebSockets;
 
 namespace Amiko.Server.Controllers
@@ -8,13 +11,15 @@ namespace Amiko.Server.Controllers
     public class WebsocketController : ControllerBase
     {
         private readonly ILogger<WebsocketController> _logger;
+        private SqliteContext _dbContext;
 
-        public WebsocketController(ILogger<WebsocketController> logger)
+        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext)
         {
             _logger = logger;
+            _dbContext = dbContext;
         }
 
-        private static readonly List<WebSocket> _sockets = new();
+        private static readonly List<WebSocket> _sockets = [];
 
         [Route("/ws")]
         public async Task Get()
@@ -35,6 +40,18 @@ namespace Amiko.Server.Controllers
                     if (response.MessageType == WebSocketMessageType.Binary)
                     {
                         _logger.Log(LogLevel.Information, $"Message received of size {buffer.Length}");
+
+                        buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: ew
+                        using MemoryStream ms = new(buffer);
+                        var prot = Serializer.Deserialize<Message>(ms);
+
+                        ContextInterpreter.Get(_dbContext).AddMessage(new()
+                        {
+                            CreationTime = DateTime.Now,
+                            Id = Guid.NewGuid(),
+                            Username = prot.Name,
+                            Message = prot.Content
+                        });
 
                         List<Task> tasks = [];
                         lock (_sockets)
