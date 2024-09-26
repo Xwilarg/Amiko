@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20240926123900_InitialCreate")]
+    [Migration("20240926130042_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

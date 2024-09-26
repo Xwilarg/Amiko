@@ -59,11 +59,14 @@ namespace Amiko.Client
                     await sock.ReceiveAsync(buffer, CancellationToken.None);
                     buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: ew
                     using MemoryStream ms = new(buffer);
-                    var prot = Serializer.Deserialize<Message>(ms);
+                    var prot = Serializer.Deserialize<Message[]>(ms);
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        AddMessage(prot.Name, prot.Content, MessageType.User);
+                        foreach (var msg in prot)
+                        {
+                            AddMessage(msg.Name, msg.Content, MessageType.User);
+                        }
                     });
                 }
                 catch (Exception ex)

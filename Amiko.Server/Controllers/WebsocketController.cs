@@ -34,7 +34,7 @@ namespace Amiko.Server.Controllers
 
                 // First connection: send all messages
                 using MemoryStream oms = new();
-                Serializer.Serialize(oms, ContextInterpreter.Get(_dbContext).AllMessages);
+                Serializer.Serialize(oms, ContextInterpreter.Get(_dbContext).AllMessages());
                 await client.SendAsync(oms.ToArray(), WebSocketMessageType.Binary, true, CancellationToken.None);
 
                 while (true)

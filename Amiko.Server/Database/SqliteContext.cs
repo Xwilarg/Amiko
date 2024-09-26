@@ -38,11 +38,14 @@ public class ContextInterpreter
         _ctx.SaveChanges();
     }
 
-    public IEnumerable<Message> AllMessages => !_ctx.Channels.Any() ? [] : _ctx.Channels.First().Messages.Select(x => new Message()
+    public IEnumerable<Message> AllMessages()
     {
-        Name = x.Username,
-        Content = x.Message
-    });
+        return !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x => new Message()
+        {
+            Name = x.Username,
+            Content = x.Message
+        });
+    }
 }
 
 public class SqliteContext : DbContext
@@ -58,7 +61,7 @@ public class ChannelContext
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public string Name { set; get; }
-    public List<MessageContext> Messages { set; get; } = new();
+    public List<MessageContext> Messages { set; get; }
 }
 
 public class MessageContext
