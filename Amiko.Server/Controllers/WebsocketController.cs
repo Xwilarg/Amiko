@@ -49,13 +49,15 @@ namespace Amiko.Server.Controllers
                         // Save to db
                         buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: ew
                         using MemoryStream ms = new(buffer);
+                        var now = DateTime.UtcNow;
                         var prot = Serializer.Deserialize<Message>(ms);
                         ContextInterpreter.Get(_dbContext).AddMessage(new()
                         {
-                            CreationTime = DateTime.Now,
+                            CreationTime = now,
                             Username = prot.Name,
                             Message = prot.Content
                         });
+                        prot.SentAt = now;
 
                         // Send message back
                         List<Task> tasks = [];
@@ -63,7 +65,9 @@ namespace Amiko.Server.Controllers
                         {
                             foreach (var s in _sockets.Where(x => x != client))
                             {
-                                Task t = s.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
+                                using MemoryStream ims = new();
+                                Serializer.Serialize(ims, prot);
+                                Task t = s.SendAsync(ims.ToArray(), WebSocketMessageType.Binary, true, CancellationToken.None);
                                 tasks.Add(t);
                             }
                         }

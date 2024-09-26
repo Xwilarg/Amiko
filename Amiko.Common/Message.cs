@@ -15,4 +15,6 @@ public class Message : BaseMessage
     public string Name { get; set; }
     [ProtoMember(3)]
     public string Content { get; set; }
+    [ProtoMember(4)]
+    public DateTime SentAt { get; set; }
 }

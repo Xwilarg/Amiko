@@ -1,7 +1,8 @@
-﻿using Amiko.Common;
+﻿using Amiko.Client.Data;
+using Amiko.Common;
 using ProtoBuf;
-using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Text.Json;
 
 namespace Amiko.Client
 {
@@ -11,32 +12,60 @@ namespace Amiko.Client
         /// Handle connection with server
         /// </summary>
         private ClientWebSocket sock;
+        private Config _config;
+
+        private string userConfigPath = Path.Combine(FileSystem.AppDataDirectory, "config.json");
 
         public MainPage()
         {
             InitializeComponent();
 
+            if (File.Exists(userConfigPath))
+            {
+                _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(userConfigPath));
+                if (_config.Username == null) _config.Username = $"User {new Random().Next(0, 10000):0000}";
+            }
+            else
+            {
+                _config = new()
+                {
+                    Username = $"User {new Random().Next(0, 10000):0000}"
+                };
+                File.WriteAllText(userConfigPath, JsonSerializer.Serialize(_config));
+            }
+
             Appearing += async (s, e) =>
             {
-                Username.Text = $"User {new Random().Next(0, 10000):0000}";
+                Username.Text = _config.Username;
 
                 sock = new();
                 AddError("Connecting...", MessageType.Info);
                 await ConnectAsync();
                 _ = Task.Run(ListenAsync);
             };
+
+            Loaded += (s, e) => // https://stackoverflow.com/a/76368188
+            {
+                _ = Task.Delay(200).ContinueWith(t =>
+                {
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        Input.Focus();
+                    });
+                });
+            };
         }
 
         private void AddError(string message, MessageType type)
         {
-            MessageList.Children.Add(new MessageView(string.Empty, message, type));
+            MessageList.Children.Add(new MessageView(string.Empty, message, DateTime.Now, type));
 
             ScrollDown();
         }
 
-        private void AddMessage(string name, string content, MessageType type)
+        private void AddMessage(string name, string content, DateTime time, MessageType type)
         {
-            MessageList.Children.Add(new MessageView(name, content, type));
+            MessageList.Children.Add(new MessageView(name, content, time, type));
 
             ScrollDown();
         }
@@ -65,7 +94,8 @@ namespace Amiko.Client
                     {
                         foreach (var msg in prot)
                         {
-                            AddMessage(msg.Name, msg.Content, MessageType.User);
+                            TimeZoneInfo systemTimeZone = TimeZoneInfo.Local;
+                            AddMessage(msg.Name, msg.Content, TimeZoneInfo.ConvertTimeFromUtc(msg.SentAt, systemTimeZone), MessageType.User);
                         }
                     });
                 }
@@ -80,11 +110,11 @@ namespace Amiko.Client
         {
             try
             {
-                if (Debugger.IsAttached)
+                /*if (Debugger.IsAttached)
                 {
                     await sock.ConnectAsync(new("ws://localhost:5129/ws"), CancellationToken.None);
                 }
-                else
+                else*/
                 {
                     await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
                 }
@@ -104,8 +134,15 @@ namespace Amiko.Client
 
             if (string.IsNullOrWhiteSpace(msg)) return;
 
+            if (Username.Text != _config.Username)
+            {
+                _config.Username = Username.Text.Trim();
+                Username.Text = _config.Username;
+                File.WriteAllText(userConfigPath, JsonSerializer.Serialize(_config));
+            }
+
             Input.Text = string.Empty;
-            AddMessage(Username.Text, msg, MessageType.Self);
+            AddMessage(_config.Username, msg, DateTime.Now, MessageType.Self);
 
             var prot = new Message()
             {

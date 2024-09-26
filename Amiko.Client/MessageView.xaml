@@ -5,9 +5,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
     <HorizontalStackLayout>
         <Label
+            x:Name="Time"
+            Padding="10,0,0,0"
+            FontSize="10"
+            VerticalTextAlignment="Center"
+            WidthRequest="200" />
+        <Label
             x:Name="Name"
             Padding="10,0,0,0"
-            Text="Test"
             WidthRequest="100" />
         <Label x:Name="Content" Padding="50,0,0,0" />
     </HorizontalStackLayout>

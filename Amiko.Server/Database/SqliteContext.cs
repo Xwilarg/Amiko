@@ -43,7 +43,8 @@ public class ContextInterpreter
         return !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x => new Message()
         {
             Name = x.Username,
-            Content = x.Message
+            Content = x.Message,
+            SentAt = x.CreationTime
         });
     }
 }

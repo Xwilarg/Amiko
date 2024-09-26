@@ -2,12 +2,13 @@ namespace Amiko.Client;
 
 public partial class MessageView : ContentView
 {
-	public MessageView(string name, string content, MessageType type)
+	public MessageView(string name, string content, DateTime date, MessageType type)
 	{
 		InitializeComponent();
 
         Name.Text = name;
         Content.Text = content;
+        Time.Text = date.ToString("yyyy/MM/dd HH:mm:ss");
         Name.TextColor = type switch
         {
             MessageType.Info => new Color(76, 235, 52),
