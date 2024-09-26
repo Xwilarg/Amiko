@@ -2,9 +2,7 @@ using Amiko.Common;
 using Amiko.Server.Database;
 using Microsoft.AspNetCore.Mvc;
 using ProtoBuf;
-using System;
 using System.Net.WebSockets;
-using System.Threading;
 
 namespace Amiko.Server.Controllers
 {
@@ -55,7 +53,6 @@ namespace Amiko.Server.Controllers
                         ContextInterpreter.Get(_dbContext).AddMessage(new()
                         {
                             CreationTime = DateTime.Now,
-                            Id = Guid.NewGuid(),
                             Username = prot.Name,
                             Message = prot.Content
                         });

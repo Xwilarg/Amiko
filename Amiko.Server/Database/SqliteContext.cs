@@ -1,7 +1,7 @@
 ﻿using Amiko.Common;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Threading.Channels;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amiko.Server.Database;
 
@@ -19,21 +19,26 @@ public class ContextInterpreter
         return new(ctx);
     }
 
-    public void AddMessage(MessageContext ctx)
+    public void AddMessage(MessageContext msh)
     {
         if (!_ctx.Channels.Any())
         {
             _ctx.Channels.Add(new()
             {
-                Id = Guid.NewGuid(),
-                Name = "Default"
+                Name = "Default",
+                Messages = [
+                    msh
+                ]
             });
         }
-        _ctx.Channels.First().Messages.Add(ctx);
+        else
+        {
+            _ctx.Channels.First().Messages.Add(msh);
+        }
         _ctx.SaveChanges();
     }
 
-    public IEnumerable<Message> AllMessages => _ctx.Channels.First().Messages.Select(x => new Message()
+    public IEnumerable<Message> AllMessages => !_ctx.Channels.Any() ? [] : _ctx.Channels.First().Messages.Select(x => new Message()
     {
         Name = x.Username,
         Content = x.Message
@@ -50,7 +55,7 @@ public class SqliteContext : DbContext
 
 public class ChannelContext
 {
-    [Key] public Guid Id { set; get; }
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.None)] public int Id { set; get; }
 
     public string Name { set; get; }
     public List<MessageContext> Messages { set; get; } = new();
@@ -58,7 +63,7 @@ public class ChannelContext
 
 public class MessageContext
 {
-    [Key] public Guid Id { set; get; }
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.None)] public int Id { set; get; }
 
     public DateTime CreationTime { set; get; }
 

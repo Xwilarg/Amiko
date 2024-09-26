@@ -15,7 +15,7 @@ namespace Amiko.Server.Migrations
                 name: "Channels",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -27,11 +27,11 @@ namespace Amiko.Server.Migrations
                 name: "MessageContext",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
                     CreationTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Message = table.Column<string>(type: "TEXT", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
-                    ChannelContextId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    ChannelContextId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
