@@ -1,28 +1,9 @@
 ﻿using Amiko.Common;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Channels;
 
 namespace Amiko.Server.Database;
-
-public class SqliteContext : DbContext
-{
-    public SqliteContext()
-    {
-        if (!Channels.Any())
-        {
-            Channels.Add(new()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Default"
-            })
-        }
-    }
-
-    public DbSet<ChannelContext> Channels { set; get; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite("Data Source=Sqlite.db");
-}
 
 public class ContextInterpreter
 {
@@ -40,7 +21,16 @@ public class ContextInterpreter
 
     public void AddMessage(MessageContext ctx)
     {
+        if (!_ctx.Channels.Any())
+        {
+            _ctx.Channels.Add(new()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Default"
+            });
+        }
         _ctx.Channels.First().Messages.Add(ctx);
+        _ctx.SaveChanges();
     }
 
     public IEnumerable<Message> AllMessages => _ctx.Channels.First().Messages.Select(x => new Message()
@@ -48,6 +38,14 @@ public class ContextInterpreter
         Name = x.Username,
         Content = x.Message
     });
+}
+
+public class SqliteContext : DbContext
+{
+    public DbSet<ChannelContext> Channels { set; get; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlite("Data Source=Sqlite.db");
 }
 
 public class ChannelContext

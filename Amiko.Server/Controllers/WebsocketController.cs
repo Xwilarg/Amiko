@@ -2,7 +2,9 @@ using Amiko.Common;
 using Amiko.Server.Database;
 using Microsoft.AspNetCore.Mvc;
 using ProtoBuf;
+using System;
 using System.Net.WebSockets;
+using System.Threading;
 
 namespace Amiko.Server.Controllers
 {
@@ -32,6 +34,11 @@ namespace Amiko.Server.Controllers
                     _sockets.Add(client);
                 }
 
+                // First connection: send all messages
+                using MemoryStream oms = new();
+                Serializer.Serialize(oms, ContextInterpreter.Get(_dbContext).AllMessages);
+                await client.SendAsync(oms.ToArray(), WebSocketMessageType.Binary, true, CancellationToken.None);
+
                 while (true)
                 {
                     var buffer = new byte[1024];
@@ -41,10 +48,10 @@ namespace Amiko.Server.Controllers
                     {
                         _logger.Log(LogLevel.Information, $"Message received of size {buffer.Length}");
 
+                        // Save to db
                         buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: ew
                         using MemoryStream ms = new(buffer);
                         var prot = Serializer.Deserialize<Message>(ms);
-
                         ContextInterpreter.Get(_dbContext).AddMessage(new()
                         {
                             CreationTime = DateTime.Now,
@@ -53,6 +60,7 @@ namespace Amiko.Server.Controllers
                             Message = prot.Content
                         });
 
+                        // Send message back
                         List<Task> tasks = [];
                         lock (_sockets)
                         {

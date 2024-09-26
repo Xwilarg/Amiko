@@ -1,5 +1,6 @@
 ﻿using Amiko.Common;
 using ProtoBuf;
+using System.Diagnostics;
 using System.Net.WebSockets;
 
 namespace Amiko.Client
@@ -76,7 +77,14 @@ namespace Amiko.Client
         {
             try
             {
-                await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
+                if (Debugger.IsAttached)
+                {
+                    await sock.ConnectAsync(new("ws://localhost:5129/ws"), CancellationToken.None);
+                }
+                else
+                {
+                    await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
+                }
                 SendButton.IsEnabled = true;
                 AddError("Connected", MessageType.Info);
                 //SemanticScreenReader.Announce("Connected");
@@ -108,7 +116,6 @@ namespace Amiko.Client
                 {
                     using MemoryStream ms = new();
                     Serializer.Serialize(ms, prot);
-                    Console.WriteLine(ms.ToArray().Length);
                     await sock.SendAsync(ms.ToArray(), WebSocketMessageType.Binary, true, CancellationToken.None);
                     //SemanticScreenReader.Announce("Message sent");
                 }
