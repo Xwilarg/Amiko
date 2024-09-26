@@ -55,7 +55,7 @@ public class SqliteContext : DbContext
 
 public class ChannelContext
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.None)] public int Id { set; get; }
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public string Name { set; get; }
     public List<MessageContext> Messages { set; get; } = new();
@@ -63,7 +63,7 @@ public class ChannelContext
 
 public class MessageContext
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.None)] public int Id { set; get; }
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public DateTime CreationTime { set; get; }
 

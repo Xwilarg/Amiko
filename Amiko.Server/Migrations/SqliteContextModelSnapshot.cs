@@ -20,6 +20,7 @@ namespace Amiko.Server.Migrations
             modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -34,6 +35,7 @@ namespace Amiko.Server.Migrations
             modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ChannelContextId")
