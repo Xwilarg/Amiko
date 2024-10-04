@@ -1,6 +1,7 @@
 ﻿using Amiko.Client.Data;
 using Amiko.Common;
 using ProtoBuf;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text.Json;
 
@@ -110,11 +111,11 @@ namespace Amiko.Client
         {
             try
             {
-                /*if (Debugger.IsAttached)
+                if (Debugger.IsAttached)
                 {
                     await sock.ConnectAsync(new("ws://localhost:5129/ws"), CancellationToken.None);
                 }
-                else*/
+                else
                 {
                     await sock.ConnectAsync(new("ws://amiko.zirk.eu/ws"), CancellationToken.None);
                 }

@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Amiko.Client;
 
 public partial class MessageView : ContentView
@@ -25,6 +27,15 @@ public partial class MessageView : ContentView
             MessageType.Self => new Color(237, 237, 237),
             _ => throw new NotImplementedException()
         };
+
+        foreach (var m in Regex.Matches(content, "https?:\\/\\/[^ ]+").Cast<Match>())
+        {
+            var url = m.Value;
+            if (url.EndsWith(".png") || url.EndsWith(".jpg") || url.EndsWith(".jpeg"))
+            {
+                MessageContent.Add(new MessageImageView(new Uri(url)));
+            }
+        }
     }
 }
 
