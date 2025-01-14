@@ -57,7 +57,12 @@ namespace Amiko.Server.Controllers
                             Username = prot.Name,
                             Message = prot.Content
                         });
-                        prot.SentAt = now;
+                        var d = now.ToUniversalTime() - DateTime.UnixEpoch;
+                        prot.SentAt = new()
+                        {
+                            Seconds = (long)Math.Floor(d.TotalSeconds),
+                            Nanos = d.Nanoseconds
+                        };
 
                         // Send message back
                         List<Task> tasks = [];

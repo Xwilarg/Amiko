@@ -1,0 +1,25 @@
+.subtitle {
+    margin-bottom: 0 !important;
+}
+
+#messages {
+    padding: .5em;
+    height: calc(100vh - 200px);
+}
+
+.message {
+    margin-bottom: 0 !important;
+    padding: .5em;
+}
+
+.message:hover {
+    background-color: rgb(43, 43, 43);
+}
+
+.message.error {
+    color: hsl(0, 100%, 87%);
+}
+
+.message.system {
+    color: hsl(240, 100%, 87%)
+}

@@ -40,11 +40,19 @@ public class ContextInterpreter
 
     public IEnumerable<Message> AllMessages()
     {
-        return !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x => new Message()
+        return !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x =>
         {
-            Name = x.Username,
-            Content = x.Message,
-            SentAt = x.CreationTime
+            var d = x.CreationTime.ToUniversalTime() - DateTime.UnixEpoch;
+            return new Message()
+            {
+                Name = x.Username,
+                Content = x.Message,
+                SentAt = new()
+                {
+                    Seconds = (long)Math.Floor(d.TotalSeconds),
+                    Nanos = d.Nanoseconds
+                }
+            };
         });
     }
 }

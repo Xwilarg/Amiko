@@ -1,14 +1,22 @@
 syntax = "proto3";
-import "google/protobuf/timestamp.proto";
+
+message Timestamp {
+    int64 seconds = 1;
+    int32 nanos = 2;
+}
 
 message Message {
     MessageType type = 1;
     string name = 2;
     string content = 3;
-    google.protobuf.Timestamp sent_at = 4;
+    Timestamp sentAt = 4;
 }
 
 enum MessageType {
     MESSAGE = 0;
     MESSAGELIST = 1;
+}
+
+message MessageArray {
+    repeated Message messages = 1;
 }

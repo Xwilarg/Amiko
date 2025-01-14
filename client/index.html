@@ -4,15 +4,29 @@
     <head>
         <meta charset="UTF-8">
         <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' ws://localhost:5129/ws; script-src 'self' 'unsafe-eval'">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' ws://localhost:5129/ws ws://amiko.zirk.eu/ws; script-src 'self' 'unsafe-eval'">
         <title>Amiko</title>
         <link rel="stylesheet" href="./node_modules/bulma/css/bulma.min.css"/>
+        <link rel="stylesheet" href="./css/main.css"/>
     </head>
     <body>
-        <template id="message">
-            <div class="content"></div>
+        <template id="message-template">
+            <div class="container message  is-flex-grow-0">
+                <small class="date"></small>
+                <h2 class="subtitle"></h2>
+                <p class="content"></p>
+            </div>
         </template>
         <div class="container is-flex is-flex-direction-column" id="messages">
+        </div>
+
+        <div class="field is-grouped">
+            <div class="control">
+                <input class="input" type="text" placeholder="Your message" id="message-field" />
+            </div>
+            <div class="control">
+                <button class="button is-link" id="send-message">Send</button>
+            </div>
         </div>
 
         <!-- You can also require other files to run in this process -->
