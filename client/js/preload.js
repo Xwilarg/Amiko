@@ -13,22 +13,27 @@ function sendMessage(text) {
 
 window.addEventListener('DOMContentLoaded', () => {
 
-    protobuf.load("message.proto", function(err, root) {
-        if (err) console.log(err);
-        else console.log("ok");
-    });
-
     sendMessage(`Chrome v${process.versions["chrome"]}, Node v${process.versions["node"]}, Electron v${process.versions["electron"]}`);
 
-    const socket = new WebSocket("ws://localhost:5129/ws"); // ws://amiko.zirk.eu/ws
+    protobuf.load("message.proto", function(err, root) {
+        if (err) {
+            sendMessage(err.message);
+            return;
+        }
+        var msg = root.lookupType("Message");
 
-    // Connection opened
-    socket.addEventListener("open", (event) => {
-        sendMessage("Connected to server");
-    });
+        const socket = new WebSocket("ws://localhost:5129/ws"); // ws://amiko.zirk.eu/ws
 
-    // Listen for messages
-    socket.addEventListener("message", (event) => {
-    console.log("Message from server ", event.data);
+        // Connection opened
+        socket.addEventListener("open", (event) => {
+            sendMessage("Connected to server");
+        });
+
+        // Listen for messages
+        socket.addEventListener("message", async function(event) {
+            const buffer = await new Response(event.data).arrayBuffer();
+            const uint = [...new Uint8Array(buffer)];
+            sendMessage(msg.decode(uint).content);
+        });
     });
 });
