@@ -5,6 +5,10 @@ message Timestamp {
     int32 nanos = 2;
 }
 
+message TargetType {
+    MessageType type = 1;
+}
+
 message Message {
     MessageType type = 1;
     string name = 2;
@@ -12,11 +16,16 @@ message Message {
     Timestamp sentAt = 4;
 }
 
-enum MessageType {
-    MESSAGE = 0;
-    MESSAGELIST = 1;
+message MessageValidation {
+    bool validation = 1;
 }
 
 message MessageArray {
-    repeated Message messages = 1;
+    MessageType type = 1;
+    repeated Message messages = 2;
+}
+
+enum MessageType {
+    MESSAGE = 1;
+    MESSAGELIST = 2;
 }

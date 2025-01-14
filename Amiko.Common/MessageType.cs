@@ -1,7 +1,7 @@
 ﻿namespace Amiko.Common;
 
-public enum MessageType : byte
+public enum MessageType
 {
-    Message,
-    MessageList
+    Message = 1,
+    MessageList = 2
 }

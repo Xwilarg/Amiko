@@ -27,3 +27,10 @@ public class Message : BaseMessage
     [ProtoMember(4)]
     public Timestamp SentAt { get; set; }
 }
+
+[ProtoContract]
+public class MessageGroup : BaseMessage
+{
+    [ProtoMember(2)]
+    public Message[] Messages { get; set; }
+}

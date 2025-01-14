@@ -37,7 +37,6 @@ window.addEventListener('DOMContentLoaded', () => {
             sendErrorMessage(err.message);
             return;
         }
-        var msg = root.lookupType("MessageArray");
 
         const socket = new WebSocket("ws://localhost:5129/ws");
         // const socket = new WebSocket("ws://amiko.zirk.eu/ws");
@@ -47,25 +46,39 @@ window.addEventListener('DOMContentLoaded', () => {
             sendSystemMessage("Connected to server");
         });
 
+        const type_id = root.lookupType("TargetType");
+        const type_msgArr = root.lookupType("MessageArray");
+        const type_msg = root.lookupType("Message");
         // Listen for messages
         socket.addEventListener("message", async function(event) {
+
             const buffer = await new Response(event.data).arrayBuffer();
             const uint = [...new Uint8Array(buffer)];
-            for (const c of msg.decode(uint).messages) {
-                sendMessage(c.sentAt, c.name, c.content);
+
+            console.log(type_id.decode(uint).type);
+            switch (type_id.decode(uint).type) {
+                case 0:
+                    const c = type_msg.decode(uint);
+                    sendMessage(c.sentAt, c.name, c.content);
+                    break;
+
+                case 1:
+                    for (const c of type_msgArr.decode(uint).messages) {
+                        sendMessage(c.sentAt, c.name, c.content);
+                    }
+                    break;
             }
         });
 
         document.getElementById("send-message").addEventListener("click", _ => {
             const content = document.getElementById("message-field");
             if (content.value) {
-                var message = AwesomeMessage.create({
+                var newMsg = type_msg.create({
                     type: 0,
                     name: "Test user",
-                    content: message,
-                    sent_at: 0
+                    content: content.value
                 });
-                console.log(content.value);
+                socket.send(type_msg.encode(newMsg).finish());
                 content.value = "";
             }
         });

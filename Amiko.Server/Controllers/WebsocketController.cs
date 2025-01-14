@@ -51,6 +51,7 @@ namespace Amiko.Server.Controllers
                         using MemoryStream ms = new(buffer);
                         var now = DateTime.UtcNow;
                         var prot = Serializer.Deserialize<Message>(ms);
+                        _logger.Log(LogLevel.Information, $"{prot.Content} by {prot.Name}");
                         ContextInterpreter.Get(_dbContext).AddMessage(new()
                         {
                             CreationTime = now,

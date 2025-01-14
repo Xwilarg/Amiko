@@ -38,22 +38,26 @@ public class ContextInterpreter
         _ctx.SaveChanges();
     }
 
-    public IEnumerable<Message> AllMessages()
+    public MessageGroup AllMessages()
     {
-        return !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x =>
+        return new MessageGroup()
         {
-            var d = x.CreationTime.ToUniversalTime() - DateTime.UnixEpoch;
-            return new Message()
+            Type = MessageType.MessageList,
+            Messages = !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x =>
             {
-                Name = x.Username,
-                Content = x.Message,
-                SentAt = new()
+                var d = x.CreationTime.ToUniversalTime() - DateTime.UnixEpoch;
+                return new Message()
                 {
-                    Seconds = (long)Math.Floor(d.TotalSeconds),
-                    Nanos = d.Nanoseconds
-                }
-            };
-        });
+                    Name = x.Username,
+                    Content = x.Message,
+                    SentAt = new()
+                    {
+                        Seconds = (long)Math.Floor(d.TotalSeconds),
+                        Nanos = d.Nanoseconds
+                    }
+                };
+            }).ToArray()
+        };
     }
 }
 
