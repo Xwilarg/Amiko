@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.3.1"
+  },
+  "main": "main.js",
+  "dependencies": {
+    "bulma": "^1.0.3"
+  }
+}
