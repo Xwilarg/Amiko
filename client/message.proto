@@ -1,0 +1,14 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+message Message {
+    MessageType type = 1;
+    string name = 2;
+    string content = 3;
+    google.protobuf.Timestamp sent_at = 4;
+}
+
+enum MessageType {
+    MESSAGE = 0;
+    MESSAGELIST = 1;
+}

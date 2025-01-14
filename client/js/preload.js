@@ -1,3 +1,5 @@
+const protobuf = require("protobufjs");
+
 function sendMessage(text) {
     const container = document.getElementById("messages");
     const template = document.getElementById("message");
@@ -10,6 +12,11 @@ function sendMessage(text) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+
+    protobuf.load("message.proto", function(err, root) {
+        if (err) console.log(err);
+        else console.log("ok");
+    });
 
     sendMessage(`Chrome v${process.versions["chrome"]}, Node v${process.versions["node"]}, Electron v${process.versions["electron"]}`);
 

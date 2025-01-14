@@ -7,6 +7,7 @@
   },
   "main": "main.js",
   "dependencies": {
-    "bulma": "^1.0.3"
+    "bulma": "^1.0.3",
+    "protobufjs": "^7.4.0"
   }
 }
