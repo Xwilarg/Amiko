@@ -1,18 +1,20 @@
-const protobuf = require("protobufjs");
-
 function sendSystemMessage(text) {
-    sendMessageInternal(new Date(), null, text, "system");
+    sendMessageInternal(new Date(), null, text, [ "system" ]);
 }
 
 function sendErrorMessage(text) {
-    sendMessageInternal(new Date(), null, text, "error");
+    sendMessageInternal(new Date(), null, text, [ "error" ]);
 }
 
 function sendMessage(date, name, text) {
-    sendMessageInternal(new Date(date.seconds.toNumber() * 1000 + date.nanos / 1e6), name, text, null);
+    sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), name, text, []);
 }
 
-function sendMessageInternal(date, name, text, indication) {
+function sendMyMessage(text, id) {
+    sendMessageInternal(new Date(), "Me", text, [ "sending", `message-${id}` ]);
+}
+
+function sendMessageInternal(date, name, text, indications) {
     const container = document.getElementById("messages");
     const template = document.getElementById("message-template");
 
@@ -21,66 +23,71 @@ function sendMessageInternal(date, name, text, indication) {
     instance.querySelector(".content").innerHTML = text;
     instance.querySelector(".subtitle").innerHTML = name;
 
-    if (indication !== null) {
-        instance.querySelector(".message").classList.add(indication);
+    for (let i of indications) {
+        instance.querySelector(".message").classList.add(i);
     }
 
     container.appendChild(instance);
+
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    const container = document.getElementById("messages");
+    container.scrollTo(0, container.scrollHeight);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
 
+    let currId = 0;
+
     sendSystemMessage(`Chrome v${process.versions["chrome"]}, Node v${process.versions["node"]}, Electron v${process.versions["electron"]}`);
 
-    protobuf.load("message.proto", function(err, root) {
-        if (err) {
-            sendErrorMessage(err.message);
-            return;
-        }
+    const socket = new WebSocket("ws://localhost:5129/ws");
+    // const socket = new WebSocket("ws://amiko.zirk.eu/ws");
 
-        const socket = new WebSocket("ws://localhost:5129/ws");
-        // const socket = new WebSocket("ws://amiko.zirk.eu/ws");
+    // Connection opened
+    socket.addEventListener("open", (_) => {
+        sendSystemMessage("Connected to server");
+    });
 
-        // Connection opened
-        socket.addEventListener("open", (event) => {
-            sendSystemMessage("Connected to server");
-        });
+    // Listen for messages
+    socket.addEventListener("message", async function(event) {
 
-        const type_id = root.lookupType("TargetType");
-        const type_msgArr = root.lookupType("MessageArray");
-        const type_msg = root.lookupType("Message");
-        // Listen for messages
-        socket.addEventListener("message", async function(event) {
+        const json = JSON.parse(event.data);
 
-            const buffer = await new Response(event.data).arrayBuffer();
-            const uint = [...new Uint8Array(buffer)];
+        console.log(`Received ${json.type}`);
+        switch (json.type) {
+            case 0:
+                sendMessage(json.sentAt, json.name, json.content);
+                break;
 
-            console.log(type_id.decode(uint).type);
-            switch (type_id.decode(uint).type) {
-                case 0:
-                    const c = type_msg.decode(uint);
+            case 1:
+                for (const c of json.messages) {
                     sendMessage(c.sentAt, c.name, c.content);
-                    break;
+                }
+                break;
+                
+            case 2:
+                document.querySelector(`.message-${json.id}`).classList.remove("sending");
+                if (json.isError) document.querySelector(`.message-${json.id}`).classList.add("error");
+                break;
+        }
+    });
 
-                case 1:
-                    for (const c of type_msgArr.decode(uint).messages) {
-                        sendMessage(c.sentAt, c.name, c.content);
-                    }
-                    break;
-            }
-        });
-
-        document.getElementById("send-message").addEventListener("click", _ => {
-            const content = document.getElementById("message-field");
-            if (content.value) {
-                var newMsg = type_msg.create({
-                    type: 0,
-                    name: "Test user",
-                    content: content.value
-                });
-                socket.send(type_msg.encode(newMsg).finish());
-                content.value = "";
-            }
-        });
+    document.getElementById("send-message").addEventListener("click", _ => {
+        const content = document.getElementById("message-field");
+        if (content.value) {
+            var newMsg = {
+                type: 0,
+                name: "Test user",
+                content: content.value,
+                currId: currId
+            };
+            socket.send(JSON.stringify(newMsg));
+            sendMyMessage(content.value, currId);
+            currId++;
+            content.value = "";
+        }
     });
 });

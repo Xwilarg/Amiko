@@ -2,6 +2,7 @@
 
 public enum MessageType
 {
-    Message = 1,
-    MessageList = 2
+    Message,
+    MessageList,
+    Acknowledge
 }

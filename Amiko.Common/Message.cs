@@ -1,36 +1,31 @@
-﻿using ProtoBuf;
-
-namespace Amiko.Common;
+﻿namespace Amiko.Common;
 
 public class BaseMessage
 {
-    [ProtoMember(1)]
-    public MessageType Type { get; set; }
+    public MessageType Type { set; get; }
 }
 
-[ProtoContract]
 public class Timestamp
 {
-    [ProtoMember(1)]
-    public long Seconds { get; set; }
-    [ProtoMember(2)]
-    public int Nanos { get; set; }
+    public long Seconds { set; get; }
+    public int Nanos { set; get; }
 }
 
-[ProtoContract]
 public class Message : BaseMessage
 {
-    [ProtoMember(2)]
-    public string Name { get; set; }
-    [ProtoMember(3)]
-    public string Content { get; set; }
-    [ProtoMember(4)]
-    public Timestamp SentAt { get; set; }
+    public string Name { set; get; }
+    public string Content { set; get; }
+    public Timestamp SentAt { set; get; }
+    public int Id { set; get; }
 }
 
-[ProtoContract]
 public class MessageGroup : BaseMessage
 {
-    [ProtoMember(2)]
-    public Message[] Messages { get; set; }
+    public Message[] Messages { set; get; }
+}
+
+public class Acknowledge : BaseMessage
+{
+    public int Id { set; get; }
+    public bool IsError { set; get; }
 }

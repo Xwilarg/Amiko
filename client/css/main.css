@@ -5,6 +5,7 @@
 #messages {
     padding: .5em;
     height: calc(100vh - 200px);
+    overflow-y: scroll;
 }
 
 .message {
@@ -22,4 +23,8 @@
 
 .message.system {
     color: hsl(240, 100%, 87%)
+}
+
+.message.sending {
+    color: rgb(80, 80, 80);
 }
