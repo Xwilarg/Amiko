@@ -1,4 +1,5 @@
 const os = require('os');
+const { Notification } = require('electron');
 
 function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
@@ -62,6 +63,9 @@ window.addEventListener('DOMContentLoaded', () => {
         switch (json.type) {
             case 0:
                 sendMessage(json.sentAt, json.name, json.content);
+                new window.Notification(json.name, {
+                    body: json.content
+                });
                 break;
 
             case 1:
