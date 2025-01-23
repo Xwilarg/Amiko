@@ -46,7 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
     sendSystemMessage(`Chrome v${process.versions["chrome"]}, Node v${process.versions["node"]}, Electron v${process.versions["electron"]}`);
 
     const socket = new WebSocket("ws://localhost:5129/ws");
-    // const socket = new WebSocket("ws://amiko.zirk.eu/ws");
+    //const socket = new WebSocket("wss://amiko.zirk.eu/ws");
 
     // Connection opened
     socket.addEventListener("open", (_) => {
