@@ -1,3 +1,5 @@
+const os = require('os');
+
 function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
 }
@@ -11,7 +13,7 @@ function sendMessage(date, name, text) {
 }
 
 function sendMyMessage(text, id) {
-    sendMessageInternal(new Date(), "Me", text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(new Date(), os.hostname(), text, [ "sending", `message-${id}` ]);
 }
 
 function sendMessageInternal(date, name, text, indications) {
@@ -80,7 +82,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (content.value) {
             var newMsg = {
                 type: 0,
-                name: "Test user",
+                name: os.hostname(),
                 content: content.value,
                 currId: currId
             };
