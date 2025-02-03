@@ -75,17 +75,18 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+let currId = 0;
 function openMessageConnection() {
-
-    let currId = 0;
-
-    sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
 
     const socket = new WebSocket(createWebsocketUrl(), ["client", token]);
 
     // Connection opened
     socket.addEventListener("open", (_) => {
         sendSystemMessage("Connected to server");
+    });
+
+    socket.addEventListener("close", (_) => {
+        openMessageConnection();
     });
 
     // Listen for messages
@@ -135,6 +136,8 @@ function openMessageConnection() {
     });
 
     document.getElementById("send-message").addEventListener("click", _ => {
+        sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
+
         const content = document.getElementById("message-field");
         if (content.value) {
             var newMsg = {
