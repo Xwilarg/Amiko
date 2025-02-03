@@ -23,4 +23,9 @@ public class UserManager
     {
         return _users.FirstOrDefault(x => hash == x.Password);
     }
+
+    public User? GetUserFromId(string id)
+    {
+        return _users.FirstOrDefault(x => id == x.Id);
+    }
 }

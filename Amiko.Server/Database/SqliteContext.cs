@@ -48,7 +48,7 @@ public class ContextInterpreter
                 var d = x.CreationTime.ToUniversalTime() - DateTime.UnixEpoch;
                 return new Message()
                 {
-                    Name = x.Username,
+                    Author = x.AuthorId,
                     Content = x.Message,
                     SentAt = new()
                     {
@@ -84,5 +84,5 @@ public class MessageContext
     public DateTime CreationTime { set; get; }
 
     public string Message { set; get; }
-    public string Username { set; get; }
+    public string AuthorId { set; get; }
 }

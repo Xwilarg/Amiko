@@ -13,7 +13,7 @@ public class Timestamp
 
 public class Message : BaseMessage
 {
-    public string Name { set; get; }
+    public string Author { set; get; }
     public string Content { set; get; }
     public Timestamp SentAt { set; get; }
     public int Id { set; get; }

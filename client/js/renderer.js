@@ -11,7 +11,7 @@ function sendMessage(date, name, text) {
 }
 
 function sendMyMessage(text, id) {
-    sendMessageInternal(new Date(), os.hostname(), text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(new Date(), "Me", text, [ "sending", `message-${id}` ]);
 }
 
 function sendMessageInternal(date, name, text, indications) {
@@ -95,15 +95,15 @@ function openMessageConnection() {
         console.log(`Received ${json.type}`);
         switch (json.type) {
             case 0:
-                sendMessage(json.sentAt, json.name, json.content);
-                new window.Notification(json.name, {
+                sendMessage(json.sentAt, json.author, json.content);
+                new window.Notification(json.author, {
                     body: json.content
                 });
                 break;
 
             case 1:
                 for (const c of json.messages) {
-                    sendMessage(c.sentAt, c.name, c.content);
+                    sendMessage(c.sentAt, c.author, c.content);
                 }
                 break;
                 
@@ -119,7 +119,6 @@ function openMessageConnection() {
         if (content.value) {
             var newMsg = {
                 type: 0,
-                name: os.hostname(),
                 content: content.value,
                 currId: currId
             };
