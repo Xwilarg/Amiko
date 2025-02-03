@@ -11,6 +11,23 @@
         <link rel="stylesheet" href="./css/main.css"/>
     </head>
     <body>
+        <div class="modal is-active" id="login-popup">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <div class="field">
+                    <label class="label">Password</label>
+                    <div class="control">
+                      <input class="input" type="text" placeholder="Password">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                      <button class="button is-link">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <template id="message-template">
             <div class="container message  is-flex-grow-0">
                 <small class="date"></small>
