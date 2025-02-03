@@ -38,6 +38,7 @@ function scrollToBottom() {
 }
 
 let token = null;
+let userInfo = null;
 
 // Deploy: "wss://amiko.zirk.eu/ws"
 const apiTarget = "localhost:5129";
@@ -95,8 +96,9 @@ function openMessageConnection() {
         console.log(`Received ${json.type}`);
         switch (json.type) {
             case 0: // Message received
-                sendMessage(json.sentAt, json.author, json.content);
-                new window.Notification(json.author, {
+                const username = userInfo[json.author];
+                sendMessage(json.sentAt, username, json.content);
+                new window.Notification(username, {
                     body: json.content
                 });
                 break;
@@ -113,8 +115,18 @@ function openMessageConnection() {
                 break;
 
             case 3: // Users info
+
+                userInfo = {};
                 for (const c of json.data) {
-                    console.log(c);
+                    userInfo[c.id] = c.username;
+                }
+
+                for (const msg of document.querySelectorAll(".message")) {
+                    const usernameContainer = msg.querySelector(".subtitle");
+                    const username = userInfo[usernameContainer.innerHTML];
+                    if (username) {
+                        usernameContainer.innerHTML = username;
+                    }
                 }
 
                 document.getElementById("send-message").disabled = false;
