@@ -1,40 +1,90 @@
 using Amiko.Server.Database;
+using Amiko.Server.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-namespace Amiko.Server
+namespace Amiko.Server;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+        builder.Services.AddSingleton<UserManager>();
+
+        // Add services to the container.
+
+        builder.Services.AddDbContext<SqliteContext>();
+        builder.Services.AddControllers();
+        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        builder.Services.AddOpenApi();
+
+        builder.Services.AddAuthentication(options =>
         {
-            var builder = WebApplication.CreateBuilder(args);
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.IncludeErrorDetails = true;
 
-            // Add services to the container.
 
-            builder.Services.AddDbContext<SqliteContext>();
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            var data = Encoding.UTF8.GetBytes("EffyIsLoveYouButPleaseINeedABetterPassword");
+            var securityKey = new SymmetricSecurityKey(data);
 
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                app.MapOpenApi();
-            }
+                ClockSkew = TimeSpan.Zero,
 
-            app.UseWebSockets();
+                ValidateLifetime = true,
 
-            app.UseHttpsRedirection();
+                ValidateAudience = false,
+                ValidateIssuer = false,
 
-            app.UseAuthorization();
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = securityKey
+            };
 
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    if (context.Request.Headers.ContainsKey("sec-websocket-protocol"))
+                    {
+                        var token = context.Request.Headers["sec-websocket-protocol"].ToString();
+                        context.Token = token.Substring(token.IndexOf(',') + 1).Trim();
+                        context.Request.Headers["sec-websocket-protocol"] = "client";
 
-            app.MapControllers();
+#if DEBUG
+                        options.RequireHttpsMetadata = false;
+#else
+                        options.RequireHttpsMetadata = true;
+#endif
+                    }
+                    return Task.CompletedTask;
+                }
+            };
+        });
 
-            app.Run();
+        var app = builder.Build();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
         }
+
+        app.UseWebSockets();
+
+        app.UseAuthorization();
+
+        // app.UseHttpsRedirection();
+
+        app.MapControllers();
+
+        app.Run();
     }
 }

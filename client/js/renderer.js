@@ -37,14 +37,50 @@ function scrollToBottom() {
     container.scrollTo(0, container.scrollHeight);
 }
 
+let token = null;
+
+// Deploy: "wss://amiko.zirk.eu/ws"
+const apiTarget = "localhost:5129";
+const isSecure = false;
+
+function createWebsocketUrl() {
+    return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
+}
+function createHttpUrl(endpoint) {
+    return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("password-submit").addEventListener("click", _ => {
+        const pwd = document.getElementById("password");
+
+        fetch(createHttpUrl("auth/token"), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pwd.value)
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(text => {
+            token = text;
+            pwd.value = "";
+            document.getElementById("login-popup").classList.remove("is-active");
+            openMessageConnection();
+        })
+        .catch((err) => {
+            alert(`Login failed: ${err}`)
+        });
+    });
+});
+
+function openMessageConnection() {
 
     let currId = 0;
 
-    sendSystemMessage(`Chrome v${versions["chrome"]}, Node v${versions["node"]}, Electron v${versions["electron"]}`);
+    sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
 
-    //const socket = new WebSocket("ws://localhost:5129/ws");
-    const socket = new WebSocket("wss://amiko.zirk.eu/ws");
+    const socket = new WebSocket(createWebsocketUrl(), ["client", token]);
 
     // Connection opened
     socket.addEventListener("open", (_) => {
@@ -93,4 +129,4 @@ window.addEventListener('DOMContentLoaded', () => {
             content.value = "";
         }
     });
-});
+}

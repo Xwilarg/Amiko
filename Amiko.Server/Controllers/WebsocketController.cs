@@ -1,7 +1,7 @@
 using Amiko.Common;
 using Amiko.Server.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -36,12 +36,12 @@ namespace Amiko.Server.Controllers
 
         private static readonly List<WebSocket> _sockets = [];
 
-        [Route("/ws")]
+        [Route("/ws"), Authorize]
         public async Task Get()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                var client = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                var client = await HttpContext.WebSockets.AcceptWebSocketAsync("client");
                 lock (_sockets)
                 {
                     _sockets.Add(client);
@@ -55,7 +55,20 @@ namespace Amiko.Server.Controllers
                 while (true)
                 {
                     var buffer = new byte[1024];
-                    var response = await client.ReceiveAsync(buffer, CancellationToken.None);
+                    WebSocketReceiveResult? response;
+                    
+                    try
+                    {
+                        response = await client.ReceiveAsync(buffer, CancellationToken.None);
+                    }
+                    catch (WebSocketException)
+                    {
+                        lock (_sockets)
+                        {
+                            _sockets.Remove(client);
+                        }
+                        break;
+                    }
 
                     _logger.Log(LogLevel.Information, $"Message received of size {buffer.Length} of type {response.MessageType}");
                     if (response.MessageType == WebSocketMessageType.Text)
