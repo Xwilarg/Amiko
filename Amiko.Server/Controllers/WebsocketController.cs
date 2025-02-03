@@ -22,6 +22,7 @@ namespace Amiko.Server.Controllers
         {
             _logger = logger;
             _dbContext = dbContext;
+            _userManager = userManager;
         }
 
         private static JsonSerializerOptions _option;

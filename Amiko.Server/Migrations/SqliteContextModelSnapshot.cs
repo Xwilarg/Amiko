@@ -38,6 +38,10 @@ namespace Amiko.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("ChannelContextId")
                         .HasColumnType("INTEGER");
 
@@ -45,10 +49,6 @@ namespace Amiko.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
