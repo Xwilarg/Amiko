@@ -51,9 +51,14 @@ namespace Amiko.Server.Controllers
                     _sockets.Add(client);
                 }
 
+                var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)?.Id ?? "0";
+
                 // First connection: send all messages
                 _logger.Log(LogLevel.Information, $"New client connected");
                 var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(ContextInterpreter.Get(_dbContext).AllMessages(), Option));
+                await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+
+                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_userManager.GetAllUsersInfo(authorId), Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
                 while (true)
@@ -88,8 +93,6 @@ namespace Amiko.Server.Controllers
 
                         try
                         {
-                            var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)?.Id ?? "0";
-
                             _logger.Log(LogLevel.Information, $"{prot.Content} by {authorId}");
 
                             // Save to db

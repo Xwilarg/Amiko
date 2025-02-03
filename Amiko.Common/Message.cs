@@ -11,6 +11,13 @@ public class Timestamp
     public int Nanos { set; get; }
 }
 
+public class UserInfo : BaseMessage
+{
+    public string Id { set; get; }
+    public bool IsMe { set; get; }
+    public string Username { set; get; }
+}
+
 public class Message : BaseMessage
 {
     public string Author { set; get; }
@@ -19,9 +26,10 @@ public class Message : BaseMessage
     public int Id { set; get; }
 }
 
-public class MessageGroup : BaseMessage
+public class DataGroup<T> : BaseMessage
+    where T : BaseMessage
 {
-    public Message[] Messages { set; get; }
+    public T[] Data { set; get; }
 }
 
 public class Acknowledge : BaseMessage

@@ -38,12 +38,12 @@ public class ContextInterpreter
         _ctx.SaveChanges();
     }
 
-    public MessageGroup AllMessages()
+    public DataGroup<Message> AllMessages()
     {
-        return new MessageGroup()
+        return new DataGroup<Message>()
         {
             Type = MessageType.MessageList,
-            Messages = !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x =>
+            Data = !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x =>
             {
                 var d = x.CreationTime.ToUniversalTime() - DateTime.UnixEpoch;
                 return new Message()

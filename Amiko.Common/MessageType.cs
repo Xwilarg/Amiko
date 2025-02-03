@@ -4,5 +4,6 @@ public enum MessageType
 {
     Message,
     MessageList,
-    Acknowledge
+    Acknowledge,
+    UserInfo
 }

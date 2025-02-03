@@ -94,22 +94,30 @@ function openMessageConnection() {
 
         console.log(`Received ${json.type}`);
         switch (json.type) {
-            case 0:
+            case 0: // Message received
                 sendMessage(json.sentAt, json.author, json.content);
                 new window.Notification(json.author, {
                     body: json.content
                 });
                 break;
 
-            case 1:
-                for (const c of json.messages) {
+            case 1: // Array of messages received (app start)
+                for (const c of json.data) {
                     sendMessage(c.sentAt, c.author, c.content);
                 }
                 break;
-                
-            case 2:
+
+            case 2: // Acknowledgement of a message sent
                 document.querySelector(`.message-${json.id}`).classList.remove("sending");
                 if (json.isError) document.querySelector(`.message-${json.id}`).classList.add("error");
+                break;
+
+            case 3: // Users info
+                for (const c of json.data) {
+                    console.log(c);
+                }
+
+                document.getElementById("send-message").disabled = false;
                 break;
         }
     });

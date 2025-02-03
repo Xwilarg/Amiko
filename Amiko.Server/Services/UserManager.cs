@@ -1,4 +1,5 @@
-﻿using Amiko.Server.Models;
+﻿using Amiko.Common;
+using Amiko.Server.Models;
 using System.Text.Json;
 
 namespace Amiko.Server.Services;
@@ -17,6 +18,20 @@ public class UserManager
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
+    }
+
+    public DataGroup<UserInfo> GetAllUsersInfo(string myId)
+    {
+        return new DataGroup<UserInfo>()
+        {
+            Type = MessageType.UserInfo,
+            Data = _users.Select(x => new UserInfo()
+            {
+                Id = x.Id,
+                IsMe = x.Id == myId,
+                Username = x.Username
+            }).ToArray()
+        };
     }
 
     public User? GetUserFromPassword(string hash)
