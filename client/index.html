@@ -35,16 +35,16 @@
                 <p class="content"></p>
             </div>
         </template>
-        <div class="container is-flex is-flex-direction-column" id="messages">
+        <div class="is-flex is-flex-direction-column" id="messages">
         </div>
 
-        <div class="field is-grouped">
-            <div class="control">
+        <form class="field has-addons">
+            <p class="control is-expanded">
                 <input class="input" type="text" placeholder="Your message" id="message-field" />
-            </div>
-            <div class="control">
-                <button class="button is-link" id="send-message" disabled>Send</button>
-            </div>
-        </div>
+            </p>
+            <p class="control">
+                <input class="button is-link" type="submit" id="send-message" disabled/>
+            </p>
+        </form>
     </body>
 </html>

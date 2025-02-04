@@ -102,6 +102,8 @@ function openMessageConnection() {
         console.log(`Received ${json.type}`);
         switch (json.type) {
             case 0: // Message received
+                console.log(userInfo);
+                console.log(json.author);
                 const username = userInfo[json.author];
                 sendMessage(json.sentAt, username, json.content);
                 new window.Notification(username, {
@@ -140,7 +142,8 @@ function openMessageConnection() {
         }
     });
 
-    document.getElementById("send-message").addEventListener("click", _ => {
+    document.getElementById("send-message").addEventListener("click", e => {
+        e.preventDefault();
         const content = document.getElementById("message-field");
         if (content.value) {
             var newMsg = {
