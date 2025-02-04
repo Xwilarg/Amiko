@@ -39,11 +39,14 @@ function scrollToBottom() {
 
 let token = null;
 let userInfo = null;
+let currId = 0;
 
-// Deploy: "wss://amiko.zirk.eu/ws"
+const apiTarget = "amiko.zirk.eu";
+const isSecure = true;
+/*
 const apiTarget = "localhost:5129";
 const isSecure = false;
-
+*/
 function createWebsocketUrl() {
     return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
 }
@@ -75,8 +78,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-let currId = 0;
 function openMessageConnection() {
+    document.getElementById("messages").innerHTML = "";
+    sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
 
     const socket = new WebSocket(createWebsocketUrl(), ["client", token]);
 
@@ -136,8 +140,6 @@ function openMessageConnection() {
     });
 
     document.getElementById("send-message").addEventListener("click", _ => {
-        sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
-
         const content = document.getElementById("message-field");
         if (content.value) {
             var newMsg = {
