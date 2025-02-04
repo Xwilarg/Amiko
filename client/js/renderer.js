@@ -11,7 +11,7 @@ function sendMessage(date, name, text) {
 }
 
 function sendMyMessage(text, id) {
-    sendMessageInternal(new Date(), "Me", text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(new Date(), myUsername, text, [ "sending", `message-${id}` ]);
 }
 
 function sendMessageInternal(date, name, text, indications) {
@@ -37,8 +37,16 @@ function scrollToBottom() {
     container.scrollTo(0, container.scrollHeight);
 }
 
+// Access token to the backend
 let token = null;
+
+// Current user username
+let myUsername = "";
+
+// All infos about various users
 let userInfo = null;
+
+// Current message ID
 let currId = 0;
 
 const apiTarget = "amiko.zirk.eu";
@@ -130,6 +138,9 @@ function openMessageConnection() {
                 userInfo = {};
                 for (const c of json.data) {
                     userInfo[c.id] = c.username;
+                    if (c.isMe) {
+                        myUsername = c.username;
+                    }
                 }
 
                 for (const msg of document.querySelectorAll(".message")) {
