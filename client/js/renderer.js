@@ -79,6 +79,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function openMessageConnection() {
+    document.getElementById("send-message").disabled = true;
     document.getElementById("messages").innerHTML = "";
     sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
 
