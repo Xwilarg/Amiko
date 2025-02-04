@@ -27,9 +27,23 @@ function sendMessageInternal(date, name, text, indications) {
         instance.querySelector(".message").classList.add(i);
     }
 
+    parseMessage(instance);
+
     container.appendChild(instance);
 
     scrollToBottom();
+}
+
+function parseMessage(msg) {
+    const text = msg.querySelector(".content").innerHTML;
+
+    let m = text.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)/gm);
+    if (m) {
+        const prev = msg.querySelector(".rich-preview");
+        for (let img of m) {
+            prev.innerHTML += `<img class="image" src="${img}"/>`;
+        }
+    }
 }
 
 function scrollToBottom() {

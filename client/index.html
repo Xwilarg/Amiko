@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5129 ws://localhost:5129 https://amiko.zirk.eu ws://amiko.zirk.eu; script-src 'self' 'unsafe-eval'">
+        <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5129 ws://localhost:5129 https://amiko.zirk.eu ws://amiko.zirk.eu; script-src 'self' 'unsafe-eval'">-->
         <title>Amiko</title>
         <script src="./js/renderer.js"></script>
         <link rel="stylesheet" href="./node_modules/bulma/css/bulma.min.css"/>
@@ -17,12 +17,12 @@
                 <div class="field">
                     <label class="label">Password</label>
                     <div class="control">
-                      <input id="password" class="input" type="text" placeholder="Password">
+                        <input id="password" class="input" type="password" placeholder="Password">
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                      <button class="button is-link" id="password-submit">Submit</button>
+                        <button class="button is-link" id="password-submit">Submit</button>
                     </div>
                 </div>
             </div>
@@ -33,6 +33,7 @@
                 <small class="date"></small>
                 <h2 class="subtitle"></h2>
                 <p class="content"></p>
+                <div class="rich-preview is-flex"></div>
             </div>
         </template>
         <div class="is-flex is-flex-direction-column" id="messages">

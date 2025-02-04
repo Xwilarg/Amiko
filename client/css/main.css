@@ -31,3 +31,12 @@
 .message.sending {
     color: rgb(80, 80, 80);
 }
+
+.rich-preview img {
+    max-width: 256px;
+    max-height: 256px;
+}
+
+.is-flex {
+    gap: 10px;
+}
