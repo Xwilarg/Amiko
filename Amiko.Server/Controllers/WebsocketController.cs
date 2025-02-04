@@ -54,7 +54,7 @@ namespace Amiko.Server.Controllers
                 var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)?.Id ?? "0";
 
                 // First connection: send all messages
-                _logger.Log(LogLevel.Information, $"New client connected");
+                _logger.Log(LogLevel.Information, $"New client connected ({authorId})");
                 var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(ContextInterpreter.Get(_dbContext).AllMessages(), Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -88,12 +88,11 @@ namespace Amiko.Server.Controllers
                         var now = DateTime.UtcNow;
 
                         // Parse actual message
-                        _logger.Log(LogLevel.Information, $"Received {Encoding.UTF8.GetString(buffer)}");
                         var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
 
                         try
                         {
-                            _logger.Log(LogLevel.Information, $"{prot.Content} by {authorId}");
+                            _logger.Log(LogLevel.Information, $"Received {prot.Content} by {authorId}");
 
                             // Save to db
                             ContextInterpreter.Get(_dbContext).AddMessage(new()
@@ -108,6 +107,7 @@ namespace Amiko.Server.Controllers
                                 Seconds = (long)Math.Floor(d.TotalSeconds),
                                 Nanos = d.Nanoseconds
                             };
+                            prot.Author = authorId;
 
                             // Send message back
                             List<Task> tasks = [];

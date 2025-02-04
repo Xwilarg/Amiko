@@ -82,6 +82,7 @@ function openMessageConnection() {
     document.getElementById("send-message").disabled = true;
     document.getElementById("messages").innerHTML = "";
     sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
+    sendSystemMessage(`Connecting...`);
 
     const socket = new WebSocket(createWebsocketUrl(), ["client", token]);
 
@@ -94,6 +95,10 @@ function openMessageConnection() {
         openMessageConnection();
     });
 
+    socket.addEventListener("error", (e) => {
+        console.log(e);
+    });
+
     // Listen for messages
     socket.addEventListener("message", async function(event) {
 
@@ -102,8 +107,6 @@ function openMessageConnection() {
         console.log(`Received ${json.type}`);
         switch (json.type) {
             case 0: // Message received
-                console.log(userInfo);
-                console.log(json.author);
                 const username = userInfo[json.author];
                 sendMessage(json.sentAt, username, json.content);
                 new window.Notification(username, {
