@@ -2,8 +2,9 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
 
+let mainWindow;
 const createWindow = () => {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
     webPreferences: {
@@ -21,7 +22,8 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow()
 
-  ipcMain.handle('path', () => app.getPath("userData"))
+  ipcMain.handle('path', () => app.getPath("userData"));
+  ipcMain.handle('isFocused', () => mainWindow.isFocused());
 
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the

@@ -178,9 +178,11 @@ function openMessageConnection() {
             case 0: // Message received
                 const username = userInfo[json.author];
                 sendMessage(json.sentAt, username, json.content);
-                new window.Notification(username, {
-                    body: json.content
-                });
+                if (!await notification.isFocusedAsync()) {
+                    new window.Notification(username, {
+                        body: json.content
+                    });
+                }
                 break;
 
             case 1: // Array of messages received (app start)

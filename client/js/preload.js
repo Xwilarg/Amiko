@@ -20,3 +20,8 @@ contextBridge.exposeInMainWorld('filesystem', {
         fs.writeFileSync(path, token);
     }
 });
+contextBridge.exposeInMainWorld('notification', {
+    isFocusedAsync: async () => {
+        return ipcRenderer.invoke('isFocused');
+    },
+});
