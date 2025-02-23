@@ -40,9 +40,17 @@ function parseMessage(msg) {
     let m = text.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)/gm);
     if (m) {
         const prev = msg.querySelector(".rich-preview");
+        prev.classList.remove("is-hidden");
         for (let img of m) {
             prev.innerHTML += `<img class="image" src="${img}"/>`;
         }
+    }
+
+    msg.querySelector(".content").innerHTML = text.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
+    for (const link of msg.querySelectorAll(".link")) {
+        link.addEventListener("click", (_) => {
+            interaction.open(link.innerHTML);
+        });
     }
 }
 

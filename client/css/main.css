@@ -40,3 +40,13 @@
 .is-flex {
     gap: 10px;
 }
+
+.link {
+    text-decoration: underline;
+    color: lightcoral;
+    cursor: pointer;
+}
+
+.link:hover {
+    color: white;
+}
