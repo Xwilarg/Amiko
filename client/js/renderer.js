@@ -84,9 +84,28 @@ function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+    const pwd = document.getElementById("password");
+    const fileToken = await filesystem.readAsync();
+
+    if (fileToken) {
+        fetch(createHttpUrl("auth/validate"), {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${fileToken}`
+            }
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(_ => {
+            token = fileToken;
+            pwd.value = "";
+            document.getElementById("login-popup").classList.remove("is-active");
+            openMessageConnection();
+        })
+        .catch((err) => {});
+    }
+
     document.getElementById("password-submit").addEventListener("click", _ => {
-        const pwd = document.getElementById("password");
 
         fetch(createHttpUrl("auth/token"), {
             method: 'POST',
@@ -96,8 +115,9 @@ window.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify(pwd.value)
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
-        .then(text => {
+        .then(async text => {
             token = text;
+            await filesystem.writeAsync(token);
             pwd.value = "";
             document.getElementById("login-popup").classList.remove("is-active");
             openMessageConnection();

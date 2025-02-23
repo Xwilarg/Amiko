@@ -31,7 +31,7 @@ public class Program
             options.IncludeErrorDetails = true;
 
 
-            var data = Encoding.UTF8.GetBytes("EffyIsLoveYouButPleaseINeedABetterPassword");
+            var data = Encoding.UTF8.GetBytes("EffyILoveYouButPleaseINeedABetterPassword");
             var securityKey = new SymmetricSecurityKey(data);
 
             options.SaveToken = true;

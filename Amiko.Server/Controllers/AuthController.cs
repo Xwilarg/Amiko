@@ -1,4 +1,5 @@
 ﻿using Amiko.Server.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -38,7 +39,7 @@ public class AuthController : ControllerBase
             return StatusCode(StatusCodes.Status401Unauthorized, "This user does no exist");
         }
 
-        var data = Encoding.UTF8.GetBytes("EffyIsLoveYouButPleaseINeedABetterPassword");
+        var data = Encoding.UTF8.GetBytes("EffyILoveYouButPleaseINeedABetterPassword");
         var securityKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(data);
 
         var claims = new List<Claim>
@@ -58,5 +59,12 @@ public class AuthController : ControllerBase
         var tokenString = tokenHandler.WriteToken(token);
 
         return StatusCode(StatusCodes.Status200OK, tokenString);
+    }
+
+    [Authorize]
+    [HttpPost("validate")]
+    public IActionResult ValidateToken()
+    {
+        return StatusCode(StatusCodes.Status200OK, null);
     }
 }
