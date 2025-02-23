@@ -1,4 +1,4 @@
-﻿namespace Amiko.Common;
+﻿namespace Amiko.Models;
 
 public class BaseMessage
 {
