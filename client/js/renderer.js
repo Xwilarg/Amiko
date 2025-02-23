@@ -77,6 +77,9 @@ const isSecure = true;
 const apiTarget = "localhost:5129";
 const isSecure = false;
 */
+
+let socket;
+
 function createWebsocketUrl() {
     return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
 }
@@ -126,6 +129,22 @@ window.addEventListener('DOMContentLoaded', async () => {
             alert(`Login failed: ${err}`)
         });
     });
+
+    document.getElementById("send-message").addEventListener("click", e => {
+        e.preventDefault();
+        const content = document.getElementById("message-field");
+        if (content.value) {
+            var newMsg = {
+                type: 0,
+                content: content.value,
+                id: currId
+            };
+            socket.send(JSON.stringify(newMsg));
+            sendMyMessage(content.value, currId);
+            currId++;
+            content.value = "";
+        }
+    });
 });
 
 function openMessageConnection() {
@@ -134,7 +153,7 @@ function openMessageConnection() {
     sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
     sendSystemMessage(`Connecting...`);
 
-    const socket = new WebSocket(createWebsocketUrl(), ["client", token]);
+    socket = new WebSocket(createWebsocketUrl(), ["client", token]);
 
     // Connection opened
     socket.addEventListener("open", (_) => {
@@ -195,22 +214,6 @@ function openMessageConnection() {
 
                 document.getElementById("send-message").disabled = false;
                 break;
-        }
-    });
-
-    document.getElementById("send-message").addEventListener("click", e => {
-        e.preventDefault();
-        const content = document.getElementById("message-field");
-        if (content.value) {
-            var newMsg = {
-                type: 0,
-                content: content.value,
-                currId: currId
-            };
-            socket.send(JSON.stringify(newMsg));
-            sendMyMessage(content.value, currId);
-            currId++;
-            content.value = "";
         }
     });
 }
