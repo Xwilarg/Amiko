@@ -1,8 +1,10 @@
 import { PasswordModal } from "./components/PasswordModal";
 import { Message } from "./components/Message"
 import { FlatList, Text, View } from "react-native";
+const RNFS = require('react-native-fs');
 
 export default function App() {
+    const [message, setMessage] = useState("");
     return (
         <View
         style={{
@@ -20,6 +22,14 @@ export default function App() {
             >
                 
             </FlatList>
+
+            <View style={{}}>
+                <TextInput style={styles.textInput} secureTextEntry={true} onChangeText={setMessage}></TextInput>
+                <Button title='Submit' onPress={() => {
+                    sendMessage(message);
+                    setMessage("");
+                }} />
+            </View>
         </View>
     );
 }
@@ -55,6 +65,19 @@ class MessageCmp {
     }
 }
 
+function sendMessage(msg) {
+    if (msg) {
+        var newMsg = {
+            type: 0,
+            content: content.value,
+            id: currId
+        };
+        socket.send(JSON.stringify(newMsg));
+        sendMyMessage(content.value, currId);
+        currId++;
+    }
+}
+
 function sendMessageInternal(msg) {
     messages.push(msg);
 }
@@ -86,6 +109,7 @@ function submitPassword(pwd) {
     .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
     .then(async text => {
         token = text;
+        //await RNFS.writeFile(RNFS.DocumentDirectoryPath + '/token.dat', token, 'utf8');
         //await filesystem.writeAsync(token);
         openMessageConnection();
     })
