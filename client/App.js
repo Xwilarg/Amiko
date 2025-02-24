@@ -1,7 +1,8 @@
 import { PasswordModal } from "./components/PasswordModal";
 import { Message } from "./components/Message"
-import { FlatList, Text, View } from "react-native";
-const RNFS = require('react-native-fs');
+import { FlatList, TextInput, Button, View } from "react-native";
+import { useState } from 'react';
+//const RNFS = require('react-native-fs');
 
 export default function App() {
     const [message, setMessage] = useState("");
@@ -24,9 +25,13 @@ export default function App() {
             </FlatList>
 
             <View style={{}}>
-                <TextInput style={styles.textInput} secureTextEntry={true} onChangeText={setMessage}></TextInput>
+                <TextInput style={{
+                    borderColor: 'black',
+                    borderRadius: '1px',
+                    borderWidth: '2px'
+                }} onChangeText={setMessage}></TextInput>
                 <Button title='Submit' onPress={() => {
-                    sendMessage(message);
+                    sendUserMessage(message);
                     setMessage("");
                 }} />
             </View>
@@ -65,15 +70,15 @@ class MessageCmp {
     }
 }
 
-function sendMessage(msg) {
+function sendUserMessage(msg) {
     if (msg) {
         var newMsg = {
             type: 0,
-            content: content.value,
+            content: msg,
             id: currId
         };
         socket.send(JSON.stringify(newMsg));
-        sendMyMessage(content.value, currId);
+        sendMyMessage(msg, currId);
         currId++;
     }
 }
