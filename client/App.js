@@ -1,8 +1,8 @@
-import { PasswordModal } from "@/components/PasswordModal";
-import { Message } from "@/components/Message"
+import { PasswordModal } from "./components/PasswordModal";
+import { Message } from "./components/Message"
 import { FlatList, Text, View } from "react-native";
 
-export default function Index() {
+export default function App() {
     return (
         <View
         style={{
@@ -11,7 +11,7 @@ export default function Index() {
             alignItems: "center",
         }}
         >
-            <PasswordModal callback={(pwd: string) => {submitPassword(pwd)}}></PasswordModal>
+            <PasswordModal callback={(pwd) => {submitPassword(pwd)}}></PasswordModal>
 
             <FlatList
                 data={messages}
@@ -24,14 +24,15 @@ export default function Index() {
     );
 }
 
+
 // Access token to the backend
-let token: string | null = null;
+let token = null;
 
 // Current user username
 let myUsername = "";
 
 // All infos about various users
-let userInfo: {string: string};
+let userInfo;
 
 // Current message ID
 let currId = 0;
@@ -43,54 +44,38 @@ const isSecure = true;
 const apiTarget = "localhost:5129";
 const isSecure = false;
 
-let messages: MessageCmp[] = [];
+let messages = [];
 
 class MessageCmp {
-    constructor(date: Date, name: string | null, message: string, id: string) {
+    constructor(date, name, message, id) {
         this.date = date;
         this.name = name;
         this.message = message;
         this.id = id;
     }
-
-    date: Date;
-    name: string | null;
-    message: string;
-    id: string;
 }
 
-class EpoxDate
-{
-    constructor(seconds: number, nanos: number) {
-        this.seconds = seconds;
-        this.nanos = nanos;
-    }
-
-    seconds: number;
-    nanos: number;
-}
-
-function sendMessageInternal(msg: MessageCmp) {
+function sendMessageInternal(msg) {
     messages.push(msg);
 }
 
-function sendSystemMessage(text: string) {
+function sendSystemMessage(text) {
     sendMessageInternal(new MessageCmp(new Date(), null, text, crypto.randomUUID()));
 }
 
-function sendErrorMessage(text: string) {
+function sendErrorMessage(text) {
     sendMessageInternal(new MessageCmp(new Date(), null, text, crypto.randomUUID()));
 }
 
-function sendMessage(date: EpoxDate, name: string, text: string) {
+function sendMessage(date, name, text) {
     sendMessageInternal(new MessageCmp(new Date(date.seconds * 1000 + date.nanos / 1e6), name, text, crypto.randomUUID()));
 }
 
-function sendMyMessage(text: string, id: string) {
+function sendMyMessage(text, id) {
     sendMessageInternal(new MessageCmp(new Date(), myUsername, text, crypto.randomUUID()));
 }
 
-function submitPassword(pwd: string) {
+function submitPassword(pwd) {
     fetch(createHttpUrl("auth/token"), {
         method: 'POST',
         headers: {
@@ -116,7 +101,7 @@ function openMessageConnection() {
     //document.getElementById("messages").innerHTML = "";
     sendSystemMessage(`Connecting...`);
 
-    socket = new WebSocket(createWebsocketUrl(), ["client", token!]);
+    socket = new WebSocket(createWebsocketUrl(), ["client", token]);
 
     // Connection opened
     socket.addEventListener("open", (_) => {
@@ -183,9 +168,9 @@ function openMessageConnection() {
     });
 }
 
-function createWebsocketUrl(): string {
+function createWebsocketUrl() {
     return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
 }
-function createHttpUrl(endpoint: string): string {
+function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
