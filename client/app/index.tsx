@@ -31,7 +31,7 @@ let token: string | null = null;
 let myUsername = "";
 
 // All infos about various users
-let userInfo = null;
+let userInfo: {string: string};
 
 // Current message ID
 let currId = 0;
@@ -112,7 +112,75 @@ function submitPassword(pwd: string) {
 let socket;
 
 function openMessageConnection() {
-    console.log(token);
+    //document.getElementById("send-message").disabled = true;
+    //document.getElementById("messages").innerHTML = "";
+    sendSystemMessage(`Connecting...`);
+
+    socket = new WebSocket(createWebsocketUrl(), ["client", token!]);
+
+    // Connection opened
+    socket.addEventListener("open", (_) => {
+        sendSystemMessage("Connected to server");
+    });
+
+    socket.addEventListener("close", (_) => {
+        openMessageConnection();
+    });
+
+    socket.addEventListener("error", (e) => {
+        console.log(e);
+    });
+
+    // Listen for messages
+    socket.addEventListener("message", async function(event) {
+
+        const json = JSON.parse(event.data);
+
+        console.log(`Received ${json.type}`);
+        switch (json.type) {
+            case 0: // Message received
+                const username = userInfo[json.author];
+                sendMessage(json.sentAt, username, json.content);
+                /*if (!await notification.isFocusedAsync()) {
+                    new window.Notification(username, {
+                        body: json.content
+                    });
+                }*/
+                break;
+
+            case 1: // Array of messages received (app start)
+                for (const c of json.data) {
+                    sendMessage(c.sentAt, c.author, c.content);
+                }
+                break;
+
+            case 2: // Acknowledgement of a message sent
+                //document.querySelector(`.message-${json.id}`).classList.remove("sending");
+                //if (json.isError) document.querySelector(`.message-${json.id}`).classList.add("error");
+                break;
+
+            case 3: // Users info
+
+                userInfo = {};
+                for (const c of json.data) {
+                    userInfo[c.id] = c.username;
+                    if (c.isMe) {
+                        myUsername = c.username;
+                    }
+                }
+
+                for (const msg of document.querySelectorAll(".message")) {
+                    const usernameContainer = msg.querySelector(".subtitle");
+                    const username = userInfo[usernameContainer.innerHTML];
+                    if (username) {
+                        usernameContainer.innerHTML = username;
+                    }
+                }
+
+                //document.getElementById("send-message").disabled = false;
+                break;
+        }
+    });
 }
 
 function createWebsocketUrl(): string {
@@ -121,5 +189,3 @@ function createWebsocketUrl(): string {
 function createHttpUrl(endpoint: string): string {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
-
-sendSystemMessage(`Connecting...`);
