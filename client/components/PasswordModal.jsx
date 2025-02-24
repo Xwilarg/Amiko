@@ -9,7 +9,7 @@ export function PasswordModal({callback}) {
     transparent={true}
     visible={modalVisible}>
         <View style={styles.centeredView}>
-            <TextInput secureTextEntry={true} onChangeText={setPassword}></TextInput>
+            <TextInput style={styles.textInput} secureTextEntry={true} onChangeText={setPassword}></TextInput>
             <Button title='Submit' onPress={() => {
                 setPassword("");
                 callback(password);
@@ -24,5 +24,10 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    textInput: {
+        borderColor: 'black',
+        borderRadius: '1px',
+        borderWidth: '2px'
     }
 });

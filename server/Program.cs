@@ -69,6 +69,14 @@ public class Program
             };
         });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("debug", p =>
+            {
+                p.WithOrigins("http://localhost:8081").AllowAnyHeader();
+            });
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -76,6 +84,7 @@ public class Program
         {
             app.MapOpenApi();
         }
+        app.UseCors("debug");
 
         app.UseWebSockets();
 

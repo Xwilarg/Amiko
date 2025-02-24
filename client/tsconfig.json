@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "components/PasswordModal.jsx"  ]
+, "components/PasswordModal.jsx", "components/Message.jsx"  ]
 }
