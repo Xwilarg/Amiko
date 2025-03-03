@@ -1,6 +1,6 @@
 import { PasswordModal } from "./components/PasswordModal";
 import { Message } from "./components/Message"
-import { FlatList, TextInput, Button, View } from "react-native";
+import { FlatList, TextInput, Button, View, StyleSheet } from "react-native";
 import { useState } from 'react';
 import { MessageManager } from "./components/MessageManager"
 //const RNFS = require('react-native-fs');
@@ -32,12 +32,8 @@ export default function App() {
                 
             </FlatList>
 
-            <View style={{}}>
-                <TextInput style={{
-                    borderColor: 'black',
-                    borderRadius: '1px',
-                    borderWidth: '2px'
-                }} onChangeText={setMessage} value={message}></TextInput>
+            <View>
+                <TextInput style={styles.textInput} onChangeText={setMessage} value={message}></TextInput>
                 <Button title='Submit' onPress={() => {
                     messageManager.sendUserMessage(message);
                     setMessage("");
@@ -46,3 +42,11 @@ export default function App() {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    textInput: {
+        borderColor: 'black',
+        borderRadius: 1,
+        borderWidth: 2
+    }
+});

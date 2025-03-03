@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
         borderColor: 'black',
-        borderRadius: '1px',
-        borderWidth: '2px'
+        borderRadius: 1,
+        borderWidth: 2
     }
 });
