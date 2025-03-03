@@ -37,7 +37,7 @@ export default function App() {
                     borderColor: 'black',
                     borderRadius: '1px',
                     borderWidth: '2px'
-                }} onChangeText={setMessage}></TextInput>
+                }} onChangeText={setMessage} value={message}></TextInput>
                 <Button title='Submit' onPress={() => {
                     messageManager.sendUserMessage(message);
                     setMessage("");

@@ -118,7 +118,6 @@ export class MessageManager {
                     break;
 
                 case 3: // Users info
-
                     self.userInfo = {};
                     for (const c of json.data) {
                         self.userInfo[c.id] = c.username;
