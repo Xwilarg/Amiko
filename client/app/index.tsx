@@ -21,12 +21,12 @@ export default function Index() {
             alignItems: "center",
         }}
         >
-            <PasswordModal callback={(pwd) => {messageManager.submitPassword(pwd)}}></PasswordModal>
+            <PasswordModal callback={(pwd: string) => {messageManager.submitPassword(pwd)}}></PasswordModal>
 
             <FlatList
                 data={messages}
-                renderItem={({item}) => <Message date={item.date.toLocaleString()} name={item.name} message={item.message} />}
-                keyExtractor={(item, _) => item.id}
+                renderItem={({item}: any) => <Message date={item.date.toLocaleString()} name={item.name} message={item.message} />}
+                keyExtractor={(item: any, _) => item.id}
             >
                 
             </FlatList>

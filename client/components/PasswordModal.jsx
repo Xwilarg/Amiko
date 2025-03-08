@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { View, Modal, StyleSheet, Button, TextInput } from 'react-native';
+import { Input } from '~/components/ui/input';
+import { View, Modal, StyleSheet, Button } from 'react-native';
 
 export function PasswordModal({callback}) {
     const [modalVisible, setModalVisible] = useState(true);
@@ -9,7 +10,7 @@ export function PasswordModal({callback}) {
     transparent={true}
     visible={modalVisible}>
         <View style={styles.centeredView}>
-            <TextInput style={styles.textInput} secureTextEntry={true} onChangeText={setPassword}></TextInput>
+            <Input style={styles.textInput} secureTextEntry={true} onChangeText={setPassword}></Input>
             <Button title='Submit' onPress={() => {
                 setPassword("");
                 callback(password);
