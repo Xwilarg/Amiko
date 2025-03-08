@@ -1,11 +1,10 @@
-import { PasswordModal } from "./components/PasswordModal";
-import { Message } from "./components/Message"
+import { PasswordModal } from "../components/PasswordModal";
+import { Message } from "../components/Message"
 import { FlatList, TextInput, Button, View, StyleSheet } from "react-native";
 import { useState } from 'react';
-import { MessageManager } from "./components/MessageManager"
-//const RNFS = require('react-native-fs');
+import { MessageManager } from "../components/MessageManager"
 
-export default function App() {
+export default function Index() {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     
@@ -42,6 +41,7 @@ export default function App() {
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     textInput: {
