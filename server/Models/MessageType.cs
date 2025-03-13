@@ -5,5 +5,6 @@ public enum MessageType
     Message,
     MessageList,
     Acknowledge,
-    UserInfo
+    UserInfo,
+    ChannelInfo
 }

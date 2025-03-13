@@ -19,7 +19,7 @@ public class ContextInterpreter
         return new(ctx);
     }
 
-    public void AddMessage(MessageContext msh)
+    public void AddMessage(MessageContext msg)
     {
         if (!_ctx.Channels.Any())
         {
@@ -27,13 +27,13 @@ public class ContextInterpreter
             {
                 Name = "Default",
                 Messages = [
-                    msh
+                    msg
                 ]
             });
         }
         else
         {
-            _ctx.Channels.First().Messages.Add(msh);
+            _ctx.Channels.First().Messages.Add(msg);
         }
         _ctx.SaveChanges();
     }

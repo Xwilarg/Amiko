@@ -18,6 +18,12 @@ public class UserInfo : BaseMessage
     public string Username { set; get; }
 }
 
+public class ChannelInfo : BaseMessage
+{
+    public int Id { set; get; }
+    public string Name { set; get; }
+}
+
 public class Message : BaseMessage
 {
     public string Author { set; get; }

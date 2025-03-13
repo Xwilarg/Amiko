@@ -61,6 +61,9 @@ namespace Amiko.Server.Controllers
                 bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_userManager.GetAllUsersInfo(authorId), Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
+                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new DataGroup<ChannelInfo>() { Type = MessageType.ChannelInfo, Data = _dbContext.Channels.Select(x => new ChannelInfo() { Id = x.Id, Name = x.Name }).ToArray() }, Option));
+                await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+
                 while (true)
                 {
                     var buffer = new byte[1024];
