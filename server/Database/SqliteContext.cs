@@ -1,6 +1,5 @@
 ﻿using Amiko.Models;
 using Amiko.Server.Models;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,10 +10,14 @@ namespace Amiko.Server.Database;
 public class ContextInterpreter
 {
     private SqliteContext _ctx;
+    private static bool _firstInit = true; // TODO: ugh
 
     private ContextInterpreter(SqliteContext ctx)
     {
         _ctx = ctx;
+
+        if (!_firstInit) return;
+        _firstInit = false;
 
         // Load/Update db from config
         if (!File.Exists("config.json"))
@@ -49,7 +52,7 @@ public class ContextInterpreter
 
     public int AddServer(string name)
     {
-        var serv = new ServerContext() { Name = name, Channels = new() };
+        var serv = new ServerContext() { Name = name };
         _ctx.Servers.Add(serv);
         _ctx.SaveChanges();
 
@@ -61,7 +64,7 @@ public class ContextInterpreter
         var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
         if (serv == null) throw new InvalidOperationException("Server not found");
 
-        var chan = new ChannelContext() { Name = name, Messages = new() };
+        var chan = new ChannelContext() { Name = name };
         serv.Channels.Add(chan);
         _ctx.SaveChanges();
 
@@ -120,7 +123,7 @@ public class ServerContext
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public string Name { set; get; }
-    public List<ChannelContext> Channels { set; get; }
+    public List<ChannelContext> Channels { set; get; } = [];
 }
 
 public class ChannelContext
@@ -128,7 +131,7 @@ public class ChannelContext
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public string Name { set; get; }
-    public List<MessageContext> Messages { set; get; }
+    public List<MessageContext> Messages { set; get; } = [];
 }
 
 public class MessageContext

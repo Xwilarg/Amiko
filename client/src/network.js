@@ -30,7 +30,6 @@ export function sendMessageFromInput(content) {
 }
 
 export function openMessageConnection(token) {
-    console.log("hey");
     document.getElementById("send-message").disabled = true;
     document.getElementById("messages").innerHTML = "";
 

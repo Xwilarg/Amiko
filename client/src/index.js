@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             document.getElementById("login-popup").classList.remove("is-active");
             openMessageConnection(token);
         })
-        .catch((err) => {});
+        .catch((err) => { console.error(err); });
     }
 
     document.getElementById("password-submit").addEventListener("click", _ => {
