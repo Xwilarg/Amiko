@@ -1,5 +1,6 @@
 credentials.json
 client/out/
+client/js/
 *.db*
 
 ## Ignore Visual Studio temporary files, build results, and
