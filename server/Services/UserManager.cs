@@ -6,18 +6,18 @@ namespace Amiko.Server.Services;
 
 public class UserManager
 {
-    private User[] _users;
+    private UserConfig[] _users;
 
     public UserManager()
     {
-        if (!File.Exists("credentials.json"))
+        if (!File.Exists("config.json"))
         {
             throw new InvalidOperationException();
         }
-        _users = JsonSerializer.Deserialize<User[]>(File.ReadAllText("credentials.json"), new JsonSerializerOptions()
+        _users = JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        }).Users;
     }
 
     public UserInfo[] GetAllUsersInfo(string myId)
@@ -30,12 +30,12 @@ public class UserManager
         }).ToArray();
     }
 
-    public User? GetUserFromPassword(string hash)
+    public UserConfig? GetUserFromPassword(string hash)
     {
         return _users.FirstOrDefault(x => hash == x.Password);
     }
 
-    public User? GetUserFromId(string id)
+    public UserConfig? GetUserFromId(string id)
     {
         return _users.FirstOrDefault(x => id == x.Id);
     }

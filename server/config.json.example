@@ -1,0 +1,13 @@
+{
+    "users": [{
+        "id": "1",
+        "username": "Sample User",
+        "password": "PasswordHash"
+    }],
+    "servers": [{
+        "name": "Server Name",
+        "channels": [{
+            "name": "Channel Name"
+        }]
+    }]
+}

@@ -1,8 +1,9 @@
 ﻿using Amiko.Models;
+using Amiko.Server.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace Amiko.Server.Database;
 
@@ -81,6 +82,34 @@ public class ContextInterpreter
 
 public class SqliteContext : DbContext
 {
+    public SqliteContext()
+    {
+        // Load/Update db from config
+        if (!File.Exists("config.json"))
+        {
+            throw new InvalidOperationException();
+        }
+        var servs = JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }).Servers;
+        foreach (var s in servs)
+        {
+            if (!Servers.Any(x => x.Name == s.Name))
+            {
+                ContextInterpreter.Get(this).AddServer(s.Name);
+            }
+            foreach (var c in s.Channels)
+            {
+                var server = Servers.First(x => x.Name == s.Name);
+                if (!server.Channels.Any(x => x.Name == c.Name))
+                {
+                    ContextInterpreter.Get(this).AddChannel(server.Id, c.Name);
+                }
+            }
+        }
+    }
+
     public DbSet<ServerContext> Servers { set; get; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
