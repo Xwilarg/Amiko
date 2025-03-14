@@ -20,18 +20,14 @@ public class UserManager
         });
     }
 
-    public DataGroup<UserInfo> GetAllUsersInfo(string myId)
+    public UserInfo[] GetAllUsersInfo(string myId)
     {
-        return new DataGroup<UserInfo>()
+        return _users.Select(x => new UserInfo()
         {
-            Type = MessageType.UserInfo,
-            Data = _users.Select(x => new UserInfo()
-            {
-                Id = x.Id,
-                IsMe = x.Id == myId,
-                Username = x.Username
-            }).ToArray()
-        };
+            Id = x.Id,
+            IsMe = x.Id == myId,
+            Username = x.Username
+        }).ToArray();
     }
 
     public User? GetUserFromPassword(string hash)

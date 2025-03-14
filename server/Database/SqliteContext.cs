@@ -1,5 +1,6 @@
 ﻿using Amiko.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,54 +20,79 @@ public class ContextInterpreter
         return new(ctx);
     }
 
-    public void AddMessage(MessageContext msg)
+    public int AddServer(string name)
     {
-        if (!_ctx.Channels.Any())
-        {
-            _ctx.Channels.Add(new()
-            {
-                Name = "Default",
-                Messages = [
-                    msg
-                ]
-            });
-        }
-        else
-        {
-            _ctx.Channels.First().Messages.Add(msg);
-        }
+        var serv = new ServerContext() { Name = name, Channels = new() };
+        _ctx.Servers.Add(serv);
+        _ctx.SaveChanges();
+
+        return serv.Id;
+    }
+
+    public int AddChannel(int servId, string name)
+    {
+        var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
+        if (serv == null) throw new InvalidOperationException("Server not found");
+
+        var chan = new ChannelContext() { Name = name, Messages = new() };
+        serv.Channels.Add(chan);
+        _ctx.SaveChanges();
+
+        return chan.Id;
+    }
+
+    public void AddMessage(int servId, int chanId, MessageContext msg)
+    {
+        var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
+        if (serv == null) throw new InvalidOperationException("Server not found");
+
+        var chan = serv.Channels.FirstOrDefault(x => x.Id == chanId);
+        if (chan == null) throw new InvalidOperationException("Channel not found");
+
+        chan.Messages.Add(msg);
         _ctx.SaveChanges();
     }
 
-    public DataGroup<Message> AllMessages()
+    public ServerInfo[] GetStartingInfo(int maxMsgCount)
     {
-        return new DataGroup<Message>()
+        return _ctx.Servers.Select(s => new ServerInfo()
         {
-            Type = MessageType.MessageList,
-            Data = !_ctx.Channels.Any() ? [] : _ctx.Channels.Include(x => x.Messages).First().Messages.Select(x =>
+            Id = s.Id,
+            Name = s.Name,
+            Channels = s.Channels.Select(c => new ChannelInfo()
             {
-                var d = x.CreationTime.ToUniversalTime() - DateTime.UnixEpoch;
-                return new Message()
+                Id = c.Id,
+                Name = c.Name,
+                Messages = c.Messages.Take(maxMsgCount).Select(m => new Message()
                 {
-                    Author = x.AuthorId,
-                    Content = x.Message,
+                    Author = m.AuthorId,
+                    Content = m.Message,
                     SentAt = new()
                     {
-                        Seconds = (long)Math.Floor(d.TotalSeconds),
-                        Nanos = d.Nanoseconds
+                        Seconds = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
+                        Nanos = (m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).Nanoseconds
                     }
-                };
+                }
+                ).ToArray()
             }).ToArray()
-        };
+        }).ToArray();
     }
 }
 
 public class SqliteContext : DbContext
 {
-    public DbSet<ChannelContext> Channels { set; get; }
+    public DbSet<ServerContext> Servers { set; get; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.UseSqlite("Data Source=Sqlite.db");
+}
+
+public class ServerContext
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
+
+    public string Name { set; get; }
+    public List<ChannelContext> Channels { set; get; }
 }
 
 public class ChannelContext
