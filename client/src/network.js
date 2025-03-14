@@ -7,14 +7,17 @@ const isSecure = false;
 
 let socket;
 
+// Access token to the backend
+let token = null;
+
 function createWebsocketUrl() {
     return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
 }
-function createHttpUrl(endpoint) {
+export function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
 
-function openMessageConnection() {
+export function openMessageConnection() {
     document.getElementById("send-message").disabled = true;
     document.getElementById("messages").innerHTML = "";
     sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
@@ -38,7 +41,6 @@ function openMessageConnection() {
 
     // Listen for messages
     socket.addEventListener("message", async function(event) {
-
         const json = JSON.parse(event.data);
 
         console.log(`Received ${json.type}`);
