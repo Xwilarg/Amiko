@@ -145,9 +145,9 @@ namespace Amiko.Server.Controllers
                                 { }
                             }
                         }
-                        catch
+                        catch (Exception e)
                         {
-                            var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge() { Type = MessageType.Acknowledge, Id = prot.Id, IsError = true }, Option));
+                            _logger.LogError(e.ToString());
                         }
                     }
                     else if (response.MessageType == WebSocketMessageType.Close)

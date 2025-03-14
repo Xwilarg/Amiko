@@ -18,11 +18,13 @@ export function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
 
-export function sendMessageFromInput(content) {
+export function sendMessageFromInput(content, servId, chanId) {
     var newMsg = {
         type: 0,
         content: content,
-        id: currId
+        id: currId,
+        serverId: servId,
+        channelId: chanId
     };
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(content, currId);
@@ -42,7 +44,6 @@ export function openMessageConnection(token) {
     // Connection opened
     socket.addEventListener("open", (_) => {
         sendSystemMessage("Connected to server");
-        document.getElementById("send-message").disabled = false;
     });
 
     socket.addEventListener("close", (_) => {
@@ -61,17 +62,18 @@ export function openMessageConnection(token) {
         switch (json.type) {
             case 0: // Data received is an array
                 for (const c of json.data) {
-                    switch (json.data[0].type)
+                    console.log(`(Of type ${c.type})`);
+                    switch (c.type)
                     {
                         /*case 1: // Message
                             sendMessage(c.sentAt, c.author, c.content);
                             break;*/
                         
-                        case 2: // Server info
+                        case 3: // Server info
                             updateServerInfo(c);
                             break;
 
-                        case 3: // User info
+                        case 4: // User info
                             updateUserInfo(c);
                             break;
                         

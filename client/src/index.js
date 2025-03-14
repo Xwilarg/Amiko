@@ -1,4 +1,5 @@
-import { createHttpUrl, openMessageConnection, sendMessageFromInput } from "./network";
+import { createHttpUrl, openMessageConnection } from "./network";
+import { initRenderer } from "./renderer";
 
 let token;
 
@@ -45,12 +46,5 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    document.getElementById("send-message").addEventListener("click", e => {
-        e.preventDefault();
-        const content = document.getElementById("message-field");
-        if (content.value) {
-            sendMessageFromInput(content.value);
-            content.value = "";
-        }
-    });
+    initRenderer();
 });

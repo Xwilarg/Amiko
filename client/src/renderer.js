@@ -1,3 +1,5 @@
+import { sendMessageFromInput } from "./network";
+
 export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
 }
@@ -105,6 +107,8 @@ export function updateServerInfo(msg) {
                 servId: msg.id,
                 chanId: msg.channels[0].id
             }
+            console.log(`Current channel is now ${currChan.servId} / ${currChan.chanId}`);
+            document.getElementById("send-message").disabled = false;
             refreshMessageDisplay();
         }
     }
@@ -123,5 +127,17 @@ export function updateUserInfo(msg) {
             usernameContainer.innerHTML = username;
         }
     }
+}
+
+export function initRenderer()
+{
+    document.getElementById("send-message").addEventListener("click", e => {
+        e.preventDefault();
+        const content = document.getElementById("message-field");
+        if (content.value) {
+            sendMessageFromInput(content.value, currChan.servId, currChan.chanId);
+            content.value = "";
+        }
+    });
 }
 
