@@ -59,6 +59,11 @@ function scrollToBottom() {
     container.scrollTo(0, container.scrollHeight);
 }
 
+function refreshMessageDisplay() {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
+}
+
 // Access token to the backend
 let token = null;
 
@@ -67,6 +72,8 @@ let myUsername = "";
 
 // All infos about various users
 let userInfo = {};
+let servInfo = {};
+let currChan = null;
 
 // Current message ID
 let currId = 0;
@@ -180,11 +187,30 @@ function openMessageConnection() {
                 for (const c of json.data) {
                     switch (json.data[0].type)
                     {
-                        case 1: // Message
+                        /*case 1: // Message
                             sendMessage(c.sentAt, c.author, c.content);
-                            break;
+                            break;*/
                         
                         case 2: // Server info
+                            servInfo[c.id] = {
+                                name: c.name,
+                                channels: {}
+                            };
+                            for (const chan of c.channels)
+                            {
+                                servInfo[c.id].channels[chan.id] = {
+                                    name: chan.name,
+                                    messages: chan.messages
+                                }
+                            }
+                            if (currChan === null) {
+                                currChan = {
+                                    servId: c.id,
+                                    chanId: c.channels[0].id
+                                }
+                                refreshMessageDisplay();
+                            }
+
                             break;
 
                         case 3: // User info

@@ -26,6 +26,6 @@ function initBrowser() {
 }
 
 if (typeof versions === 'undefined') {
-    // If versions is unefined, it means we are on the browser version
+    // If versions is undefined, it means we are on the browser version
     initBrowser();
 }

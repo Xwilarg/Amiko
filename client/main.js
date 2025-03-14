@@ -8,7 +8,7 @@ const createWindow = () => {
     width: 1200,
     height: 900,
     webPreferences: {
-      preload: path.join(__dirname, 'js/preload.js'),
+      preload: path.join(__dirname, 'js/platform/desktop.js'),
       sandbox: false
     }
   })
