@@ -1,5 +1,6 @@
 ﻿using Amiko.Models;
 using Amiko.Server.Models;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +15,31 @@ public class ContextInterpreter
     private ContextInterpreter(SqliteContext ctx)
     {
         _ctx = ctx;
+
+        // Load/Update db from config
+        if (!File.Exists("config.json"))
+        {
+            throw new InvalidOperationException();
+        }
+        var servs = JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        }).Servers;
+        foreach (var s in servs)
+        {
+            if (!ctx.Servers.Any(x => x.Name == s.Name))
+            {
+                AddServer(s.Name);
+            }
+            foreach (var c in s.Channels)
+            {
+                var server = ctx.Servers.First(x => x.Name == s.Name);
+                if (!server.Channels.Any(x => x.Name == c.Name))
+                {
+                    AddChannel(server.Id, c.Name);
+                }
+            }
+        }
     }
 
     public static ContextInterpreter Get(SqliteContext ctx)
@@ -83,34 +109,6 @@ public class ContextInterpreter
 
 public class SqliteContext : DbContext
 {
-    public SqliteContext()
-    {
-        // Load/Update db from config
-        if (!File.Exists("config.json"))
-        {
-            throw new InvalidOperationException();
-        }
-        var servs = JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), new JsonSerializerOptions()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        }).Servers;
-        foreach (var s in servs)
-        {
-            if (!Servers.Any(x => x.Name == s.Name))
-            {
-                ContextInterpreter.Get(this).AddServer(s.Name);
-            }
-            foreach (var c in s.Channels)
-            {
-                var server = Servers.First(x => x.Name == s.Name);
-                if (!server.Channels.Any(x => x.Name == c.Name))
-                {
-                    ContextInterpreter.Get(this).AddChannel(server.Id, c.Name);
-                }
-            }
-        }
-    }
-
     public DbSet<ServerContext> Servers { set; get; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)

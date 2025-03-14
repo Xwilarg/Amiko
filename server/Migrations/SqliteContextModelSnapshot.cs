@@ -27,9 +27,14 @@ namespace Amiko.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ServerContextId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Channels");
+                    b.HasIndex("ServerContextId");
+
+                    b.ToTable("ChannelContext");
                 });
 
             modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
@@ -59,6 +64,28 @@ namespace Amiko.Server.Migrations
                     b.ToTable("MessageContext");
                 });
 
+            modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Servers");
+                });
+
+            modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
+                {
+                    b.HasOne("Amiko.Server.Database.ServerContext", null)
+                        .WithMany("Channels")
+                        .HasForeignKey("ServerContextId");
+                });
+
             modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
                 {
                     b.HasOne("Amiko.Server.Database.ChannelContext", null)
@@ -69,6 +96,11 @@ namespace Amiko.Server.Migrations
             modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>
+                {
+                    b.Navigation("Channels");
                 });
 #pragma warning restore 612, 618
         }

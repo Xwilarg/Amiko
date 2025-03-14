@@ -12,7 +12,7 @@ namespace Amiko.Server.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Channels",
+                name: "Servers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -21,7 +21,26 @@ namespace Amiko.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Channels", x => x.Id);
+                    table.PrimaryKey("PK_Servers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChannelContext",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    ServerContextId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChannelContext", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChannelContext_Servers_ServerContextId",
+                        column: x => x.ServerContextId,
+                        principalTable: "Servers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -39,11 +58,16 @@ namespace Amiko.Server.Migrations
                 {
                     table.PrimaryKey("PK_MessageContext", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MessageContext_Channels_ChannelContextId",
+                        name: "FK_MessageContext_ChannelContext_ChannelContextId",
                         column: x => x.ChannelContextId,
-                        principalTable: "Channels",
+                        principalTable: "ChannelContext",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChannelContext_ServerContextId",
+                table: "ChannelContext",
+                column: "ServerContextId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MessageContext_ChannelContextId",
@@ -58,7 +82,10 @@ namespace Amiko.Server.Migrations
                 name: "MessageContext");
 
             migrationBuilder.DropTable(
-                name: "Channels");
+                name: "ChannelContext");
+
+            migrationBuilder.DropTable(
+                name: "Servers");
         }
     }
 }
