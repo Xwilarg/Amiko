@@ -66,7 +66,7 @@ let token = null;
 let myUsername = "";
 
 // All infos about various users
-let userInfo = null;
+let userInfo = {};
 
 // Current message ID
 let currId = 0;
@@ -158,6 +158,7 @@ function openMessageConnection() {
     // Connection opened
     socket.addEventListener("open", (_) => {
         sendSystemMessage("Connected to server");
+        document.getElementById("send-message").disabled = false;
     });
 
     socket.addEventListener("close", (_) => {
@@ -175,7 +176,37 @@ function openMessageConnection() {
 
         console.log(`Received ${json.type}`);
         switch (json.type) {
-            case 0: // Message received
+            case 0: // Data received is an array
+                for (const c of json.data) {
+                    switch (json.data[0].type)
+                    {
+                        case 1: // Message
+                            sendMessage(c.sentAt, c.author, c.content);
+                            break;
+                        
+                        case 2: // Server info
+                            break;
+
+                        case 3: // User info
+                            userInfo[c.id] = c.username;
+                            if (c.isMe) {
+                                myUsername = c.username;
+                            }
+            
+                            for (const msg of document.querySelectorAll(".message")) {
+                                const usernameContainer = msg.querySelector(".subtitle");
+                                const username = userInfo[usernameContainer.innerHTML];
+                                if (username) {
+                                    usernameContainer.innerHTML = username;
+                                }
+                            }
+                            break;
+                        
+                    }
+                }
+                break;
+
+            case 1: // Message received
                 const username = userInfo[json.author];
                 sendMessage(json.sentAt, username, json.content);
                 if (!await notification.isFocusedAsync()) {
@@ -185,36 +216,9 @@ function openMessageConnection() {
                 }
                 break;
 
-            case 1: // Array of messages received (app start)
-                for (const c of json.data) {
-                    sendMessage(c.sentAt, c.author, c.content);
-                }
-                break;
-
             case 2: // Acknowledgement of a message sent
                 document.querySelector(`.message-${json.id}`).classList.remove("sending");
                 if (json.isError) document.querySelector(`.message-${json.id}`).classList.add("error");
-                break;
-
-            case 3: // Users info
-
-                userInfo = {};
-                for (const c of json.data) {
-                    userInfo[c.id] = c.username;
-                    if (c.isMe) {
-                        myUsername = c.username;
-                    }
-                }
-
-                for (const msg of document.querySelectorAll(".message")) {
-                    const usernameContainer = msg.querySelector(".subtitle");
-                    const username = userInfo[usernameContainer.innerHTML];
-                    if (username) {
-                        usernameContainer.innerHTML = username;
-                    }
-                }
-
-                document.getElementById("send-message").disabled = false;
                 break;
         }
     });
