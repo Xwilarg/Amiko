@@ -51,17 +51,24 @@ namespace Amiko.Server.Controllers
                     _sockets.Add(client);
                 }
 
+                // Info of who sent the msg
                 var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)?.Id ?? "0";
 
-                // First connection: send all messages
+                // First connection from user!
                 _logger.Log(LogLevel.Information, $"New client connected ({authorId})");
-                var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(ContextInterpreter.Get(_dbContext).AllMessages(), Option));
+
+                // Send information about all servers existing
+                var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
+                {
+                    Data = ContextInterpreter.Get(_dbContext).GetStartingInfo(50)
+                }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
-                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(_userManager.GetAllUsersInfo(authorId), Option));
-                await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
-
-                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new DataGroup<ChannelInfo>() { Type = MessageType.ChannelInfo, Data = _dbContext.Channels.Select(x => new ChannelInfo() { Id = x.Id, Name = x.Name }).ToArray() }, Option));
+                // Send information about all users existing
+                bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
+                {
+                    Data = _userManager.GetAllUsersInfo(authorId)
+                }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
                 while (true)
@@ -98,7 +105,7 @@ namespace Amiko.Server.Controllers
                             _logger.Log(LogLevel.Information, $"Received {prot.Content} by {authorId}");
 
                             // Save to db
-                            ContextInterpreter.Get(_dbContext).AddMessage(new()
+                            ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                             {
                                 CreationTime = now,
                                 AuthorId = authorId,

@@ -24,6 +24,7 @@ public class UserManager
     {
         return _users.Select(x => new UserInfo()
         {
+            Type = MessageType.UserInfo,
             Id = x.Id,
             IsMe = x.Id == myId,
             Username = x.Username

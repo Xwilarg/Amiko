@@ -58,6 +58,7 @@ public class ContextInterpreter
     {
         return _ctx.Servers.Select(s => new ServerInfo()
         {
+            Type = MessageType.ServerInfo,
             Id = s.Id,
             Name = s.Name,
             Channels = s.Channels.Select(c => new ChannelInfo()

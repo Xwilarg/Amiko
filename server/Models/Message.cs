@@ -30,8 +30,7 @@ public class ServerInfo : BaseMessage
     public string Name { set; get; }
     public ChannelInfo[] Channels { set; get; }
 }
-
-public class ChannelInfo : BaseMessage
+public class ChannelInfo
 {
     public int Id { set; get; }
     public string Name { set; get; }
@@ -50,9 +49,30 @@ public class UserInfo : BaseMessage
 /// </summary>
 public class Message : BaseMessage
 {
+    /// <summary>
+    /// Server in which the message was sent
+    /// </summary>
+    public int ServerId { set; get; }
+    /// <summary>
+    /// Channel in which the message was sent
+    /// </summary>
+    public int ChannelId { set; get; }
+
+    /// <summary>
+    /// ID of the author of the message
+    /// </summary>
     public string Author { set; get; }
+    /// <summary>
+    /// Content of the message
+    /// </summary>
     public string Content { set; get; }
+    /// <summary>
+    /// When the message was sent
+    /// </summary>
     public Timestamp SentAt { set; get; }
+    /// <summary>
+    /// ID of the message, used for acknowledgement
+    /// </summary>
     public int Id { set; get; }
 }
 
