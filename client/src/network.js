@@ -1,14 +1,15 @@
+import { sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+/*
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
-/*
+*/
 const apiTarget = "localhost:5129";
 const isSecure = false;
-*/
 
 let socket;
 
-// Access token to the backend
-let token = null;
+// Current message ID
+let currId = 0;
 
 function createWebsocketUrl() {
     return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
@@ -17,9 +18,23 @@ export function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
 
-export function openMessageConnection() {
+export function sendMessageFromInput(content) {
+    var newMsg = {
+        type: 0,
+        content: content,
+        id: currId
+    };
+    socket.send(JSON.stringify(newMsg));
+    sendMyMessage(content, currId);
+    currId++;
+}
+
+export function openMessageConnection(token) {
+    console.log("hey");
     document.getElementById("send-message").disabled = true;
     document.getElementById("messages").innerHTML = "";
+
+    // TODO: Move on refresh
     sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
     sendSystemMessage(`Connecting...`);
 
@@ -54,40 +69,11 @@ export function openMessageConnection() {
                             break;*/
                         
                         case 2: // Server info
-                            servInfo[c.id] = {
-                                name: c.name,
-                                channels: {}
-                            };
-                            for (const chan of c.channels)
-                            {
-                                servInfo[c.id].channels[chan.id] = {
-                                    name: chan.name,
-                                    messages: chan.messages
-                                }
-                            }
-                            if (currChan === null) {
-                                currChan = {
-                                    servId: c.id,
-                                    chanId: c.channels[0].id
-                                }
-                                refreshMessageDisplay();
-                            }
-
+                            updateServerInfo(c);
                             break;
 
                         case 3: // User info
-                            userInfo[c.id] = c.username;
-                            if (c.isMe) {
-                                myUsername = c.username;
-                            }
-            
-                            for (const msg of document.querySelectorAll(".message")) {
-                                const usernameContainer = msg.querySelector(".subtitle");
-                                const username = userInfo[usernameContainer.innerHTML];
-                                if (username) {
-                                    usernameContainer.innerHTML = username;
-                                }
-                            }
+                            updateUserInfo(c);
                             break;
                         
                     }
@@ -95,8 +81,7 @@ export function openMessageConnection() {
                 break;
 
             case 1: // Message received
-                const username = userInfo[json.author];
-                sendMessage(json.sentAt, username, json.content);
+                updateReceivedMessage(json);
                 if (!await notification.isFocusedAsync()) {
                     new window.Notification(username, {
                         body: json.content

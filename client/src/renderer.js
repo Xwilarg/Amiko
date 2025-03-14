@@ -1,16 +1,22 @@
-function sendSystemMessage(text) {
+export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
 }
 
-function sendErrorMessage(text) {
+export function sendErrorMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "error" ]);
 }
 
-function sendMessage(date, name, text) {
+function sendIncomingMessage(date, id, text) {
+    let name;
+    if (json.author in userInfo) {
+        name = userInfo[json.author];
+    } else {
+        name = id;
+    }
     sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), name, text, []);
 }
 
-function sendMyMessage(text, id) {
+export function sendMyMessage(text, id) {
     sendMessageInternal(new Date(), myUsername, text, [ "sending", `message-${id}` ]);
 }
 
@@ -62,6 +68,9 @@ function scrollToBottom() {
 function refreshMessageDisplay() {
     const container = document.getElementById("messages");
     container.innerHTML = "";
+    for (const msg of servInfo[currChan.sendId].channels[currChan.chanId].messages) {
+        sendIncomingMessage(msg.sentAt, msg.author, msg.content);
+    }
 }
 
 // Current user username
@@ -72,17 +81,47 @@ let userInfo = {};
 let servInfo = {};
 let currChan = null;
 
-// Current message ID
-let currId = 0;
+export function updateReceivedMessage(msg) {
+    servInfo[msg.serverId].channels[msg.channelId].messages.push(msg);
+    if (currChan.servId === msg.serverId && currChan.chanId === msg.channelId) {
+        sendIncomingMessage(msg.sentAt, msg.author, msg.content);
+    }
+}
 
-export function sendMessageFromInput(content) {
-    var newMsg = {
-        type: 0,
-        content: content,
-        id: currId
+export function updateServerInfo(msg) {
+    servInfo[msg.id] = {
+        name: msg.name,
+        channels: {}
     };
-    socket.send(JSON.stringify(newMsg));
-    sendMyMessage(content, currId);
-    currId++;
+    for (const chan of msg.channels)
+    {
+        servInfo[msg.id].channels[chan.id] = {
+            name: chan.name,
+            messages: chan.messages
+        }
+
+        if (currChan === null) {
+            currChan = {
+                servId: msg.id,
+                chanId: msg.channels[0].id
+            }
+            refreshMessageDisplay();
+        }
+    }
+}
+
+export function updateUserInfo(msg) {
+    userInfo[msg.id] = msg.username;
+    if (msg.isMe) {
+        myUsername = msg.username;
+    }
+
+    for (const m of document.querySelectorAll(".message")) {
+        const usernameContainer = m.querySelector(".subtitle");
+        const username = userInfo[usernameContainer.innerHTML];
+        if (username) {
+            usernameContainer.innerHTML = username;
+        }
+    }
 }
 

@@ -1,5 +1,6 @@
-import { createHttpUrl, openMessageConnection } from "./network";
-import { sendMessageFromInput } from "./renderer";
+import { createHttpUrl, openMessageConnection, sendMessageFromInput } from "./network";
+
+let token;
 
 window.addEventListener('DOMContentLoaded', async () => {
     const pwd = document.getElementById("password");
@@ -17,7 +18,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             token = fileToken;
             pwd.value = "";
             document.getElementById("login-popup").classList.remove("is-active");
-            openMessageConnection();
+            openMessageConnection(token);
         })
         .catch((err) => {});
     }
@@ -37,7 +38,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             await filesystem.writeAsync(token);
             pwd.value = "";
             document.getElementById("login-popup").classList.remove("is-active");
-            openMessageConnection();
+            openMessageConnection(token);
         })
         .catch((err) => {
             alert(`Login failed: ${err}`)
