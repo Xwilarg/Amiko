@@ -70,7 +70,7 @@ function scrollToBottom() {
 function refreshMessageDisplay() {
     const container = document.getElementById("messages");
     container.innerHTML = "";
-    for (const msg of servInfo[currChan.sendId].channels[currChan.chanId].messages) {
+    for (const msg of servInfo[currChan.servId].channels[currChan.chanId].messages) {
         sendIncomingMessage(msg.sentAt, msg.author, msg.content);
     }
 }
