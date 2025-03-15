@@ -74,7 +74,7 @@ public class ContextInterpreter
 
     public void AddMessage(int servId, int chanId, MessageContext msg)
     {
-        var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
+        var serv = _ctx.Servers.Include(s => s.Channels).FirstOrDefault(x => x.Id == servId);
         if (serv == null) throw new InvalidOperationException("Server not found");
 
         var chan = serv.Channels.FirstOrDefault(x => x.Id == chanId);
