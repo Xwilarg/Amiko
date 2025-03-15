@@ -1,5 +1,6 @@
 ﻿using Amiko.Models;
 using Amiko.Server.Models;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,7 +19,6 @@ public class ContextInterpreter
 
         if (!_firstInit) return;
         _firstInit = false;
-        Console.WriteLine($"Possibles: {_ctx.Servers.First().Channels.Count()}");
 
         // Load/Update db from config
         if (!File.Exists("config.json"))
@@ -37,7 +37,7 @@ public class ContextInterpreter
             }
             foreach (var c in s.Channels)
             {
-                var server = _ctx.Servers.First(x => x.Name == s.Name);
+                var server = _ctx.Servers.Include(s => s.Channels).First(x => x.Name == s.Name);
                 if (!server.Channels.Any(x => x.Name == c.Name))
                 {
                     AddChannel(server.Id, c.Name);

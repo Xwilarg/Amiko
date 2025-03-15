@@ -10,8 +10,8 @@ export function sendErrorMessage(text) {
 
 function sendIncomingMessage(date, id, text) {
     let name;
-    if (json.author in userInfo) {
-        name = userInfo[json.author];
+    if (id in userInfo) {
+        name = userInfo[id];
     } else {
         name = id;
     }
