@@ -24,5 +24,6 @@
   "version": "1.0.0-beta",
   "author": "Xwilarg",
   "name": "amiko",
-  "description": "Chat software"
+  "description": "Chat software",
+  "license": "MIT"
 }
