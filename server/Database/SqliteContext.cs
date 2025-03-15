@@ -86,7 +86,7 @@ public class ContextInterpreter
 
     public ServerInfo[] GetStartingInfo(int maxMsgCount)
     {
-        return _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).Select(s => new ServerInfo()
+        var data = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).Select(s => new ServerInfo()
         {
             Type = MessageType.ServerInfo,
             Id = s.Id,
@@ -103,11 +103,19 @@ public class ContextInterpreter
                     {
                         Seconds = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
                         Nanos = (m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).Nanoseconds
-                    }
-                }
-                ).ToArray()
+                    },
+                    Id = m.Id
+                }).ToArray()
             }).ToArray()
         }).ToArray();
+        foreach (var s in data)
+        {
+            foreach (var c in s.Channels)
+            {
+                c.Messages = c.Messages.OrderBy(x => x.Id).ToArray();
+            }
+        }
+        return data;
     }
 }
 
