@@ -20,8 +20,10 @@ function sendIncomingMessage(date, id, text) {
 }
 
 export function sendMyMessage(msg, text, id) {
+    const now = new Date();
+    msg.date = now;
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(new Date(), myUsername, text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(now, myUsername, text, [ "sending", `message-${id}` ]);
 }
 
 function sendMessageInternal(date, name, text, indications) {
@@ -73,7 +75,13 @@ function refreshMessageDisplay() {
     const container = document.getElementById("messages");
     container.innerHTML = "";
     for (const msg of servInfo[currChan.servId].channels[currChan.chanId].messages) {
-        sendIncomingMessage(msg.sentAt, msg.author, msg.content);
+        let date;
+        if (msg.sentAt) {
+            date = new Date(msg.sentAt.seconds * 1000 + msg.sentAt.nanos / 1e6)
+        } else {
+            date = msg.date;
+        }
+        sendMessageInternal(date, msg.author ? getUsernameFromId(msg.author) : myUsername, msg.content, []);
     }
 }
 
