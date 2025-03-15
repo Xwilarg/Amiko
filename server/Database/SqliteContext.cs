@@ -18,6 +18,7 @@ public class ContextInterpreter
 
         if (!_firstInit) return;
         _firstInit = false;
+        Console.WriteLine($"Possibles: {_ctx.Servers.First().Channels.Count()}");
 
         // Load/Update db from config
         if (!File.Exists("config.json"))
@@ -30,13 +31,13 @@ public class ContextInterpreter
         }).Servers;
         foreach (var s in servs)
         {
-            if (!ctx.Servers.Any(x => x.Name == s.Name))
+            if (!_ctx.Servers.Any(x => x.Name == s.Name))
             {
                 AddServer(s.Name);
             }
             foreach (var c in s.Channels)
             {
-                var server = ctx.Servers.First(x => x.Name == s.Name);
+                var server = _ctx.Servers.First(x => x.Name == s.Name);
                 if (!server.Channels.Any(x => x.Name == c.Name))
                 {
                     AddChannel(server.Id, c.Name);

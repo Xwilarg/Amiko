@@ -75,6 +75,17 @@ function refreshMessageDisplay() {
     }
 }
 
+function refreshChannelDisplay() {
+    const channels = document.getElementById("channels");
+    channels.innerHTML = "";
+    for (const [key, value] of Object.entries(servInfo[currChan.servId].channels)) {
+        channels.innerHTML += `<button class="button">${value.name}</button>`;
+        document.querySelector("#channels > button:last-of-type").addEventListener("click", () => {
+            console.log(key);
+        });
+    }
+}
+
 // Current user username
 let myUsername = "";
 
@@ -112,6 +123,7 @@ export function updateServerInfo(msg) {
             refreshMessageDisplay();
         }
     }
+    refreshChannelDisplay(); // TODO: don't call that everytimes
 }
 
 export function updateUserInfo(msg) {

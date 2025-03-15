@@ -37,16 +37,24 @@
                 <div class="rich-preview is-flex is-hidden"></div>
             </div>
         </template>
-        <div class="is-flex is-flex-direction-column" id="messages">
-        </div>
+        <div class="fixed-grid has-6-cols">
+            <div class="grid">
+              <div class="cell"></div> <!-- Server display -->
+              <div class="cell" id="channels"></div> <!-- Channel display -->
+              <div class="cell is-col-span-4"> <!-- Main view -->
+                <div class="is-flex is-flex-direction-column" id="messages">
+                </div>
 
-        <form class="field has-addons">
-            <p class="control is-expanded">
-                <input class="input" type="text" placeholder="Your message" id="message-field" />
-            </p>
-            <p class="control">
-                <input class="button is-link" type="submit" id="send-message" disabled/>
-            </p>
-        </form>
+                <form class="field has-addons">
+                    <p class="control is-expanded">
+                        <input class="input" type="text" placeholder="Your message" id="message-field" />
+                    </p>
+                    <p class="control">
+                        <input class="button is-link" type="submit" id="send-message" disabled/>
+                    </p>
+                </form>
+              </div>
+            </div>
+          </div>
     </body>
 </html>
