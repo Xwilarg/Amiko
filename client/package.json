@@ -2,7 +2,6 @@
   "scripts": {
     "build": "esbuild src/index.js --bundle --minify --sourcemap --outfile=js/index.js && esbuild src/platform/browser.js --minify --sourcemap --outfile=js/platform/browser.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
     "start": "electron-forge start",
-    "package": "electron-forge package",
     "make": "electron-forge make"
   },
   "devDependencies": {

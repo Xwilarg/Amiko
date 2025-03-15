@@ -1,0 +1,70 @@
+name: CI
+
+on: [ push, pull_request ]
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Create release
+      run: dotnet publish -c Release -r linux-x64
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: back
+        path: backend/api/bin/Release/net8.0/linux-x64/publish
+        if-no-files-found: error
+
+  front:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: 'web/package-lock.json'
+    - name: Install JS dependencies
+      run: npm i
+    - name: Build scripts
+      run: npm run build
+    - name: Make executable
+      run: npm run make
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: web
+        path: |
+          client/css/
+          client/js/
+          client/node_modules/
+          client/index.html
+        if-no-files-found: error
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: web
+        path: |
+          client/css/
+          client/js/
+          client/node_modules/
+          client/index.html
+        if-no-files-found: error
