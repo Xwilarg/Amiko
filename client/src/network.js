@@ -1,10 +1,11 @@
 import { sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
-/*
+
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
-*/
+/*
 const apiTarget = "localhost:5129";
 const isSecure = false;
+*/
 
 let socket;
 
@@ -47,7 +48,7 @@ export function openMessageConnection(token) {
     });
 
     socket.addEventListener("close", (_) => {
-        openMessageConnection();
+        openMessageConnection(token);
     });
 
     socket.addEventListener("error", (e) => {
