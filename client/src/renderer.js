@@ -79,13 +79,18 @@ function refreshChannelDisplay() {
     const channels = document.getElementById("channels");
     channels.innerHTML = "";
     for (const [key, value] of Object.entries(servInfo[currChan.servId].channels)) {
-        channels.innerHTML += `<button class="button${currChan.chanId == key ? " is-primary" : ""}">${value.name}</button>`;
-        document.querySelector("#channels > button:last-of-type").addEventListener("click", (e) => {
+        const chanBtn = document.createElement("button");
+        chanBtn.innerHTML = value.name;
+        chanBtn.classList.add("button");
+        if (currChan.chanId == key) chanBtn.classList.add("is-primary");
+
+        chanBtn.addEventListener("click", (e) => {
             currChan.chanId = key;
             refreshMessageDisplay();
             document.querySelector("#channels > .is-primary").classList.remove("is-primary");
             e.target.classList.add("is-primary");
         });
+        document.getElementById("channels").appendChild(chanBtn);
     }
 }
 
@@ -128,8 +133,12 @@ export function updateServerInfo(msg) {
     }
     refreshChannelDisplay(); // TODO: don't call that everytimes
 
-    document.getElementById("servers").innerHTML += `<button class="button${currChan.servId == msg.id ? " is-primary" : ""}">${msg.name}</button>`;
-    document.querySelector("#servers > button:last-of-type").addEventListener("click", (e) => {
+    const servBtn = document.createElement("button");
+    servBtn.innerHTML = msg.name;
+    servBtn.classList.add("button");
+    if (currChan.servId == msg.id) servBtn.classList.add("is-primary");
+
+    servBtn.addEventListener("click", (e) => {
         currChan = {
             servId: msg.id,
             chanId: msg.channels[0].id
@@ -139,6 +148,7 @@ export function updateServerInfo(msg) {
         document.querySelector("#servers > .is-primary").classList.remove("is-primary");
         e.target.classList.add("is-primary");
     });
+    document.getElementById("servers").appendChild(servBtn);
 }
 
 export function updateUserInfo(msg) {
