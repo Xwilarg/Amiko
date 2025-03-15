@@ -120,6 +120,8 @@ export function updateReceivedMessage(msg) {
 }
 
 export function updateServerInfo(msg) {
+    if (msg.id in servInfo) return; // TODO: allow update
+
     servInfo[msg.id] = {
         name: msg.name,
         channels: {}
