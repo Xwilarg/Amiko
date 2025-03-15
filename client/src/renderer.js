@@ -79,9 +79,12 @@ function refreshChannelDisplay() {
     const channels = document.getElementById("channels");
     channels.innerHTML = "";
     for (const [key, value] of Object.entries(servInfo[currChan.servId].channels)) {
-        channels.innerHTML += `<button class="button">${value.name}</button>`;
-        document.querySelector("#channels > button:last-of-type").addEventListener("click", () => {
-            console.log(key);
+        channels.innerHTML += `<button class="button${currChan.chanId == key ? " is-primary" : ""}">${value.name}</button>`;
+        document.querySelector("#channels > button:last-of-type").addEventListener("click", (e) => {
+            currChan.chanId = key;
+            refreshMessageDisplay();
+            document.querySelector("#channels > .is-primary").classList.remove("is-primary");
+            e.target.classList.add("is-primary");
         });
     }
 }
@@ -124,6 +127,18 @@ export function updateServerInfo(msg) {
         }
     }
     refreshChannelDisplay(); // TODO: don't call that everytimes
+
+    document.getElementById("servers").innerHTML += `<button class="button${currChan.servId == msg.id ? " is-primary" : ""}">${msg.name}</button>`;
+    document.querySelector("#servers > button:last-of-type").addEventListener("click", (e) => {
+        currChan = {
+            servId: msg.id,
+            chanId: msg.channels[0].id
+        }
+        refreshChannelDisplay();
+        refreshMessageDisplay();
+        document.querySelector("#servers > .is-primary").classList.remove("is-primary");
+        e.target.classList.add("is-primary");
+    });
 }
 
 export function updateUserInfo(msg) {
