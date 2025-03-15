@@ -60,6 +60,7 @@ namespace Amiko.Server.Controllers
                 // Send information about all servers existing
                 var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
                 {
+                    Type = MessageType.Array,
                     Data = ContextInterpreter.Get(_dbContext).GetStartingInfo(50)
                 }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -67,6 +68,7 @@ namespace Amiko.Server.Controllers
                 // Send information about all users existing
                 bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
                 {
+                    Type = MessageType.Array,
                     Data = _userManager.GetAllUsersInfo(authorId)
                 }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -97,52 +99,65 @@ namespace Amiko.Server.Controllers
                         buffer = buffer.TakeWhile((v, index) => buffer.Skip(index).Any(w => w != 0x00)).ToArray(); // TODO: ew
                         var now = DateTime.UtcNow;
 
-                        // Parse actual message
-                        var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
-
                         try
                         {
-                            _logger.Log(LogLevel.Information, $"Received {prot.Content} by {authorId}");
+                            var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), Option);
 
-                            // Save to db
-                            ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
+                            if (baseMsg.Type == MessageType.Heartbeat)
                             {
-                                CreationTime = now,
-                                AuthorId = authorId,
-                                Message = prot.Content
-                            });
-                            var d = now.ToUniversalTime() - DateTime.UnixEpoch;
-                            prot.SentAt = new()
+                                await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                            }
+                            else if (baseMsg.Type == MessageType.Message)
                             {
-                                Seconds = (long)Math.Floor(d.TotalSeconds),
-                                Nanos = d.Nanoseconds
-                            };
-                            prot.Author = authorId;
+                                // Parse actual message
+                                var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
 
-                            // Send message back
-                            List<Task> tasks = [];
-                            lock (_sockets)
-                            {
-                                foreach (var s in _sockets.Where(x => x != client)) // Send the message to every users
+                                _logger.Log(LogLevel.Information, $"Received {prot.Content} by {authorId}");
+
+                                // Save to db
+                                ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                                 {
-                                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, Option));
-                                    Task t = s.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
-                                    tasks.Add(t);
+                                    CreationTime = now,
+                                    AuthorId = authorId,
+                                    Message = prot.Content
+                                });
+                                var d = now.ToUniversalTime() - DateTime.UnixEpoch;
+                                prot.SentAt = new()
+                                {
+                                    Seconds = (long)Math.Floor(d.TotalSeconds),
+                                    Nanos = d.Nanoseconds
+                                };
+                                prot.Author = authorId;
+
+                                // Send message back
+                                List<Task> tasks = [];
+                                lock (_sockets)
+                                {
+                                    foreach (var s in _sockets.Where(x => x != client)) // Send the message to every users
+                                    {
+                                        var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, Option));
+                                        Task t = s.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
+                                        tasks.Add(t);
+                                    }
+                                    { // Send an acknowledgment to the user that sent it
+                                        var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge() { Type = MessageType.Acknowledge, Id = prot.Id, IsError = false }, Option));
+                                        Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                        tasks.Add(t);
+                                    }
                                 }
-                                { // Send an acknowledgment to the user that sent it
-                                    var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge() { Type = MessageType.Acknowledge, Id = prot.Id, IsError = false }, Option));
-                                    Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
-                                    tasks.Add(t);
+                                foreach (var t in tasks)
+                                {
+                                    try
+                                    {
+                                        await t;
+                                    }
+                                    catch (Exception e)
+                                    { }
                                 }
                             }
-                            foreach (var t in tasks)
+                            else
                             {
-                                try
-                                {
-                                    await t;
-                                }
-                                catch (Exception e)
-                                { }
+                                throw new NotImplementedException($"Unknown message {baseMsg.Type}");
                             }
                         }
                         catch (Exception e)

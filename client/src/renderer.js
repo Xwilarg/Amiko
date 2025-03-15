@@ -8,17 +8,19 @@ export function sendErrorMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "error" ]);
 }
 
-function sendIncomingMessage(date, id, text) {
-    let name;
+export function getUsernameFromId(id) {
     if (id in userInfo) {
-        name = userInfo[id];
-    } else {
-        name = id;
+        return userInfo[id];
     }
-    sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), name, text, []);
+    return id;
 }
 
-export function sendMyMessage(text, id) {
+function sendIncomingMessage(date, id, text) {
+    sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), getUsernameFromId(id), text, []);
+}
+
+export function sendMyMessage(msg, text, id) {
+    servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
     sendMessageInternal(new Date(), myUsername, text, [ "sending", `message-${id}` ]);
 }
 

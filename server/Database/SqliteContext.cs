@@ -74,7 +74,7 @@ public class ContextInterpreter
 
     public void AddMessage(int servId, int chanId, MessageContext msg)
     {
-        var serv = _ctx.Servers.Include(s => s.Channels).FirstOrDefault(x => x.Id == servId);
+        var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).FirstOrDefault(x => x.Id == servId);
         if (serv == null) throw new InvalidOperationException("Server not found");
 
         var chan = serv.Channels.FirstOrDefault(x => x.Id == chanId);
@@ -86,7 +86,7 @@ public class ContextInterpreter
 
     public ServerInfo[] GetStartingInfo(int maxMsgCount)
     {
-        return _ctx.Servers.Select(s => new ServerInfo()
+        return _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).Select(s => new ServerInfo()
         {
             Type = MessageType.ServerInfo,
             Id = s.Id,

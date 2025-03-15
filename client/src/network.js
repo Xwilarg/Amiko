@@ -1,4 +1,4 @@
-import { sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { getUsernameFromId, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -8,6 +8,7 @@ const isSecure = false;
 */
 
 let socket;
+let networkInterval = null;
 
 // Current message ID
 let currId = 0;
@@ -21,14 +22,14 @@ export function createHttpUrl(endpoint) {
 
 export function sendMessageFromInput(content, servId, chanId) {
     var newMsg = {
-        type: 0,
+        type: 2,
         content: content,
         id: currId,
         serverId: servId,
         channelId: chanId
     };
     socket.send(JSON.stringify(newMsg));
-    sendMyMessage(content, currId);
+    sendMyMessage(newMsg, content, currId);
     currId++;
 }
 
@@ -45,6 +46,14 @@ export function openMessageConnection(token) {
     // Connection opened
     socket.addEventListener("open", (_) => {
         sendSystemMessage("Connected to server");
+
+        if (networkInterval !== null)
+        {
+            clearInterval(networkInterval);
+        }
+        networkInterval = setInterval(() => {
+            socket.send(JSON.stringify({ type: 0 }));
+        }, 10_000);
     });
 
     socket.addEventListener("close", (_) => {
@@ -61,20 +70,23 @@ export function openMessageConnection(token) {
 
         console.log(`Received ${json.type}`);
         switch (json.type) {
-            case 0: // Data received is an array
+            case 0: // Ack
+                break;
+
+            case 1: // Data received is an array
                 for (const c of json.data) {
                     console.log(`(Of type ${c.type})`);
                     switch (c.type)
                     {
-                        /*case 1: // Message
+                        /*case 2: // Message
                             sendMessage(c.sentAt, c.author, c.content);
                             break;*/
                         
-                        case 3: // Server info
+                        case 4: // Server info
                             updateServerInfo(c);
                             break;
 
-                        case 4: // User info
+                        case 5: // User info
                             updateUserInfo(c);
                             break;
                         
@@ -82,16 +94,16 @@ export function openMessageConnection(token) {
                 }
                 break;
 
-            case 1: // Message received
+            case 2: // Message received
                 updateReceivedMessage(json);
                 if (!await notification.isFocusedAsync()) {
-                    new window.Notification(username, {
+                    new window.Notification(`Message from ${getUsernameFromId(json.author)}`, {
                         body: json.content
                     });
                 }
                 break;
 
-            case 2: // Acknowledgement of a message sent
+            case 3: // Acknowledgement of a message sent
                 document.querySelector(`.message-${json.id}`).classList.remove("sending");
                 if (json.isError) document.querySelector(`.message-${json.id}`).classList.add("error");
                 break;
