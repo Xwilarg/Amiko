@@ -95,7 +95,7 @@ function refreshChannelDisplay() {
         if (currChan.chanId == key) chanBtn.classList.add("is-primary");
 
         chanBtn.addEventListener("click", (e) => {
-            currChan.chanId = key;
+            currChan.chanId = parseInt(key);
             refreshMessageDisplay();
             document.querySelector("#channels > .is-primary").classList.remove("is-primary");
             e.target.classList.add("is-primary");
