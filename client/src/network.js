@@ -1,4 +1,4 @@
-import { getUsernameFromId, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { getUsernameFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -9,6 +9,8 @@ const isSecure = false;
 
 let socket;
 let networkInterval = null;
+
+let sessionToken;
 
 // Current message ID
 let currId = 0;
@@ -33,8 +35,29 @@ export function sendMessageFromInput(content, servId, chanId) {
     currId++;
 }
 
+export function downloadChanExport(chanName, servId, chanId) {
+    fetch(createHttpUrl(`export/${servId}/${chanId}`), {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`
+        }
+    })
+    .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+    .then(text => {
+        var e = document.createElement('a');
+        // https://stackoverflow.com/questions/65050679/javascript-a-simple-way-to-save-a-text-file/73775602#73775602
+        e.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        e.setAttribute('download', `export-${chanName}.md`);
+        e.style.display = 'none';
+        document.body.appendChild(e);
+        e.click();
+        document.body.removeChild(e);
+    })
+    .catch((err) => { sendErrorMessage("Export failed: " + err) });
+}
+
 export function openMessageConnection(token) {
-    document.getElementById("send-message").disabled = true;
+    sessionToken = token;
     document.getElementById("messages").innerHTML = "";
 
     // TODO: Move on refresh
@@ -57,11 +80,13 @@ export function openMessageConnection(token) {
     });
 
     socket.addEventListener("close", (_) => {
+        resetInfo();
+        sendErrorMessage("Connection closed");
         openMessageConnection(token);
     });
 
     socket.addEventListener("error", (e) => {
-        console.log(e);
+        sendErrorMessage("Websocket error");
     });
 
     // Listen for messages

@@ -1,4 +1,4 @@
-import { sendMessageFromInput } from "./network";
+import { createHttpUrl, downloadChanExport, sendMessageFromInput } from "./network";
 
 export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
@@ -72,6 +72,13 @@ function scrollToBottom() {
 }
 
 function refreshMessageDisplay() {
+    const chanName = servInfo[currChan.servId].channels[currChan.chanId].name;
+    document.getElementById("channel-title").innerHTML = chanName;
+    document.getElementById("export-button").disabled = false;
+    document.getElementById("export-button").onclick = () => {
+        downloadChanExport(chanName, currChan.servId, currChan.chanId);
+    };
+
     const container = document.getElementById("messages");
     container.innerHTML = "";
     for (const msg of servInfo[currChan.servId].channels[currChan.chanId].messages) {
@@ -119,6 +126,14 @@ export function updateReceivedMessage(msg) {
     }
 }
 
+export function resetInfo()
+{
+    userInfo = {};
+    servInfo = {};
+    document.getElementById("export-button").disabled = true;
+    document.getElementById("send-message").disabled = true;
+}
+
 export function updateServerInfo(msg) {
     if (msg.id in servInfo) return; // TODO: allow update
 
@@ -138,7 +153,7 @@ export function updateServerInfo(msg) {
                 servId: msg.id,
                 chanId: msg.channels[0].id
             }
-            console.log(`Current channel is now ${currChan.servId} / ${currChan.chanId}`);
+            console.log(`Automatically load channel ${currChan.servId} / ${currChan.chanId}`);
             document.getElementById("send-message").disabled = false;
             refreshMessageDisplay();
         }
