@@ -25,7 +25,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     document.getElementById("password-submit").addEventListener("click", _ => {
-
         fetch(createHttpUrl("auth/token"), {
             method: 'POST',
             headers: {
@@ -44,6 +43,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         .catch((err) => {
             alert(`Login failed: ${err}`)
         });
+    });
+
+    document.getElementById("toggle-home").addEventListener("click", () => {
+        const settings = document.getElementById("home-dropdown");
+        if (settings.classList.contains("is-hidden")) settings.classList.remove("is-hidden");
+        else settings.classList.add("is-hidden");
     });
 
     initRenderer();
