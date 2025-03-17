@@ -2,20 +2,24 @@
 #home-dropdown {
     position: absolute;
     left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    height: 100%;
+    width: 500px;
     z-index: 1;
     background-color: rgb(43, 43, 43);
 }
+@media screen and (max-width: 750px) {
+    #home-dropdown {
+        width: 100%;
+    }
+}
 
 .navbar {
-    height: 100px;
+    height: 50px;
 }
 
 /* Channel name */
 #channel-header {
-    height: 150px;
+    height: 100px;
 }
 
 /* Message formatting */
@@ -25,7 +29,7 @@
 
 #messages {
     padding: .5em;
-    height: calc(100vh - 300px);
+    height: calc(100vh - 290px);
     overflow-y: scroll;
     margin-left: 0;
     margin-right: 0;
