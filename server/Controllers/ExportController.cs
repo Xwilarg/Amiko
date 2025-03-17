@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace Amiko.Server.Controllers;
@@ -12,13 +13,15 @@ namespace Amiko.Server.Controllers;
 [Route("/api/export/")]
 public class ExportController : ControllerBase
 {
-    private readonly ILogger<AuthController> _logger;
-        private SqliteContext _dbContext;
+    private readonly ILogger<WebsocketController> _logger;
+    private SqliteContext _dbContext;
+    private UserManager _userManager;
 
-    public ExportController(ILogger<AuthController> logger, SqliteContext dbContext)
+    public ExportController(ILogger<WebsocketController> logger, SqliteContext dbContext, UserManager userManager)
     {
         _logger = logger;
-            _dbContext = dbContext;
+        _dbContext = dbContext;
+        _userManager = userManager;
     }
 
     [Authorize]
@@ -30,8 +33,14 @@ public class ExportController : ControllerBase
         str.AppendLine($"# {ctx.GetServerName(servId)}");
         str.AppendLine($"## {ctx.GetChannelName(servId, chanId)}");
 
-        var resp = new HttpResponseMessage(HttpStatusCode.OK);
-        resp.Content = new StringContent(result, Encoding.UTF8, "text/plain");
-        return StatusCode(StatusCodes.Status200OK, null);
+        var msgs = ctx.GetMessages(servId, chanId, int.MaxValue);
+        foreach (var msg in msgs)
+        {
+            str.AppendLine($"### [{msg.SentAt:yyyy/MM/dd HH:mm:ss}] {_userManager.GetUserFromId(msg.Author)?.Username ?? "deleted"}");
+            str.AppendLine(msg.Content);
+            str.AppendLine();
+        }
+
+        return Content(str.ToString(), "text/plain");
     }
 }
