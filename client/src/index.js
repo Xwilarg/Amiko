@@ -53,3 +53,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     initRenderer();
 });
+
+export function closeSettings() {
+    document.getElementById("home-dropdown").classList.add("is-hidden");
+}

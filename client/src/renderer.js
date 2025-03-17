@@ -1,3 +1,4 @@
+import { closeSettings } from ".";
 import { createHttpUrl, downloadChanExport, sendMessageFromInput } from "./network";
 
 export function sendSystemMessage(text) {
@@ -106,6 +107,8 @@ function refreshChannelDisplay() {
             refreshMessageDisplay();
             document.querySelector("#channels > .is-primary").classList.remove("is-primary");
             e.target.classList.add("is-primary");
+
+            closeSettings();
         });
         document.getElementById("channels").appendChild(chanBtn);
     }
