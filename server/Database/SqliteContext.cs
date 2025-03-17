@@ -51,6 +51,14 @@ public class ContextInterpreter
         return new(ctx);
     }
 
+    public string GetServerName(int id)
+        => _ctx.Servers.First(x => x.Id == id).Name;
+
+    public string GetChannelName(int servId, int chanId)
+        => _ctx.Servers.Include(s => s.Channels)
+        .First(x => x.Id == servId).Channels
+        .First(x => x.Id == chanId).Name;
+
     public int AddServer(string name)
     {
         var serv = new ServerContext() { Name = name };
@@ -84,6 +92,29 @@ public class ContextInterpreter
         _ctx.SaveChanges();
     }
 
+    public Message[] GetMessages(int servId, int chanId, int msgCount)
+    {
+        var msgs =
+            _ctx.Servers
+                .Include(s => s.Channels)
+                .ThenInclude(c => c.Messages)
+                .First(x => x.Id == servId).Channels
+                .First(x => x.Id == chanId).Messages
+                .TakeLast(msgCount)
+                .Select(m => new Message()
+                {
+                    Author = m.AuthorId,
+                    Content = m.Message,
+                    SentAt = new()
+                    {
+                        Seconds = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
+                        Nanos = (m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).Nanoseconds
+                    },
+                    Id = m.Id
+                });
+        return msgs.OrderBy(x => x.Id).ToArray();
+    }
+
     public ServerInfo[] GetStartingInfo(int maxMsgCount)
     {
         var data = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).Select(s => new ServerInfo()
@@ -95,24 +126,14 @@ public class ContextInterpreter
             {
                 Id = c.Id,
                 Name = c.Name,
-                Messages = c.Messages.Take(maxMsgCount).Select(m => new Message()
-                {
-                    Author = m.AuthorId,
-                    Content = m.Message,
-                    SentAt = new()
-                    {
-                        Seconds = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
-                        Nanos = (m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).Nanoseconds
-                    },
-                    Id = m.Id
-                }).ToArray()
+                Messages = null
             }).ToArray()
         }).ToArray();
         foreach (var s in data)
         {
             foreach (var c in s.Channels)
             {
-                c.Messages = c.Messages.OrderBy(x => x.Id).ToArray();
+                c.Messages = GetMessages(s.Id, c.Id, maxMsgCount);
             }
         }
         return data;
