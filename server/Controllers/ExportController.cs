@@ -2,9 +2,8 @@ using Amiko.Server.Database;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace Amiko.Server.Controllers;
@@ -36,7 +35,9 @@ public class ExportController : ControllerBase
         var msgs = ctx.GetMessages(servId, chanId, int.MaxValue);
         foreach (var msg in msgs)
         {
-            str.AppendLine($"### [{msg.SentAt:yyyy/MM/dd HH:mm:ss}] {_userManager.GetUserFromId(msg.Author)?.Username ?? "deleted"}");
+            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(msg.SentAt.Seconds);
+            str.AppendLine($"### [{dateTime:yyyy/MM/dd HH:mm:ss}] {_userManager.GetUserFromId(msg.Author)?.Username ?? "deleted"}");
             str.AppendLine(msg.Content);
             str.AppendLine();
         }
