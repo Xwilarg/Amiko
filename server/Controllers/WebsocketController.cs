@@ -52,8 +52,8 @@ namespace Amiko.Server.Controllers
                 }
 
                 // Info of who sent the msg
-                var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)!.Id;
-                Console.WriteLine($"Author id is {authorId}");
+                var claimId = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value;
+                var authorId = _userManager.GetUserFromId(claimId).Id;
 
                 // First connection from user!
                 _logger.Log(LogLevel.Information, $"New client connected ({authorId})");
@@ -93,6 +93,7 @@ namespace Amiko.Server.Controllers
                     }
 
                     _logger.Log(LogLevel.Information, $"Message received of size {buffer.Length} of type {response.MessageType}");
+                    authorId = _userManager.GetUserFromId(claimId).Id;
                     if (response.MessageType == WebSocketMessageType.Text)
                     {
 

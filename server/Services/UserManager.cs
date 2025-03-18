@@ -27,7 +27,6 @@ public class UserManager
 
     private string GetActiveUser(string id)
     {
-        Console.WriteLine($"Get {id} from " + string.Join(", ", _activeUsers.Keys));
         return _activeUsers.TryGetValue(id, out string value) ? value : id;
     }
 
@@ -39,7 +38,6 @@ public class UserManager
 
         if (_activeUsers.ContainsKey(key)) _activeUsers[key] = id;
         else _activeUsers.Add(key, id);
-        Console.WriteLine("set: " + string.Join(", ", _activeUsers.Keys));
 
         return true;
     }
