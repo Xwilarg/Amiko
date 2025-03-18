@@ -48,10 +48,10 @@ function sendMessageInternal(date, name, text, indications) {
 }
 
 function parseMessage(msg) {
-    const content = msg.querySelector(".content").replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-    const text = content.innerHTML;
+    const content = msg.querySelector(".content");
+    let finalHtml = content.innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
-    let m = text.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)([^ \n]+)?/gm);
+    let m = finalHtml.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)([^ \n]+)?/gm);
     if (m) {
         const prev = msg.querySelector(".rich-preview");
         prev.classList.remove("is-hidden");
@@ -60,16 +60,16 @@ function parseMessage(msg) {
         }
     }
 
-    let finalHtml = text.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
+    finalHtml = finalHtml.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
     for (const link of msg.querySelectorAll(".link")) {
         link.addEventListener("click", (_) => {
             interaction.open(link.innerHTML);
         });
     }
 
-    finalHtml = text.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>')
-    finalHtml = text.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<bold>$1</bold>')
-    finalHtml = text.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>')
+    finalHtml = finalHtml.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>')
+    finalHtml = finalHtml.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<b>$1</b>')
+    finalHtml = finalHtml.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>')
 
     content.innerHTML = finalHtml;
 }
