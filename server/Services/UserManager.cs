@@ -52,7 +52,7 @@ public class UserManager
             IsMyGroup = x.DependsOf == null ? x.Id == rawId : currId == x.DependsOf,
             Username = x.Username,
             Color = x.Color,
-            Character = x.Character ?? x.Username[0]
+            Character = x.Character ?? x.Username[0].ToString()
         }).ToArray();
     }
 

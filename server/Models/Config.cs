@@ -14,7 +14,7 @@
         public string? DependsOf { set; get; }
 
         public Color Color { set; get; } = new() { R = 54, G = 54, B = 54 };
-        public char? Character { set; get; }
+        public string? Character { set; get; }
     }
 
     public class Color
