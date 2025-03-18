@@ -53,6 +53,7 @@ namespace Amiko.Server.Controllers
 
                 // Info of who sent the msg
                 var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)!.Id;
+                Console.WriteLine($"Author id is {authorId}");
 
                 // First connection from user!
                 _logger.Log(LogLevel.Information, $"New client connected ({authorId})");

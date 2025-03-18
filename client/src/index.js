@@ -81,4 +81,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 export function closeSettings() {
     document.getElementById("home-dropdown").classList.add("is-hidden");
     document.getElementById("settings-dropdown").classList.add("is-hidden");
+    document.getElementById("profile-dropdown").classList.add("is-hidden");
 }

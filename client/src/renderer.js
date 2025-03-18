@@ -1,5 +1,5 @@
 import { closeSettings } from ".";
-import { downloadChanExport, sendMessageFromInput } from "./network";
+import { downloadChanExport, sendMessageFromInput, switchProfile } from "./network";
 
 export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
@@ -200,6 +200,24 @@ export function updateUserInfo(msg) {
         myId = msg.id;
     } else if (myId !== null && myId === msg.id) {
         myUsername = msg.username;
+    }
+
+    if (msg.isMyGroup || msg.isMe) {
+        const persoBtn = document.createElement("button");
+        persoBtn.innerHTML = msg.username;
+        persoBtn.classList.add("button");
+        persoBtn.classList.add("profile")
+        if (myId === msg.id) persoBtn.disabled = true;
+
+        persoBtn.addEventListener("click", (e) => {
+            switchProfile(msg.id, () => {
+                myUsername = msg.username;
+
+                document.querySelector(".profile:disabled").disabled = false;
+                e.target.disabled = true;
+            });
+        });
+        document.getElementById("profile-selection").appendChild(persoBtn);
     }
 
     for (const m of document.querySelectorAll(".message")) {

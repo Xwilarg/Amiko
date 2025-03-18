@@ -35,6 +35,20 @@ export function sendMessageFromInput(content, servId, chanId) {
     currId++;
 }
 
+export function switchProfile(profileId, onSuccess) {
+    fetch(createHttpUrl(`auth/switch/${profileId}`), {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`
+        }
+    })
+    .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+    .then(_ => {
+        onSuccess();
+    })
+    .catch((err) => { sendErrorMessage("Profile switch failed: " + err) });
+}
+
 export function downloadChanExport(chanName, servId, chanId) {
     fetch(createHttpUrl(`export/${servId}/${chanId}`), {
         method: 'GET',

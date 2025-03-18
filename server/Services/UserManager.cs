@@ -27,18 +27,19 @@ public class UserManager
 
     private string GetActiveUser(string id)
     {
-        if (_activeUsers.TryGetValue(id, out string value)) return value;
-        return id;
+        Console.WriteLine($"Get {id} from " + string.Join(", ", _activeUsers.Keys));
+        return _activeUsers.TryGetValue(id, out string value) ? value : id;
     }
 
     public bool TrySetActiveUser(string key, string id)
     {
-        var target = _users.FirstOrDefault(x => x.Id == key);
+        var target = _users.FirstOrDefault(x => x.Id == id);
         if (target == null) return false;
         if (key != id && (target.DependsOf == null || target.DependsOf != key)) return false;
 
         if (_activeUsers.ContainsKey(key)) _activeUsers[key] = id;
         else _activeUsers.Add(key, id);
+        Console.WriteLine("set: " + string.Join(", ", _activeUsers.Keys));
 
         return true;
     }
