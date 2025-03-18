@@ -68,6 +68,7 @@ function parseMessage(msg) {
     }
 
     finalHtml = finalHtml.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>')
+    finalHtml = finalHtml.replaceAll(/&gt; ([^\n]+)/gm, '<pre>$1</pre>')
     finalHtml = finalHtml.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<b>$1</b>')
     finalHtml = finalHtml.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>')
 

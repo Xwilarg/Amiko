@@ -29,7 +29,7 @@
 
 #messages {
     padding: .5em;
-    height: calc(100vh - 290px);
+    height: calc(100vh - 200px);
     overflow-y: scroll;
     margin-left: 0;
     margin-right: 0;
