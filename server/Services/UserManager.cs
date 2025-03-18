@@ -8,6 +8,11 @@ public class UserManager
 {
     private UserConfig[] _users;
 
+    /// <summary>
+    /// Associate a user to the current ID of the account he is using
+    /// </summary>
+    private Dictionary<string, string> _activeUsers = [];
+
     public UserManager()
     {
         if (!File.Exists("config.json"))
@@ -20,6 +25,24 @@ public class UserManager
         }).Users;
     }
 
+    private string GetActiveUser(string id)
+    {
+        if (_activeUsers.TryGetValue(id, out string value)) return value;
+        return id;
+    }
+
+    public bool TrySetActiveUser(string key, string id)
+    {
+        var target = _users.FirstOrDefault(x => x.Id == key);
+        if (target == null) return false;
+        if (key != id && (target.DependsOf == null || target.DependsOf != key)) return false;
+
+        if (_activeUsers.ContainsKey(key)) _activeUsers[key] = id;
+        else _activeUsers.Add(key, id);
+
+        return true;
+    }
+
     public UserInfo[] GetAllUsersInfo(string myId)
     {
         return _users.Select(x => new UserInfo()
@@ -27,6 +50,7 @@ public class UserManager
             Type = MessageType.UserInfo,
             Id = x.Id,
             IsMe = x.Id == myId,
+            IsMyGroup = x.DependsOf == null ? false : myId == x.DependsOf,
             Username = x.Username
         }).ToArray();
     }
@@ -38,6 +62,7 @@ public class UserManager
 
     public UserConfig? GetUserFromId(string id)
     {
-        return _users.FirstOrDefault(x => id == x.Id);
+        var activeId = GetActiveUser(id);
+        return _users.FirstOrDefault(x => activeId == x.Id);
     }
 }

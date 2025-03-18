@@ -61,6 +61,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
         else elem.classList.add("is-hidden");
     });
+    document.getElementById("toggle-profile").addEventListener("click", () => {
+        const elem = document.getElementById("profile-dropdown");
+        if (elem.classList.contains("is-hidden")) {
+            closeSettings();
+            elem.classList.remove("is-hidden");
+        }
+        else elem.classList.add("is-hidden");
+    });
 
     document.getElementById("style-selection").addEventListener("change", e => {
         const newVal = e.target.value;

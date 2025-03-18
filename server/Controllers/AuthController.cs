@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 
@@ -62,9 +63,23 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
+    [HttpPost("switch/{userId}")]
+    public IActionResult SwitchToId([Required] string userId)
+    {
+        var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)!.Id;
+
+        if (!_userManager.TrySetActiveUser(authorId, userId))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        return StatusCode(StatusCodes.Status200OK);
+    }
+
+    [Authorize]
     [HttpPost("validate")]
     public IActionResult ValidateToken()
     {
-        return StatusCode(StatusCodes.Status200OK, null);
+        return StatusCode(StatusCodes.Status200OK);
     }
 }

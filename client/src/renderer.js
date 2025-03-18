@@ -125,6 +125,7 @@ function refreshChannelDisplay() {
 
 // Current user username
 let myUsername = "";
+let myId = null;
 
 // All infos about various users
 let userInfo = {};
@@ -147,6 +148,7 @@ export function resetInfo()
     document.getElementById("send-message").disabled = true;
     document.getElementById("servers").innerHTML = "";
     document.getElementById("channels").innerHTML = "";
+    document.getElementById("profile-selection").innerHTML = "";
 }
 
 export function updateServerInfo(msg) {
@@ -193,7 +195,10 @@ export function updateServerInfo(msg) {
 
 export function updateUserInfo(msg) {
     userInfo[msg.id] = msg.username;
-    if (msg.isMe) {
+    if (myId == null && msg.isMe) {
+        myUsername = msg.username;
+        myId = msg.id;
+    } else if (myId !== null && myId === msg.id) {
         myUsername = msg.username;
     }
 

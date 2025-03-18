@@ -10,7 +10,8 @@
     {
         public string Id { set; get; }
         public string Username { set; get; }
-        public string Password { set; get; }
+        public string? Password { set; get; }
+        public string? DependsOf { set; get; }
     }
 
     public class ServerConfig

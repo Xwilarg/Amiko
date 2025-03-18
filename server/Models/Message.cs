@@ -41,6 +41,7 @@ public class UserInfo : BaseMessage
 {
     public string Id { set; get; }
     public bool IsMe { set; get; }
+    public bool IsMyGroup { set; get; }
     public string Username { set; get; }
 }
 
