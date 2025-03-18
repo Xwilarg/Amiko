@@ -2,7 +2,6 @@ using Amiko.Server.Database;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 

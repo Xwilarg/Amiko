@@ -3,6 +3,10 @@
         "id": "1",
         "username": "Sample User",
         "password": "PasswordHash"
+    }, {
+        "id": "2",
+        "username": "Second Account",
+        "dependsOf": "1"
     }],
     "servers": [{
         "name": "Server Name",
