@@ -61,11 +61,6 @@ function parseMessage(msg) {
     }
 
     finalHtml = finalHtml.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
-    for (const link of msg.querySelectorAll(".link")) {
-        link.addEventListener("click", (_) => {
-            interaction.open(link.innerHTML);
-        });
-    }
 
     finalHtml = finalHtml.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>');
     finalHtml = finalHtml.replaceAll(/^&gt; ([^\n]+)/gm, '<pre>$1</pre>');
@@ -74,6 +69,12 @@ function parseMessage(msg) {
     finalHtml = finalHtml.replaceAll("\n", "<br>");
 
     content.innerHTML = finalHtml;
+
+    for (const link of msg.querySelectorAll(".link")) {
+        link.addEventListener("click", (_) => {
+            interaction.open(link.innerHTML);
+        });
+    }
 }
 
 function scrollToBottom() {
