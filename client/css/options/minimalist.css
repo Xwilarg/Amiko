@@ -6,3 +6,13 @@
     display: flex;
     column-gap: 10px;
 }
+
+.message .date {
+    width: 130px;
+    flex-shrink: 0;
+}
+
+.message .subtitle {
+    width: 100px;
+    flex-shrink: 0;
+}
