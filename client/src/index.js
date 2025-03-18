@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById("style-selection").addEventListener("change", e => {
         const newVal = e.target.value;
-        document.getElementById("user-style").setAttribute("href", `./css/options/${value}.css`);
+        document.getElementById("user-style").setAttribute("href", `./css/options/${newVal}.css`);
     });
 
     initRenderer();
