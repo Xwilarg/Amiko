@@ -1,4 +1,4 @@
-import { getUsernameFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { getInfoFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -136,7 +136,7 @@ export function openMessageConnection(token) {
             case 2: // Message received
                 updateReceivedMessage(json);
                 if (!await notification.isFocusedAsync()) {
-                    new window.Notification(`Message from ${getUsernameFromId(json.author)}`, {
+                    new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
                         body: json.content
                     });
                 }

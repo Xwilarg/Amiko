@@ -22,6 +22,17 @@
     height: 50px;
 }
 
+.pfp {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+  }
+
 /* Send message textarea */
 #message-form {
     height: 75px;

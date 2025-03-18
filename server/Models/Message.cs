@@ -1,4 +1,6 @@
-﻿namespace Amiko.Models;
+﻿using Amiko.Server.Models;
+
+namespace Amiko.Models;
 
 /// <summary>
 /// Base class for a network message
@@ -43,6 +45,8 @@ public class UserInfo : BaseMessage
     public bool IsMe { set; get; }
     public bool IsMyGroup { set; get; }
     public string Username { set; get; }
+    public Color Color { set; get; }
+    public char Character { set; get; }
 }
 
 /// <summary>

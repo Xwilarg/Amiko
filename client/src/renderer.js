@@ -9,32 +9,42 @@ export function sendErrorMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "error" ]);
 }
 
-export function getUsernameFromId(id) {
+export function getInfoFromId(id) {
     if (id in userInfo) {
         return userInfo[id];
     }
-    return id;
+    return {
+        username: id,
+        color: { r: 54, g: 54, b: 54 },
+        character: '?'
+    };
 }
 
 function sendIncomingMessage(date, id, text) {
-    sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), getUsernameFromId(id), text, []);
+    sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), getInfoFromId(id), text, []);
 }
 
 export function sendMyMessage(msg, text, id) {
     const now = new Date();
     msg.date = now;
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(now, myUsername, text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(now, myInfo, text, [ "sending", `message-${id}` ]);
 }
 
-function sendMessageInternal(date, name, text, indications) {
+function sendMessageInternal(date, info, text, indications) {
     const container = document.getElementById("messages");
     const template = document.getElementById("message-template");
 
     const instance = template.content.cloneNode(true);
     instance.querySelector(".date").innerHTML = date.toLocaleString();
     instance.querySelector(".content").innerHTML = text;
-    instance.querySelector(".subtitle").innerHTML = name;
+
+    if (info) {
+        instance.querySelector(".subtitle").innerHTML = info.username;
+        var pfp = instance.querySelector(".pfp");
+        pfp.innerHTML = info.character;
+        pfp.style = `background: rgb(${info.color.r}, ${info.color.g}, ${info.color.b});`;
+    }
 
     for (let i of indications) {
         instance.querySelector(".message").classList.add(i);
@@ -99,7 +109,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.author ? getUsernameFromId(msg.author) : myUsername, msg.content, []);
+        sendMessageInternal(date, msg.author ? getInfoFromId(msg.author) : myInfo, msg.content, []);
     }
 }
 
@@ -125,7 +135,7 @@ function refreshChannelDisplay() {
 }
 
 // Current user username
-let myUsername = "";
+let myInfo = null;
 let myId = null;
 
 // All infos about various users
@@ -195,12 +205,16 @@ export function updateServerInfo(msg) {
 }
 
 export function updateUserInfo(msg) {
-    userInfo[msg.id] = msg.username;
+    userInfo[msg.id] = {
+        username: msg.username,
+        color: msg.color,
+        character: msg.character
+    };
     if (myId == null && msg.isMe) {
-        myUsername = msg.username;
+        myInfo = msg;
         myId = msg.id;
     } else if (myId !== null && myId === msg.id) {
-        myUsername = msg.username;
+        myInfo = msg;
     }
 
     if (msg.isMyGroup || msg.isMe) {
@@ -212,7 +226,7 @@ export function updateUserInfo(msg) {
 
         persoBtn.addEventListener("click", (e) => {
             switchProfile(msg.id, () => {
-                myUsername = msg.username;
+                myInfo = msg;
 
                 document.querySelector(".profile:disabled").disabled = false;
                 e.target.disabled = true;
@@ -223,9 +237,12 @@ export function updateUserInfo(msg) {
 
     for (const m of document.querySelectorAll(".message")) {
         const usernameContainer = m.querySelector(".subtitle");
-        const username = userInfo[usernameContainer.innerHTML];
-        if (username) {
-            usernameContainer.innerHTML = username;
+        const pfp = m.querySelector(".pfp");
+        const info = userInfo[usernameContainer.innerHTML];
+        if (info) {
+            usernameContainer.innerHTML = info.username;
+            pfp.innerHTML = info.character;
+            pfp.style = `background: rgb(${info.color.r}, ${info.color.g}, ${info.color.b});`;
         }
     }
 }

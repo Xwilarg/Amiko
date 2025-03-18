@@ -2,12 +2,16 @@
     display: none !important;
 }
 
-.message {
+.message .message-main{
     display: flex;
     column-gap: 10px;
 }
 
 .message .date {
+    display: none !important;
+}
+
+.message .pfp {
     display: none !important;
 }
 

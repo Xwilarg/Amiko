@@ -50,7 +50,9 @@ public class UserManager
             Id = x.Id,
             IsMe = x.Id == currId,
             IsMyGroup = x.DependsOf == null ? x.Id == rawId : currId == x.DependsOf,
-            Username = x.Username
+            Username = x.Username,
+            Color = x.Color,
+            Character = x.Character ?? x.Username[0]
         }).ToArray();
     }
 
