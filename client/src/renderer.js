@@ -1,5 +1,5 @@
 import { closeSettings } from ".";
-import { createHttpUrl, downloadChanExport, sendMessageFromInput } from "./network";
+import { downloadChanExport, sendMessageFromInput } from "./network";
 
 export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
@@ -48,9 +48,10 @@ function sendMessageInternal(date, name, text, indications) {
 }
 
 function parseMessage(msg) {
-    const text = msg.querySelector(".content").innerHTML;
+    const content = msg.querySelector(".content").replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    const text = content.innerHTML;
 
-    let m = text.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)/gm);
+    let m = text.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)([^ \n]+)?/gm);
     if (m) {
         const prev = msg.querySelector(".rich-preview");
         prev.classList.remove("is-hidden");
@@ -59,12 +60,18 @@ function parseMessage(msg) {
         }
     }
 
-    msg.querySelector(".content").innerHTML = text.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
+    let finalHtml = text.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
     for (const link of msg.querySelectorAll(".link")) {
         link.addEventListener("click", (_) => {
             interaction.open(link.innerHTML);
         });
     }
+
+    finalHtml = text.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>')
+    finalHtml = text.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<bold>$1</bold>')
+    finalHtml = text.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>')
+
+    content.innerHTML = finalHtml;
 }
 
 function scrollToBottom() {
@@ -133,13 +140,14 @@ export function resetInfo()
 {
     userInfo = {};
     servInfo = {};
+    currChan = null;
     document.getElementById("export-button").disabled = true;
     document.getElementById("send-message").disabled = true;
+    document.getElementById("servers").innerHTML = "";
+    document.getElementById("channels").innerHTML = "";
 }
 
 export function updateServerInfo(msg) {
-    if (msg.id in servInfo) return; // TODO: allow update
-
     servInfo[msg.id] = {
         name: msg.name,
         channels: {}

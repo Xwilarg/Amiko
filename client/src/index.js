@@ -46,9 +46,25 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById("toggle-home").addEventListener("click", () => {
-        const settings = document.getElementById("home-dropdown");
-        if (settings.classList.contains("is-hidden")) settings.classList.remove("is-hidden");
-        else settings.classList.add("is-hidden");
+        const elem = document.getElementById("home-dropdown");
+        if (elem.classList.contains("is-hidden")) {
+            closeSettings();
+            elem.classList.remove("is-hidden");
+        }
+        else elem.classList.add("is-hidden");
+    });
+    document.getElementById("toggle-settings").addEventListener("click", () => {
+        const elem = document.getElementById("settings-dropdown");
+        if (elem.classList.contains("is-hidden")) {
+            closeSettings();
+            elem.classList.remove("is-hidden");
+        }
+        else elem.classList.add("is-hidden");
+    });
+
+    document.getElementById("style-selection").addEventListener("change", e => {
+        const newVal = e.target.value;
+        document.getElementById("user-style").setAttribute("href", `./css/options/${value}.css`);
     });
 
     initRenderer();
@@ -56,4 +72,5 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 export function closeSettings() {
     document.getElementById("home-dropdown").classList.add("is-hidden");
+    document.getElementById("settings-dropdown").classList.add("is-hidden");
 }

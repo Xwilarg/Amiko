@@ -1,5 +1,5 @@
 /* Settings */
-#home-dropdown {
+.dropdown {
     position: absolute;
     left: 0;
     height: 100%;
@@ -8,7 +8,7 @@
     background-color: rgb(43, 43, 43);
 }
 @media screen and (max-width: 750px) {
-    #home-dropdown {
+    .dropdown {
         width: 100%;
     }
 }
