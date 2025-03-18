@@ -66,9 +66,9 @@ public class AuthController : ControllerBase
     [HttpPost("switch/{userId}")]
     public IActionResult SwitchToId([Required] string userId)
     {
-        var authorId = _userManager.GetUserFromId((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value)!.Id;
+        var claimId = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value;
 
-        if (!_userManager.TrySetActiveUser(authorId, userId))
+        if (!_userManager.TrySetActiveUser(claimId, userId))
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }

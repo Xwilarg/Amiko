@@ -70,7 +70,7 @@ namespace Amiko.Server.Controllers
                 bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
                 {
                     Type = MessageType.Array,
-                    Data = _userManager.GetAllUsersInfo(authorId)
+                    Data = _userManager.GetAllUsersInfo(claimId, authorId)
                 }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 

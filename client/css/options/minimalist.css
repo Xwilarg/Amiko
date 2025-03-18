@@ -8,8 +8,7 @@
 }
 
 .message .date {
-    width: 130px;
-    flex-shrink: 0;
+    display: none !important;
 }
 
 .message .subtitle {

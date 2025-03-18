@@ -42,14 +42,14 @@ public class UserManager
         return true;
     }
 
-    public UserInfo[] GetAllUsersInfo(string myId)
+    public UserInfo[] GetAllUsersInfo(string rawId, string currId)
     {
         return _users.Select(x => new UserInfo()
         {
             Type = MessageType.UserInfo,
             Id = x.Id,
-            IsMe = x.Id == myId,
-            IsMyGroup = x.DependsOf == null ? false : myId == x.DependsOf,
+            IsMe = x.Id == currId,
+            IsMyGroup = x.DependsOf == null ? x.Id == rawId : currId == x.DependsOf,
             Username = x.Username
         }).ToArray();
     }
