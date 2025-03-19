@@ -69,5 +69,5 @@ jobs:
       with:
         name: software
         path: |
-          client/out/make/squirrel.windows/amiko-win32-x64/
+          client/out/make/squirrel.windows/x64/
         if-no-files-found: error
