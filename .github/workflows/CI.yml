@@ -25,7 +25,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: back
-        path: server/api/bin/Release/net9.0/linux-x64/publish
+        path: server/bin/Release/net9.0/linux-x64/publish/
         if-no-files-found: error
 
   front:
@@ -63,5 +63,5 @@ jobs:
       with:
         name: software
         path: |
-          client/out/make/squirrel.windows/x64/amiko-1.0.0-beta\ Setup.exe
+          client/out/make/squirrel.windows/amiko-win32-x64/
         if-no-files-found: error
