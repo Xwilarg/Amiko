@@ -12,13 +12,22 @@ function initBrowser() {
         open: (url) => window.open(url, '_blank').focus()
     };
     filesystem = {
-        readAsync: async () => {
+        readTokenAsync: async () => {
             var match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
             if (match) return match[2];
+            return null;
         },
-        writeAsync: async (token) => {
+        writeTokenAsync: async (token) => {
             document.cookie = `token=${token}; max-age=2592000; path=/; SameSite=Strict`;
-        }
+        },
+        readPrefAsync: async (key, def) => {
+            var match = document.cookie.match(new RegExp(`(^| )${key}=([^;]+)`));
+            if (match) return match[2];
+            return def;
+        },
+        writePrefAsync: async (key, value) => {
+            document.cookie = `${key}=${value}; max-age=34560000; path=/; SameSite=Strict`;
+        },
     };
     notification = {
         isFocusedAsync: async () => document.hasFocus()

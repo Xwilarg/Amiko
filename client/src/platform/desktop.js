@@ -10,14 +10,28 @@ contextBridge.exposeInMainWorld('interaction', {
     open: (url) => shell.openExternal(url)
 });
 contextBridge.exposeInMainWorld('filesystem', {
-    readAsync: async () => {
+    readTokenAsync: async () => {
         const path = (await ipcRenderer.invoke('path')) +  + "/token.dat";
         if (!fs.existsSync(path)) return null;
         return fs.readFileSync(path, 'utf8');
     },
-    writeAsync: async (token) => {
+    writeTokenAsync: async (token) => {
         const path = (await ipcRenderer.invoke('path')) +  + "/token.dat";
         fs.writeFileSync(path, token);
+    },
+    readPrefAsync: async (key, def) => {
+        const path = (await ipcRenderer.invoke('path')) +  + "/settings.json";
+        if (!fs.existsSync(path)) return def;
+        const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+        if (key in data) return data[key];
+        return def;
+    },
+    writePrefAsync: async (key, value) => {
+        const path = (await ipcRenderer.invoke('path')) +  + "/settings.json";
+        if (!fs.existsSync(path)) fs.writeFileSync(path, JSON.stringify({key: value}));
+        const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+        data[key] = value;
+        fs.writeFileSync(path, JSON.stringify(data));
     }
 });
 contextBridge.exposeInMainWorld('notification', {

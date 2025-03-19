@@ -1,11 +1,12 @@
 import { createHttpUrl, openMessageConnection } from "./network";
+import { initPreferencesAsync } from "./preferences";
 import { initRenderer } from "./renderer";
 
 let token;
 
 window.addEventListener('DOMContentLoaded', async () => {
     const pwd = document.getElementById("password");
-    const fileToken = await filesystem.readAsync();
+    const fileToken = await filesystem.readTokenAsync();
 
     if (fileToken) {
         fetch(createHttpUrl("auth/validate"), {
@@ -35,7 +36,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
         .then(async text => {
             token = text;
-            await filesystem.writeAsync(token);
+            await filesystem.writeTokenAsync(token);
             pwd.value = "";
             document.getElementById("login-popup").classList.remove("is-active");
             openMessageConnection(token);
@@ -70,11 +71,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         else elem.classList.add("is-hidden");
     });
 
-    document.getElementById("style-selection").addEventListener("change", e => {
-        const newVal = e.target.value;
-        document.getElementById("user-style").setAttribute("href", `./css/options/${newVal}.css`);
-    });
-
+    await initPreferencesAsync();
     initRenderer();
 });
 

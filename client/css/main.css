@@ -31,7 +31,11 @@
     font-weight: bold;
     color: white;
     text-align: center;
-  }
+}
+
+.message .pfp {
+    flex-shrink: 0;
+}
 
 /* Send message textarea */
 #message-form {
