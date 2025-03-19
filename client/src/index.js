@@ -26,7 +26,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         .catch((err) => { console.error(err); });
     }
 
-    document.getElementById("password-submit").addEventListener("click", _ => {
+    document.getElementById("password-submit").addEventListener("click", e => {
+        e.preventDefault();
         fetch(createHttpUrl("auth/token"), {
             method: 'POST',
             headers: {

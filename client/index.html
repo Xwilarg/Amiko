@@ -9,26 +9,26 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="./js/index.js"></script>
         <script src="./js/platform/browser.js"></script>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
-        <link rel="stylesheet" href="./node_modules/bulma/css/bulma.min.css"/>
-        <link rel="stylesheet" href="./css/main.css"/>
-        <link rel="stylesheet" href="./css/options/regular.css" id="user-style"/>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0">
+        <link rel="stylesheet" href="./node_modules/bulma/css/bulma.min.css">
+        <link rel="stylesheet" href="./css/main.css">
+        <link rel="stylesheet" href="./css/options/regular.css" id="user-style">
     </head>
     <body>
         <div class="modal is-active" id="login-popup">
             <div class="modal-background"></div>
             <div class="modal-content">
-                <div class="field">
-                    <label class="label">Password</label>
-                    <div class="control">
-                        <input id="password" class="input" type="password" placeholder="Password">
+                <form class="field">
+                    <div class="field">
+                        <label class="label">Password</label>
+                        <div class="control">
+                            <input id="password" class="input" type="password" placeholder="Password">
+                        </div>
                     </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <button class="button is-link" id="password-submit">Submit</button>
-                    </div>
-                </div>
+                    <p class="control">
+                        <input class="button is-link" type="submit" id="password-submit">
+                    </p>
+                </form>
             </div>
         </div>
 
@@ -90,10 +90,10 @@
 
             <form class="field has-addons" id="message-form">
                 <p class="control is-expanded">
-                    <textarea class="textarea" type="text" placeholder="Your message" id="message-field"></textarea>
+                    <textarea class="textarea" placeholder="Your message" id="message-field"></textarea>
                 </p>
                 <p class="control">
-                    <input class="button is-link" type="submit" id="send-message" disabled/>
+                    <input class="button is-link" type="submit" id="send-message" disabled>
                 </p>
             </form>
         </div>
