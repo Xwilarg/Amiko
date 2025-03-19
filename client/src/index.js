@@ -3,6 +3,7 @@ import { initPreferencesAsync } from "./preferences";
 import { initRenderer } from "./renderer";
 
 let token;
+let areSettingsOpen = false;
 
 window.addEventListener('DOMContentLoaded', async () => {
     const pwd = document.getElementById("password");
@@ -46,30 +47,30 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    document.getElementById("toggle-home").addEventListener("click", () => {
-        const elem = document.getElementById("home-dropdown");
-        if (elem.classList.contains("is-hidden")) {
-            closeSettings();
-            elem.classList.remove("is-hidden");
-        }
-        else elem.classList.add("is-hidden");
-    });
-    document.getElementById("toggle-settings").addEventListener("click", () => {
-        const elem = document.getElementById("settings-dropdown");
-        if (elem.classList.contains("is-hidden")) {
-            closeSettings();
-            elem.classList.remove("is-hidden");
-        }
-        else elem.classList.add("is-hidden");
-    });
-    document.getElementById("toggle-profile").addEventListener("click", () => {
-        const elem = document.getElementById("profile-dropdown");
-        if (elem.classList.contains("is-hidden")) {
-            closeSettings();
-            elem.classList.remove("is-hidden");
-        }
-        else elem.classList.add("is-hidden");
-    });
+    const settings = [ "home", "settings", "profile" ];
+    for (const s of settings) {
+        document.getElementById(`toggle-${s}`).addEventListener("click", () => { // Click on a button to open the related menu
+            const elem = document.getElementById(`${s}-dropdown`);
+            if (elem.classList.contains("is-hidden")) {
+                closeSettings();
+                elem.classList.remove("is-hidden");
+                areSettingsOpen = true;
+            }
+            else
+            {
+                elem.classList.add("is-hidden");
+                areSettingsOpen = false;
+            }
+        });
+        window.addEventListener("click", (e) => { // Click outside of the menu area to close it
+            if (areSettingsOpen) {
+                const target = document.getElementById(`${s}-dropdown`);
+                if (!target.classList.contains("is-hidden") && !document.querySelector(".navbar").contains(e.target) && !target.contains(e.target)) {
+                    closeSettings();
+                }
+            }
+        });
+    }
 
     await initPreferencesAsync();
     initRenderer();
@@ -79,4 +80,5 @@ export function closeSettings() {
     document.getElementById("home-dropdown").classList.add("is-hidden");
     document.getElementById("settings-dropdown").classList.add("is-hidden");
     document.getElementById("profile-dropdown").classList.add("is-hidden");
+    areSettingsOpen = false;
 }
