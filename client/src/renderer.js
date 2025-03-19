@@ -258,7 +258,7 @@ export function updateUserInfo(msg) {
                 myInfo = msg;
 
                 document.querySelector(".profile:disabled").disabled = false;
-                e.target.disabled = true;
+                persoBtn.disabled = true;
             });
         });
 
