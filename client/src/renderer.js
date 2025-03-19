@@ -219,9 +219,10 @@ export function updateUserInfo(msg) {
 
     if (msg.isMyGroup || msg.isMe) {
         const persoBtn = document.createElement("button");
-        persoBtn.innerHTML = msg.username;
         persoBtn.classList.add("button");
         persoBtn.classList.add("profile")
+        persoBtn.classList.add("is-flex");
+        persoBtn.classList.add("is-flex-direction-column");
         if (myId === msg.id) persoBtn.disabled = true;
 
         persoBtn.addEventListener("click", (e) => {
@@ -232,6 +233,16 @@ export function updateUserInfo(msg) {
                 e.target.disabled = true;
             });
         });
+
+        const pfp = document.createElement("div");
+        pfp.classList.add("pfp");
+        pfp.style = `background: rgb(${msg.color.r}, ${msg.color.g}, ${msg.color.b});`;
+        pfp.innerHTML = msg.character;
+        persoBtn.appendChild(pfp);
+
+        const name = document.createElement("p");
+        name.innerHTML =  msg.username;
+        persoBtn.appendChild(name);
         document.getElementById("profile-selection").appendChild(persoBtn);
     }
 
