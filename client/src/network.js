@@ -1,4 +1,4 @@
-import { getInfoFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { acknowledgeMessage, getInfoFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -143,8 +143,7 @@ export function openMessageConnection(token) {
                 break;
 
             case 3: // Acknowledgement of a message sent
-                document.querySelector(`.message-${json.id}`).classList.remove("sending");
-                if (json.isError) document.querySelector(`.message-${json.id}`).classList.add("error");
+                acknowledgeMessage(json);
                 break;
         }
     });

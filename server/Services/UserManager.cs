@@ -61,9 +61,22 @@ public class UserManager
         return _users.FirstOrDefault(x => hash == x.Password);
     }
 
-    public UserConfig? GetUserFromId(string id)
+    public UserConfig? GetUserFromId(string id, string? prefix, out bool isPrefixed)
     {
         var activeId = GetActiveUser(id);
+
+        if (prefix != null)
+        {
+            // Did we use a prefix to target another user we have access to?
+            var prefixUser = _users.FirstOrDefault(x => x.Prefix == prefix && (x.Id == id || x.DependsOf == id));
+            if (prefixUser != null)
+            {
+                isPrefixed = true;
+                return prefixUser;
+            }
+        }
+
+        isPrefixed = false;
         return _users.FirstOrDefault(x => activeId == x.Id);
     }
 }

@@ -210,6 +210,28 @@ export function updateServerInfo(msg) {
     document.getElementById("servers").appendChild(servBtn);
 }
 
+export function acknowledgeMessage(msg) {
+    const message = document.querySelector(`.message-${msg.id}`);
+
+    message.classList.remove("sending");
+    if (msg.isError) message.classList.add("error");
+
+    if (msg.author) {
+        const info = userInfo[msg.author];
+        if (info) { // TODO: merge code with similar ones
+            const usernameContainer = message.querySelector(".subtitle");
+            const pfp = message.querySelector(".pfp");
+            usernameContainer.innerHTML = info.username;
+            pfp.innerHTML = info.character;
+            pfp.style = `background: rgb(${info.color.r}, ${info.color.g}, ${info.color.b});`;
+        }
+    }
+    if (msg.content) {
+        message.querySelector(".content").innerHTML = msg.content;
+        parseMessage(message);
+    }
+}
+
 export function updateUserInfo(msg) {
     userInfo[msg.id] = {
         username: msg.username,
