@@ -113,7 +113,7 @@ namespace Amiko.Server.Controllers
                                 // Parse actual message
                                 var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
 
-                                var prefix = prot.Content.Split(' ')[0];
+                                var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
                                 authorId = _userManager.GetUserFromId(claimId, prot.Content.Length > prefix.Length ? prefix : null, out var isPrefixed).Id;
 
                                 string content = isPrefixed ? prot.Content[(prefix.Length + 1)..] : prot.Content;
