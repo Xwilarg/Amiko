@@ -38,17 +38,12 @@
 }
 
 /* Send message textarea */
-#message-form {
+#message-form, #send-message {
     height: 75px;
 }
 
 #message-field {
     min-height: 75px;
-}
-
-/* Channel name */
-#channel-header {
-    height: 100px;
 }
 
 /* Message formatting */
@@ -58,7 +53,7 @@
 
 #messages {
     padding: .5em;
-    height: calc(100vh - 235px);
+    height: calc(100vh - 125px);
     overflow-y: scroll;
     margin-left: 0;
     margin-right: 0;

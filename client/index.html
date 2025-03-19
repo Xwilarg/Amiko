@@ -47,28 +47,37 @@
         </template>
         <nav class="navbar">
             <div class="navbar-brand">
-                <button class="navbar-link" id="toggle-home">
+                <button class="navbar-item" id="toggle-home">
                     <span class="material-symbols-outlined">home</span>
                 </button>
-                <button class="navbar-link" id="toggle-settings">
+                <button class="navbar-item" id="toggle-settings">
                     <span class="material-symbols-outlined">settings</span>
                 </button>
-                <button class="navbar-link" id="toggle-profile">
+                <button class="navbar-item" id="toggle-profile">
                     <span class="material-symbols-outlined">person</span>
                 </button>
+                <div class="level is-mobile">
+                    <h3 class="subtitle" id="channel-title"></h3>
+                </div>
             </div>
         </nav>
         <div id="home-dropdown" class="dropdown is-hidden">
-            <div id="servers"></div>
-            <hr>
-            <div id="channels"></div>
+            <div>
+                <div id="servers"></div>
+                <hr>
+                <div id="channels"></div>
+            </div>
         </div>
         <div id="settings-dropdown" class="dropdown is-hidden">
-            <div id="style-selection" class="select">
-                <select id="style-selection-select">
-                    <option value="regular">Default</option>
-                    <option value="minimalist">Minimalist</option>
-                </select>
+            <div>
+                <div id="style-selection" class="select">
+                    <select id="style-selection-select">
+                        <option value="regular">Default</option>
+                        <option value="minimalist">Minimalist</option>
+                    </select>
+                </div>
+                <br>
+                <button class="button is-primary" id="export-button" disabled>Export</button>
             </div>
         </div>
         <div id="profile-dropdown" class="dropdown is-hidden">
@@ -76,11 +85,6 @@
             </div>
         </div>
         <div>
-            <div id="channel-header">
-                <h2 class="is-title" id="channel-title"></h2>
-                <button class="button is-primary" id="export-button" disabled>Export</button>
-            </div>
-
             <div class="is-flex is-flex-direction-column" id="messages">
             </div>
 
