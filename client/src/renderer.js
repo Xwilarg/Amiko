@@ -1,5 +1,6 @@
 import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, switchProfile } from "./network";
+var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), null, text, [ "system" ]);
@@ -70,6 +71,7 @@ function parseMessage(msg) {
         }
     }
 
+    finalHtml = emoji.replace_colons(finalHtml);
     finalHtml = finalHtml.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
 
     finalHtml = finalHtml.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>');
@@ -134,6 +136,9 @@ function refreshChannelDisplay() {
         document.getElementById("channels").appendChild(chanBtn);
     }
 }
+
+const emoji = new EmojiConvertor();
+emoji.replace_mode = "unified";
 
 // Current user username
 let myInfo = null;
