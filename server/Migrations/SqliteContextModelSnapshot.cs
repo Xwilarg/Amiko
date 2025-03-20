@@ -39,7 +39,8 @@ namespace Amiko.Server.Migrations
 
             modelBuilder.Entity("Amiko.Server.Database.ChannelSeen", b =>
                 {
-                    b.Property<int>("ServId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ChanId")
@@ -48,10 +49,13 @@ namespace Amiko.Server.Migrations
                     b.Property<long>("LastSeen")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ServId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("UserContextId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ServId", "ChanId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserContextId");
 

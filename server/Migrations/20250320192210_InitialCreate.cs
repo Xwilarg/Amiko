@@ -66,6 +66,8 @@ namespace Amiko.Server.Migrations
                 name: "ChannelSeen",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     ServId = table.Column<int>(type: "INTEGER", nullable: false),
                     ChanId = table.Column<int>(type: "INTEGER", nullable: false),
                     LastSeen = table.Column<long>(type: "INTEGER", nullable: false),
@@ -73,7 +75,7 @@ namespace Amiko.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChannelSeen", x => new { x.ServId, x.ChanId });
+                    table.PrimaryKey("PK_ChannelSeen", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ChannelSeen_Users_UserContextId",
                         column: x => x.UserContextId,

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20250320152005_InitialCreate")]
+    [Migration("20250320192210_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -42,7 +42,8 @@ namespace Amiko.Server.Migrations
 
             modelBuilder.Entity("Amiko.Server.Database.ChannelSeen", b =>
                 {
-                    b.Property<int>("ServId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ChanId")
@@ -51,10 +52,13 @@ namespace Amiko.Server.Migrations
                     b.Property<long>("LastSeen")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ServId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("UserContextId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ServId", "ChanId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserContextId");
 

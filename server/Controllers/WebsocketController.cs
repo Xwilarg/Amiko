@@ -108,7 +108,7 @@ namespace Amiko.Server.Controllers
                             {
                                 var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), Option);
                                 var ctx = ContextInterpreter.Get(_dbContext);
-                                ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.Now.ToUnixTimeSeconds());
+                                ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
                             else if (baseMsg.Type == MessageType.Message)
                             {
@@ -117,7 +117,7 @@ namespace Amiko.Server.Controllers
 
                                 var ctx = ContextInterpreter.Get(_dbContext);
 
-                                if (!ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.Now.ToUnixTimeSeconds()))
+                                if (!ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
                                 {
                                     // If this fail, it means we don't have the permissions to view this channel
                                     continue;

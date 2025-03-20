@@ -134,7 +134,7 @@ export function openMessageConnection(token) {
                         body: json.content
                     });
                 }
-                else if (isCurrentChannel(msg.serverId, msg.channelId))
+                else if (isCurrentChannel(json.serverId, json.channelId))
                 {
                     sendSeenUpdate(json.servId, json.chanId);
                 }

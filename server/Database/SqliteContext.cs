@@ -262,12 +262,6 @@ public class SqliteContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.UseSqlite("Data Source=Sqlite.db");
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-	{
-		modelBuilder.Entity<ChannelSeen>()
-			.HasKey(nameof(ChannelSeen.ServId), nameof(ChannelSeen.ChanId));
-	}
 }
 
 public class UserContext
@@ -280,11 +274,13 @@ public class UserContext
     public string Character { set; get; }
     public string? Prefix { set; get; }
 
-    public List<ChannelSeen> LastSeens { set; get; }= new();
+    public List<ChannelSeen> LastSeens { set; get; } = [];
 }
 
 public class ChannelSeen
 {
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
+
     public int ServId { set; get; }
     public int ChanId { set; get; }
     public long LastSeen { set; get; }
