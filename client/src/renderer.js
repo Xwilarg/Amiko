@@ -152,6 +152,11 @@ let userInfo = {};
 let servInfo = {};
 let currChan = null;
 
+export function isCurrentChannel(servId, chanId)
+{
+    return servId === currChan.servId && chanId === currChan.chanId;
+}
+
 export function updateReceivedMessage(msg) {
     servInfo[msg.serverId].channels[msg.channelId].messages.push(msg);
     if (currChan.servId === msg.serverId && currChan.chanId === msg.channelId) {

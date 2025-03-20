@@ -1,5 +1,5 @@
 import { getCurrentAltUser } from "./preferences";
-import { acknowledgeMessage, getInfoFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { acknowledgeMessage, getInfoFromId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -134,9 +134,9 @@ export function openMessageConnection(token) {
                         body: json.content
                     });
                 }
-                else
+                else if (isCurrentChannel(msg.serverId, msg.channelId))
                 {
-                    //sendSeenUpdate(json.servId, json.chanId);
+                    sendSeenUpdate(json.servId, json.chanId);
                 }
                 break;
 
