@@ -53,7 +53,7 @@ namespace Amiko.Server.Controllers
 
                 // Info of who sent the msg
                 var claimId = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value;
-                var authorId = _userManager.GetUserFromId(claimId).Id;
+                var authorId = _userManager.GetUserFromId(claimId, null, out var _).Id;
 
                 // First connection from user!
                 _logger.Log(LogLevel.Information, $"New client connected ({authorId})");
@@ -93,7 +93,6 @@ namespace Amiko.Server.Controllers
                     }
 
                     _logger.Log(LogLevel.Information, $"Message received of size {buffer.Length} of type {response.MessageType}");
-                    authorId = _userManager.GetUserFromId(claimId).Id;
                     if (response.MessageType == WebSocketMessageType.Text)
                     {
 
@@ -114,14 +113,19 @@ namespace Amiko.Server.Controllers
                                 // Parse actual message
                                 var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
 
-                                _logger.Log(LogLevel.Information, $"Received {prot.Content} by {authorId}");
+                                var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
+                                authorId = _userManager.GetUserFromId(claimId, prot.Content.Length > prefix.Length ? prefix : null, out var isPrefixed).Id;
+
+                                string content = isPrefixed ? prot.Content[(prefix.Length + 1)..] : prot.Content;
+
+                                _logger.Log(LogLevel.Information, $"Received {content} by {authorId}");
 
                                 // Save to db
                                 ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                                 {
                                     CreationTime = now,
                                     AuthorId = authorId,
-                                    Message = prot.Content
+                                    Message = content
                                 });
                                 var d = now.ToUniversalTime() - DateTime.UnixEpoch;
                                 prot.SentAt = new()
@@ -130,6 +134,7 @@ namespace Amiko.Server.Controllers
                                     Nanos = d.Nanoseconds
                                 };
                                 prot.Author = authorId;
+                                prot.Content = content;
 
                                 // Send message back
                                 List<Task> tasks = [];
@@ -142,7 +147,14 @@ namespace Amiko.Server.Controllers
                                         tasks.Add(t);
                                     }
                                     { // Send an acknowledgment to the user that sent it
-                                        var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge() { Type = MessageType.Acknowledge, Id = prot.Id, IsError = false }, Option));
+                                        var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
+                                        {
+                                            Type = MessageType.Acknowledge,
+                                            Id = prot.Id,
+                                            IsError = false,
+                                            Author = isPrefixed ? authorId : null,
+                                            Content = isPrefixed ? content : null
+                                        }, Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);
                                     }

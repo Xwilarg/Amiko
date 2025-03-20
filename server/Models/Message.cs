@@ -87,5 +87,10 @@ public class Message : BaseMessage
 public class Acknowledge : BaseMessage
 {
     public int Id { set; get; }
+    /// <summary>
+    /// If we use a prefix to specify a second account, the author returned can be different than the sender
+    /// </summary>
+    public string? Author { set; get; }
+    public string? Content { set; get; }
     public bool IsError { set; get; }
 }
