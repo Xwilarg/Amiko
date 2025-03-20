@@ -33,6 +33,20 @@
     text-align: center;
 }
 
+.notif-container {
+    position: relative;
+}
+
+.notif {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .message .pfp {
     flex-shrink: 0;
 }

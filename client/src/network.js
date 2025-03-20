@@ -129,14 +129,14 @@ export function openMessageConnection(token) {
 
             case 2: // Message received
                 updateReceivedMessage(json);
-                if (!await notification.isFocusedAsync()) {
+                if (isCurrentChannel(json.serverId, json.channelId))
+                {
+                    sendSeenUpdate(json.servId, json.chanId);
+                }
+                else if (!await notification.isFocusedAsync()) {
                     new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
                         body: json.content
                     });
-                }
-                else if (isCurrentChannel(json.serverId, json.channelId))
-                {
-                    sendSeenUpdate(json.servId, json.chanId);
                 }
                 break;
 
