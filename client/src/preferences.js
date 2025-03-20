@@ -11,4 +11,19 @@ export async function initPreferencesAsync() {
     const style = await filesystem.readPrefAsync("style", "regular");
     document.getElementById("style-selection-select").value = style;
     updateStyle(style);
+
+    var cU = await filesystem.readPrefAsync("user", null);
+    currentUser = cU ? parseInt(cU) : null;
+}
+
+let currentUser = null;
+export async function setCurrentAltUser(value)
+{
+    await filesystem.writePrefAsync("user", value);
+    currentUser = value;
+}
+
+export function getCurrentAltUser()
+{
+    return currentUser;
 }

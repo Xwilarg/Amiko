@@ -1,5 +1,4 @@
 using Amiko.Server.Database;
-using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -13,7 +12,6 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
-        builder.Services.AddSingleton<UserManager>();
 
         // Add services to the container.
 

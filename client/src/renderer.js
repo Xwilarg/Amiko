@@ -1,5 +1,6 @@
 import { closeSettings } from ".";
-import { downloadChanExport, sendMessageFromInput, switchProfile } from "./network";
+import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
+import { getCurrentAltUser, setCurrentAltUser } from "./preferences";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -22,12 +23,13 @@ export function getInfoFromId(id) {
 }
 
 function sendIncomingMessage(date, id, text) {
-    sendMessageInternal(new Date(date.seconds * 1000 + date.nanos / 1e6), getInfoFromId(id), text, []);
+    sendMessageInternal(new Date(date * 1000), getInfoFromId(id), text, []);
 }
 
 export function sendMyMessage(msg, text, id) {
     const now = new Date();
     msg.date = now;
+    msg.author = myInfo.id;
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
     sendMessageInternal(now, myInfo, text, [ "sending", `message-${id}` ]);
 }
@@ -59,10 +61,11 @@ function sendMessageInternal(date, info, text, indications) {
 }
 
 function parseMessage(msg) {
+    msg.querySelector(".rich-preview").innerHTML = "";
     const content = msg.querySelector(".content");
     let finalHtml = content.innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
-    let m = finalHtml.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif)([^ \n]+)?/gm);
+    let m = finalHtml.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif|webp)([^ \n]+)?/gm);
     if (m) {
         const prev = msg.querySelector(".rich-preview");
         prev.classList.remove("is-hidden");
@@ -108,12 +111,13 @@ function refreshMessageDisplay() {
     for (const msg of servInfo[currChan.servId].channels[currChan.chanId].messages) {
         let date;
         if (msg.sentAt) {
-            date = new Date(msg.sentAt.seconds * 1000 + msg.sentAt.nanos / 1e6)
+            date = new Date(msg.sentAt * 1000)
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.author ? getInfoFromId(msg.author) : myInfo, msg.content, []);
+        sendMessageInternal(date, getInfoFromId(msg.author), msg.content, []);
     }
+    sendSeenUpdate(currChan.servId, currChan.chanId);
 }
 
 function refreshChannelDisplay() {
@@ -142,7 +146,6 @@ emoji.replace_mode = "unified";
 
 // Current user username
 let myInfo = null;
-let myId = null;
 
 // All infos about various users
 let userInfo = {};
@@ -188,6 +191,14 @@ export function updateServerInfo(msg) {
             console.log(`Automatically load channel ${currChan.servId} / ${currChan.chanId}`);
             document.getElementById("send-message").disabled = false;
             refreshMessageDisplay();
+        }
+
+        // Update notifications
+        if (chan.messages.length > 0)
+            console.log(`${msg.name}/${chan.name}: ${chan.lastSeen} < ${chan.messages[chan.messages.length - 1].sentAt} (${chan.messages[chan.messages.length - 1].content})`)
+        if (chan.messages.length > 0 && chan.lastSeen < chan.messages[chan.messages.length - 1].sentAt)
+        {
+            console.log(`New message available in ${msg.name}/${chan.name}`)
         }
     }
     refreshChannelDisplay(); // TODO: don't call that everytimes
@@ -238,28 +249,27 @@ export function updateUserInfo(msg) {
         color: msg.color,
         character: msg.character
     };
-    if (myId == null && msg.isMe) {
+    if (getCurrentAltUser() == null && msg.isMe) {
         myInfo = msg;
-        myId = msg.id;
-    } else if (myId !== null && myId === msg.id) {
+    } else if (getCurrentAltUser() == msg.id) {
         myInfo = msg;
     }
 
-    if (msg.isMyGroup || msg.isMe) {
+    if (msg.isMyGroup) {
         const persoBtn = document.createElement("button");
         persoBtn.classList.add("button");
         persoBtn.classList.add("profile")
         persoBtn.classList.add("is-flex");
         persoBtn.classList.add("is-flex-direction-column");
-        if (myId === msg.id) persoBtn.disabled = true;
+        if (myInfo !== null && myInfo.id === msg.id) persoBtn.disabled = true;
 
-        persoBtn.addEventListener("click", (e) => {
-            switchProfile(msg.id, () => {
-                myInfo = msg;
+        persoBtn.addEventListener("click", async () => {
+            myInfo = msg;
 
-                document.querySelector(".profile:disabled").disabled = false;
-                persoBtn.disabled = true;
-            });
+            document.querySelector(".profile:disabled").disabled = false;
+            persoBtn.disabled = true;
+
+            await setCurrentAltUser(msg.id)
         });
 
         const pfp = document.createElement("div");

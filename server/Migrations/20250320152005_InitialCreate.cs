@@ -17,11 +17,30 @@ namespace Amiko.Server.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    AllowedUsers = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Servers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Username = table.Column<string>(type: "TEXT", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: true),
+                    DependsOf = table.Column<int>(type: "INTEGER", nullable: true),
+                    Color = table.Column<int>(type: "INTEGER", nullable: false),
+                    Character = table.Column<string>(type: "TEXT", nullable: false),
+                    Prefix = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -44,6 +63,25 @@ namespace Amiko.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChannelSeen",
+                columns: table => new
+                {
+                    ServId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ChanId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LastSeen = table.Column<long>(type: "INTEGER", nullable: false),
+                    UserContextId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChannelSeen", x => new { x.ServId, x.ChanId });
+                    table.ForeignKey(
+                        name: "FK_ChannelSeen_Users_UserContextId",
+                        column: x => x.UserContextId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MessageContext",
                 columns: table => new
                 {
@@ -51,7 +89,7 @@ namespace Amiko.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     CreationTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Message = table.Column<string>(type: "TEXT", nullable: false),
-                    AuthorId = table.Column<string>(type: "TEXT", nullable: false),
+                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
                     ChannelContextId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -70,6 +108,11 @@ namespace Amiko.Server.Migrations
                 column: "ServerContextId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChannelSeen_UserContextId",
+                table: "ChannelSeen",
+                column: "UserContextId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MessageContext_ChannelContextId",
                 table: "MessageContext",
                 column: "ChannelContextId");
@@ -79,7 +122,13 @@ namespace Amiko.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ChannelSeen");
+
+            migrationBuilder.DropTable(
                 name: "MessageContext");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "ChannelContext");

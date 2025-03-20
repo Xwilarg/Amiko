@@ -46,6 +46,11 @@
     min-height: 75px;
 }
 
+/* Markdown */
+pre, code {
+    text-wrap-mode: wrap !important;
+}
+
 /* Message formatting */
 .subtitle {
     margin-bottom: 0 !important;
@@ -62,6 +67,7 @@
 
 .content {
     margin-bottom: 0 !important;
+    word-break: break-word;
 }
 
 .message {

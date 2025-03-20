@@ -1,6 +1,5 @@
 using Amiko.Models;
 using Amiko.Server.Database;
-using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
@@ -16,13 +15,11 @@ namespace Amiko.Server.Controllers
     {
         private readonly ILogger<WebsocketController> _logger;
         private SqliteContext _dbContext;
-        private UserManager _userManager;
 
-        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext, UserManager userManager)
+        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext)
         {
             _logger = logger;
             _dbContext = dbContext;
-            _userManager = userManager;
         }
 
         private static JsonSerializerOptions _option;
@@ -52,17 +49,16 @@ namespace Amiko.Server.Controllers
                 }
 
                 // Info of who sent the msg
-                var claimId = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value;
-                var authorId = _userManager.GetUserFromId(claimId, null, out var _).Id;
+                var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
                 // First connection from user!
-                _logger.Log(LogLevel.Information, $"New client connected ({authorId})");
+                _logger.Log(LogLevel.Information, $"New client connected ({claimId})");
 
                 // Send information about all servers existing
                 var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
                 {
                     Type = MessageType.Array,
-                    Data = ContextInterpreter.Get(_dbContext).GetStartingInfo(50)
+                    Data = ContextInterpreter.Get(_dbContext).GetStartingServerInfo(50, claimId)
                 }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -70,7 +66,7 @@ namespace Amiko.Server.Controllers
                 bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
                 {
                     Type = MessageType.Array,
-                    Data = _userManager.GetAllUsersInfo(claimId, authorId)
+                    Data = ContextInterpreter.Get(_dbContext).GetStartingUserInfo(claimId)
                 }, Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -108,32 +104,66 @@ namespace Amiko.Server.Controllers
                             {
                                 await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
                             }
+                            else if (baseMsg.Type == MessageType.SeenUpdate)
+                            {
+                                var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), Option);
+                                var ctx = ContextInterpreter.Get(_dbContext);
+                                ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.Now.ToUnixTimeSeconds());
+                            }
                             else if (baseMsg.Type == MessageType.Message)
                             {
                                 // Parse actual message
                                 var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
 
+                                var ctx = ContextInterpreter.Get(_dbContext);
+
+                                if (!ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.Now.ToUnixTimeSeconds()))
+                                {
+                                    // If this fail, it means we don't have the permissions to view this channel
+                                    continue;
+                                }
+
+                                string content = prot.Content;
+
+                                UserContext? targetUser = null;
                                 var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
-                                authorId = _userManager.GetUserFromId(claimId, prot.Content.Length > prefix.Length ? prefix : null, out var isPrefixed).Id;
+                                targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id));
+                                if (targetUser != null) // We found a valid matching user with the prefix
+                                {
+                                    content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
+                                }
+                                else if (prot.Author != null)
+                                {
+                                    if (!ctx.DoesUserFillClaim(claimId, prot.Author.Value))
+                                    {
+                                        var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
+                                        {
+                                            Type = MessageType.Acknowledge,
+                                            Id = prot.Id,
+                                            IsError = true
+                                        }, Option));
+                                        await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                        continue;
+                                    }
+                                    targetUser = ctx.TryGetUserFromId(prot.Author.Value);
+                                }
+                                else
+                                {
+                                    targetUser = ctx.TryGetUserFromId(claimId);
+                                }
 
-                                string content = isPrefixed ? prot.Content[(prefix.Length + 1)..] : prot.Content;
-
-                                _logger.Log(LogLevel.Information, $"Received {content} by {authorId}");
+                                _logger.Log(LogLevel.Information, $"Received {content} by {targetUser.Username}");
 
                                 // Save to db
                                 ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                                 {
                                     CreationTime = now,
-                                    AuthorId = authorId,
+                                    AuthorId = targetUser.Id,
                                     Message = content
                                 });
                                 var d = now.ToUniversalTime() - DateTime.UnixEpoch;
-                                prot.SentAt = new()
-                                {
-                                    Seconds = (long)Math.Floor(d.TotalSeconds),
-                                    Nanos = d.Nanoseconds
-                                };
-                                prot.Author = authorId;
+                                prot.SentAt = (long)Math.Floor(d.TotalSeconds);
+                                prot.Author = targetUser.Id;
                                 prot.Content = content;
 
                                 // Send message back
@@ -152,8 +182,8 @@ namespace Amiko.Server.Controllers
                                             Type = MessageType.Acknowledge,
                                             Id = prot.Id,
                                             IsError = false,
-                                            Author = isPrefixed ? authorId : null,
-                                            Content = isPrefixed ? content : null
+                                            Content = content,
+                                            Author = targetUser.Id
                                         }, Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);
@@ -194,5 +224,9 @@ namespace Amiko.Server.Controllers
                 HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
             }
         }
+    }
+
+    internal class ContextUser
+    {
     }
 }

@@ -16,5 +16,9 @@ public enum MessageType
     /// </summary>
     Acknowledge,
     ServerInfo,
-    UserInfo
+    UserInfo,
+    /// <summary>
+    /// Update the server to tell it a channel was seen recently
+    /// </summary>
+    SeenUpdate
 }

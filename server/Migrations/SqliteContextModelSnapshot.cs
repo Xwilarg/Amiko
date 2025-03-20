@@ -37,15 +37,35 @@ namespace Amiko.Server.Migrations
                     b.ToTable("ChannelContext");
                 });
 
+            modelBuilder.Entity("Amiko.Server.Database.ChannelSeen", b =>
+                {
+                    b.Property<int>("ServId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChanId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("LastSeen")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("UserContextId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ServId", "ChanId");
+
+                    b.HasIndex("UserContextId");
+
+                    b.ToTable("ChannelSeen");
+                });
+
             modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AuthorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("ChannelContextId")
                         .HasColumnType("INTEGER");
@@ -70,6 +90,9 @@ namespace Amiko.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AllowedUsers")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -79,11 +102,49 @@ namespace Amiko.Server.Migrations
                     b.ToTable("Servers");
                 });
 
+            modelBuilder.Entity("Amiko.Server.Database.UserContext", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Character")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Color")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DependsOf")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Prefix")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
                 {
                     b.HasOne("Amiko.Server.Database.ServerContext", null)
                         .WithMany("Channels")
                         .HasForeignKey("ServerContextId");
+                });
+
+            modelBuilder.Entity("Amiko.Server.Database.ChannelSeen", b =>
+                {
+                    b.HasOne("Amiko.Server.Database.UserContext", null)
+                        .WithMany("LastSeens")
+                        .HasForeignKey("UserContextId");
                 });
 
             modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
@@ -101,6 +162,11 @@ namespace Amiko.Server.Migrations
             modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>
                 {
                     b.Navigation("Channels");
+                });
+
+            modelBuilder.Entity("Amiko.Server.Database.UserContext", b =>
+                {
+                    b.Navigation("LastSeens");
                 });
 #pragma warning restore 612, 618
         }

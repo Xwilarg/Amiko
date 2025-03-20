@@ -16,16 +16,6 @@ public class ArrayMessage<T> : BaseMessage
     public T[] Data { set; get; }
 }
 
-/// <summary>
-/// Simplified represetation of a timestamp
-/// <see href="https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/timestamp.proto#L133"/>
-/// </summary>
-public class Timestamp
-{
-    public long Seconds { set; get; }
-    public int Nanos { set; get; }
-}
-
 public class ServerInfo : BaseMessage
 {
     public int Id { set; get; }
@@ -37,11 +27,12 @@ public class ChannelInfo
     public int Id { set; get; }
     public string Name { set; get; }
     public Message[] Messages { set; get; }
+    public long LastSeen { set; get; }
 }
 
 public class UserInfo : BaseMessage
 {
-    public string Id { set; get; }
+    public int Id { set; get; }
     public bool IsMe { set; get; }
     public bool IsMyGroup { set; get; }
     public string Username { set; get; }
@@ -66,7 +57,7 @@ public class Message : BaseMessage
     /// <summary>
     /// ID of the author of the message
     /// </summary>
-    public string Author { set; get; }
+    public int? Author { set; get; }
     /// <summary>
     /// Content of the message
     /// </summary>
@@ -74,7 +65,7 @@ public class Message : BaseMessage
     /// <summary>
     /// When the message was sent
     /// </summary>
-    public Timestamp SentAt { set; get; }
+    public long SentAt { set; get; }
     /// <summary>
     /// ID of the message, used for acknowledgement
     /// </summary>
@@ -90,7 +81,13 @@ public class Acknowledge : BaseMessage
     /// <summary>
     /// If we use a prefix to specify a second account, the author returned can be different than the sender
     /// </summary>
-    public string? Author { set; get; }
     public string? Content { set; get; }
+    public int? Author { set; get; }
     public bool IsError { set; get; }
+}
+
+public class SeenUpdate : BaseMessage
+{
+    public int ServerId { set; get; }
+    public int ChannelId { set; get; }
 }

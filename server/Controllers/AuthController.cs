@@ -1,6 +1,5 @@
-﻿using Amiko.Server.Services;
+﻿using Amiko.Server.Database;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -13,27 +12,18 @@ namespace Amiko.Server.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly ILogger<AuthController> _logger;
-    private UserManager _userManager;
+    private SqliteContext _dbContext;
 
-    public AuthController(ILogger<AuthController> logger, UserManager userManager)
+    public AuthController(ILogger<AuthController> logger, SqliteContext dbContext)
     {
         _logger = logger;
-        _userManager = userManager;
-    }
-
-    private string HashPassword(string password, string salt)
-    {
-        var saltBytes = Encoding.ASCII.GetBytes(salt);
-        var hash = KeyDerivation.Pbkdf2(password, saltBytes, KeyDerivationPrf.HMACSHA512, 210000, 256 / 8);
-
-        return Convert.ToHexString(hash).ToLower();
+        _dbContext = dbContext;
     }
 
     [HttpPost("token")]
     public IActionResult GetToken([FromBody] string password)
     {
-        var hashed = HashPassword(password, "Effy");
-        var user = _userManager.GetUserFromPassword(hashed);
+        var user = ContextInterpreter.Get(_dbContext).TryGetUserFromPassword(password, "Effy");
 
         if (user == null)
         {
@@ -45,7 +35,7 @@ public class AuthController : ControllerBase
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.UserData, user.Id)
+            new(ClaimTypes.UserData, user.Id.ToString())
         };
 
         var algorithms = Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature;
@@ -60,20 +50,6 @@ public class AuthController : ControllerBase
         var tokenString = tokenHandler.WriteToken(token);
 
         return StatusCode(StatusCodes.Status200OK, tokenString);
-    }
-
-    [Authorize]
-    [HttpPost("switch/{userId}")]
-    public IActionResult SwitchToId([Required] string userId)
-    {
-        var claimId = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value;
-
-        if (!_userManager.TrySetActiveUser(claimId, userId))
-        {
-            return StatusCode(StatusCodes.Status403Forbidden);
-        }
-
-        return StatusCode(StatusCodes.Status200OK);
     }
 
     [Authorize]

@@ -1,3 +1,4 @@
+import { getCurrentAltUser } from "./preferences";
 import { acknowledgeMessage, getInfoFromId, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
@@ -28,25 +29,20 @@ export function sendMessageFromInput(content, servId, chanId) {
         content: content,
         id: currId,
         serverId: servId,
-        channelId: chanId
+        channelId: chanId,
+        author: getCurrentAltUser()
     };
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(newMsg, content, currId);
     currId++;
 }
 
-export function switchProfile(profileId, onSuccess) {
-    fetch(createHttpUrl(`auth/switch/${profileId}`), {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${sessionToken}`
-        }
-    })
-    .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
-    .then(_ => {
-        onSuccess();
-    })
-    .catch((err) => { sendErrorMessage("Profile switch failed: " + err) });
+export function sendSeenUpdate(servId, chanId) {
+    socket.send(JSON.stringify({
+        type: 2,
+        serverId: servId,
+        channelId: chanId,
+    }));
 }
 
 export function downloadChanExport(chanName, servId, chanId) {
@@ -107,14 +103,12 @@ export function openMessageConnection(token) {
     socket.addEventListener("message", async function(event) {
         const json = JSON.parse(event.data);
 
-        console.log(`Received ${json.type}`);
         switch (json.type) {
             case 0: // Ack
                 break;
 
             case 1: // Data received is an array
                 for (const c of json.data) {
-                    console.log(`(Of type ${c.type})`);
                     switch (c.type)
                     {
                         /*case 2: // Message
@@ -139,6 +133,10 @@ export function openMessageConnection(token) {
                     new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
                         body: json.content
                     });
+                }
+                else
+                {
+                    //sendSeenUpdate(json.servId, json.chanId);
                 }
                 break;
 
