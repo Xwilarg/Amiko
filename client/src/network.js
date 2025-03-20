@@ -39,7 +39,7 @@ export function sendMessageFromInput(content, servId, chanId) {
 
 export function sendSeenUpdate(servId, chanId) {
     socket.send(JSON.stringify({
-        type: 2,
+        type: 6,
         serverId: servId,
         channelId: chanId,
     }));
