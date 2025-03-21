@@ -1,9 +1,15 @@
-Chat software
+Chat software aiming to put the user first
 
-## Backend
+## Features
+- Switch account in one click or by prefixing your messages
+- Easily backup your data by exporting a whole channel content to markdown format
+- (More to come...)
 
-### nginx
+## Installing from sources
 
+### Backend
+Run `dotnet build Amiko.sln` in the `server/` folder, then move all the files in your server and create the appropriate configuration
+#### nginx
 ```
 server {
 	root /home/path/to/amiko;
@@ -27,6 +33,11 @@ server {
 }
 ```
 
-## Fontend
+### Fontend
+Go in the `client/` folder, run `npm i` then `npm run build`
 
-`npm i` then `npm run start`
+#### Web
+If you want to use the web version of Amiko, you can just keep the following files/folders: `js/`, `css/`, `node_modules/`, `index.html`
+
+#### Desktop
+You can run the debug version of the app by doing `npm run start` or make a build with `npm run make`
