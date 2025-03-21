@@ -29,6 +29,7 @@
     {
         public string Name { set; get; }
         public ChannelConfig[] Channels { set; get; }
+        public int[]? AllowedUsers { set; get; }
     }
 
     public class ChannelConfig

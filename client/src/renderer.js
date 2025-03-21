@@ -1,5 +1,6 @@
 import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
+import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getCurrentAltUser, setCurrentAltUser } from "./preferences";
 var EmojiConvertor = require('emoji-js');
 
@@ -60,28 +61,47 @@ function sendMessageInternal(date, info, text, indications) {
     scrollToBottom();
 }
 
+function getMarkdown(html) {
+    html = html.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>');
+    html = html.replaceAll(/`([^*]+)`/gm, '<code>$1</code>');
+    html = html.replaceAll(/^&gt; ([^\n]+)/gm, '<pre>$1</pre>');
+    html = html.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<b>$1</b>');
+    html = html.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>');
+    return html;
+}
+
 function parseMessage(msg) {
     msg.querySelector(".rich-preview").innerHTML = "";
     const content = msg.querySelector(".content");
     let finalHtml = content.innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
-    let m = finalHtml.match(/https?:\/\/([^. \n]+\.)+(png|jpg|jpeg|gif|webp)([^ \n]+)?/gm);
-    if (m) {
+    let link = finalHtml.match(/https?:\/\/([^ \n]+)/gm);
+    if (link) {
         const prev = msg.querySelector(".rich-preview");
-        prev.classList.remove("is-hidden");
-        for (let img of m) {
-            prev.innerHTML += `<img class="image" src="${img}"/>`;
+        console.log(link);
+        for (let l of link) {
+            // Image check
+            let m = l.match(/(png|jpg|jpeg|gif|webp)$/m);
+            if (m) {
+                prev.classList.remove("is-hidden");
+                prev.innerHTML += `<img class="image" src="${l}"/>`;
+            }
+            
+            // Youtube check
+            let yt = l.match(/youtube\.com\/watch\?v=([0-9a-zA-Z]+)/m);
+            if (yt) {
+                prev.classList.remove("is-hidden");
+                prev.innerHTML += `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe>`;
+            }
+            
         }
     }
 
-    finalHtml = emoji.replace_colons(finalHtml);
     finalHtml = finalHtml.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
 
-    finalHtml = finalHtml.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>');
-    finalHtml = finalHtml.replaceAll(/`([^*]+)`/gm, '<code>$1</code>');
-    finalHtml = finalHtml.replaceAll(/^&gt; ([^\n]+)/gm, '<pre>$1</pre>');
-    finalHtml = finalHtml.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<b>$1</b>');
-    finalHtml = finalHtml.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>');
+    finalHtml = emoji.replace_colons(finalHtml);
+
+    finalHtml = getMarkdown(finalHtml);
     finalHtml = finalHtml.replaceAll("\n", "<br>");
 
     content.innerHTML = finalHtml;
@@ -100,12 +120,16 @@ function scrollToBottom() {
 
 function refreshMessageDisplay() {
     const chanName = servInfo[currChan.servId].channels[currChan.chanId].name;
+
+    // Update export button to work with current channel
+    // TODO: Don't do that everytimes
     document.getElementById("channel-title").innerHTML = chanName;
     document.getElementById("export-button").disabled = false;
     document.getElementById("export-button").onclick = () => {
         downloadChanExport(chanName, currChan.servId, currChan.chanId);
     };
 
+    // Update all messages
     const container = document.getElementById("messages");
     container.innerHTML = "";
     for (const msg of servInfo[currChan.servId].channels[currChan.chanId].messages) {
@@ -117,6 +141,9 @@ function refreshMessageDisplay() {
         }
         sendMessageInternal(date, getInfoFromId(msg.author), msg.content, []);
     }
+
+    // Whole message list are updated when we display a new channel or so
+    // Hense we send a "seen" notification
     sendSeenUpdate(currChan.servId, currChan.chanId);
 }
 
@@ -137,6 +164,9 @@ function refreshChannelDisplay() {
 
             closeSettings();
         });
+
+        addNotificationDiv(chanBtn, `notif-channel-${currChan.servId}-${key}`);
+
         document.getElementById("channels").appendChild(chanBtn);
     }
 }
@@ -188,7 +218,7 @@ export function updateServerInfo(msg) {
             messages: chan.messages
         }
 
-        if (currChan === null) {
+        if (currChan === null) { // No channel set yet, we take the first coming by
             currChan = {
                 servId: msg.id,
                 chanId: msg.channels[0].id
@@ -197,33 +227,44 @@ export function updateServerInfo(msg) {
             document.getElementById("send-message").disabled = false;
             refreshMessageDisplay();
         }
-
-        // Update notifications
-        if (chan.messages.length > 0)
-            console.log(`${msg.name}/${chan.name}: ${chan.lastSeen} < ${chan.messages[chan.messages.length - 1].sentAt} (${chan.messages[chan.messages.length - 1].content})`)
-        if (chan.messages.length > 0 && chan.lastSeen < chan.messages[chan.messages.length - 1].sentAt)
-        {
-            console.log(`New message available in ${msg.name}/${chan.name}`)
-        }
     }
     refreshChannelDisplay(); // TODO: don't call that everytimes
 
+    // Spawn buttons for server selection
     const servBtn = document.createElement("button");
     servBtn.innerHTML = msg.name;
     servBtn.classList.add("button");
     if (currChan.servId == msg.id) servBtn.classList.add("is-primary");
 
-    servBtn.addEventListener("click", (e) => {
+    servBtn.addEventListener("click", (e) => { // We clicked on a button to switch server...
         currChan = {
             servId: msg.id,
-            chanId: msg.channels[0].id
+            chanId: msg.channels[0].id // Current channel become the first we find
         }
+
+        // Refresh channels and messages to display the ones of the new server/channel
         refreshChannelDisplay();
         refreshMessageDisplay();
+
+        // Update server display UI
         document.querySelector("#servers > .is-primary").classList.remove("is-primary");
         e.target.classList.add("is-primary");
     });
+
+    addNotificationDiv(servBtn, `notif-server-${msg.id}`);
+
     document.getElementById("servers").appendChild(servBtn);
+
+    // Check if we have any unread message
+    for (const chan of msg.channels)
+    {
+        // Update notifications
+        if (chan.messages.length > 0 && chan.lastSeen < chan.messages[chan.messages.length - 1].sentAt)
+        {
+            addPendingNotification(msg.id, chan.id);
+            console.log(`New message available in ${msg.name}/${chan.name}`)
+        }
+    }
 }
 
 export function acknowledgeMessage(msg) {
@@ -317,5 +358,10 @@ export function initRenderer()
             e.preventDefault();
         }
     });
+
+    for (const spMd of document.getElementsByClassName("apply-markdown"))
+    {
+        spMd.innerHTML = getMarkdown(spMd.innerHTML);
+    }
 }
 

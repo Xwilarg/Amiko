@@ -35,21 +35,26 @@ namespace Amiko.Server.Controllers
             }
         }
 
-        private static readonly List<WebSocket> _sockets = [];
+        private class UserSocket
+        {
+            public int ClaimId { set; get; }
+            public WebSocket WebSocket { set; get; }
+        }
+        private static readonly List<UserSocket> _sockets = [];
 
         [Route("/ws"), Authorize]
         public async Task Get()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
+                // Info of who sent the msg
+                var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+
                 var client = await HttpContext.WebSockets.AcceptWebSocketAsync("client");
                 lock (_sockets)
                 {
-                    _sockets.Add(client);
+                    _sockets.Add(new() { WebSocket = client, ClaimId = claimId });
                 }
-
-                // Info of who sent the msg
-                var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
                 // First connection from user!
                 _logger.Log(LogLevel.Information, $"New client connected ({claimId})");
@@ -83,7 +88,7 @@ namespace Amiko.Server.Controllers
                     {
                         lock (_sockets)
                         {
-                            _sockets.Remove(client);
+                            _sockets.RemoveAll(x => x.WebSocket == client);
                         }
                         break;
                     }
@@ -170,10 +175,10 @@ namespace Amiko.Server.Controllers
                                 List<Task> tasks = [];
                                 lock (_sockets)
                                 {
-                                    foreach (var s in _sockets.Where(x => x != client)) // Send the message to every users
+                                    foreach (var s in _sockets.Where(x => x.WebSocket != client && ctx.CanAccessServer(prot.ServerId, x.ClaimId))) // Send the message to every users
                                     {
                                         var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, Option));
-                                        Task t = s.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
+                                        Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);
                                     }
                                     { // Send an acknowledgment to the user that sent it
@@ -213,7 +218,7 @@ namespace Amiko.Server.Controllers
                     {
                         lock (_sockets)
                         {
-                            _sockets.Remove(client);
+                            _sockets.RemoveAll(x => x.WebSocket == client);
                         }
                         break;
                     }

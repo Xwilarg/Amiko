@@ -13,6 +13,10 @@
     }
 }
 
+#settings-dropdown > div, #help-dropdown > div {
+    width: 100%;
+}
+
 .navbar {
     height: 50px;
 }

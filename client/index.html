@@ -50,7 +50,7 @@
                 <button class="navbar-item" id="toggle-home">
                     <span class="material-symbols-outlined notif-container">
                         home
-                        <span id="notif-global" class="notif"></span>
+                        <span id="notif-global" class="notif is-hidden"></span>
                     </span>
                 </button>
                 <button class="navbar-item" id="toggle-settings">
@@ -58,6 +58,9 @@
                 </button>
                 <button class="navbar-item" id="toggle-profile">
                     <span class="material-symbols-outlined">person</span>
+                </button>
+                <button class="navbar-item" id="toggle-help">
+                    <span class="material-symbols-outlined">help</span>
                 </button>
                 <div class="level is-mobile">
                     <h3 class="subtitle" id="channel-title"></h3>
@@ -73,18 +76,35 @@
         </div>
         <div id="settings-dropdown" class="dropdown is-hidden">
             <div>
-                <div id="style-selection" class="select">
-                    <select id="style-selection-select">
-                        <option value="regular">Default</option>
-                        <option value="minimalist">Minimalist</option>
-                    </select>
-                </div>
-                <br>
-                <button class="button is-primary" id="export-button" disabled>Export</button>
+                <fieldset class="box">
+                    <legend class="label has-text-centered">Global Settings</legend>
+                    <div id="style-selection" class="select">
+                        <select id="style-selection-select">
+                            <option value="regular">Default</option>
+                            <option value="minimalist">Minimalist</option>
+                        </select>
+                    </div>
+                </fieldset>
+                <fieldset class="box">
+                    <legend class="label has-text-centered">Channel Settings</legend>
+                    <button class="button is-primary" id="export-button" disabled>Export</button>
+                </fieldset>
             </div>
         </div>
         <div id="profile-dropdown" class="dropdown is-hidden">
             <div id="profile-selection" class="is-flex is-flex-wrap-wrap">
+            </div>
+        </div>
+        <div id="help-dropdown" class="dropdown is-hidden">
+            <div>
+                <fieldset class="box">
+                    <legend class="label has-text-centered">Formatting</legend>
+                    <p>**Bold Text** &gt; <span class="apply-markdown">**Bold Text**</span></p>
+                    <p>*Italic Text* &gt; <span class="apply-markdown">*Italic Text*</span></p>
+                    <p>```Pre-formatted block``` &gt; <span class="apply-markdown">```Pre-formatted block```</span></p>
+                    <p>&gt; Pre-formatted line &gt; <span class="apply-markdown">&gt; Pre-formatted line</span></p>
+                    <p>`In-lined code` &gt; <span class="apply-markdown">`In-lined code`</span></p>
+                </fieldset>
             </div>
         </div>
         <div>

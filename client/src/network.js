@@ -1,3 +1,4 @@
+import { addNotificationDiv, addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
 import { acknowledgeMessage, getInfoFromId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
@@ -43,6 +44,7 @@ export function sendSeenUpdate(servId, chanId) {
         serverId: servId,
         channelId: chanId,
     }));
+    removeNotification(servId, chanId); // We saw the message so we discard related notifications
 }
 
 export function downloadChanExport(chanName, servId, chanId) {
@@ -131,9 +133,15 @@ export function openMessageConnection(token) {
                 updateReceivedMessage(json);
                 if (isCurrentChannel(json.serverId, json.channelId))
                 {
-                    sendSeenUpdate(json.servId, json.chanId);
+                    sendSeenUpdate(json.serverId, json.channelId);
+                    if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
+                        new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
+                            body: json.content
+                        });
+                    }
                 }
-                else if (!await notification.isFocusedAsync()) {
+                else { // Whenever we are currently looking at the window or not, the message have lend in another channel so we send a notification
+                    addPendingNotification(json.serverId, json.channelId);
                     new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
                         body: json.content
                     });

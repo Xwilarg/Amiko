@@ -5,6 +5,8 @@ import { initRenderer } from "./renderer";
 let token;
 let areSettingsOpen = false;
 
+const settings = [ "home", "settings", "profile", "help" ];
+
 window.addEventListener('DOMContentLoaded', async () => {
     const pwd = document.getElementById("password");
     const fileToken = await filesystem.readTokenAsync();
@@ -48,7 +50,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    const settings = [ "home", "settings", "profile" ];
     for (const s of settings) {
         document.getElementById(`toggle-${s}`).addEventListener("click", () => { // Click on a button to open the related menu
             const elem = document.getElementById(`${s}-dropdown`);
@@ -78,8 +79,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 export function closeSettings() {
-    document.getElementById("home-dropdown").classList.add("is-hidden");
-    document.getElementById("settings-dropdown").classList.add("is-hidden");
-    document.getElementById("profile-dropdown").classList.add("is-hidden");
+    for (const s of settings) {
+        document.getElementById(`${s}-dropdown`).classList.add("is-hidden");
+    }
     areSettingsOpen = false;
 }

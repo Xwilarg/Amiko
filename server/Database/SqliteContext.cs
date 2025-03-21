@@ -34,7 +34,12 @@ public class ContextInterpreter
         {
             if (!_ctx.Servers.Any(x => x.Name == s.Name))
             {
-                AddServer(s.Name);
+                AddServer(s.Name, s.AllowedUsers);
+            }
+            else
+            {
+                _ctx.Servers.First(x => x.Name == s.Name).AllowedUsers = s.AllowedUsers?.ToList();
+                _ctx.SaveChanges();
             }
             foreach (var c in s.Channels)
             {
@@ -99,7 +104,7 @@ public class ContextInterpreter
     /// <summary>
     /// Does the user given on parameter have access to a server
     /// </summary>
-    private bool CanAccessServer(int servId, int userId)
+    public bool CanAccessServer(int servId, int userId)
     {
         var serv = _ctx.Servers.First(x => x.Id == servId);
 
@@ -162,9 +167,9 @@ public class ContextInterpreter
     }
 
 
-    private int AddServer(string name)
+    private int AddServer(string name, int[]? allowedUsers)
     {
-        var serv = new ServerContext() { Name = name };
+        var serv = new ServerContext() { Name = name, AllowedUsers = allowedUsers?.ToList() };
         _ctx.Servers.Add(serv);
         _ctx.SaveChanges();
 
@@ -217,7 +222,7 @@ public class ContextInterpreter
     public ServerInfo[] GetStartingServerInfo(int maxMsgCount, int claimId)
     {
         var user = _ctx.Users.Include(u => u.LastSeens).First(x => x.Id == claimId);
-        var data = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).AsEnumerable().Select(s => new ServerInfo()
+        var data = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).AsEnumerable().Where(x => CanAccessServer(x.Id, claimId)).Select(s => new ServerInfo()
         {
             Type = MessageType.ServerInfo,
             Id = s.Id,
