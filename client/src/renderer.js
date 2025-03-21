@@ -86,32 +86,49 @@ function parseMessage(msg, text) {
     let link = finalHtml.matchAll(/((&lt;)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)(&gt;)?/gm);
     if (link) {
         const prev = msg.querySelector(".rich-preview");
-        const behavior = null;
+        let behavior = "";
 
         for (let l of link) {
-            console.log(l);
             if (l[2] === "&lt;" && l[6] === "&gt;")
             {
                 switch (l[4])
                 {
+                    case "b":
+                        behavior = "blur";
+                        break;
+
                     default: // Don't show the image
-                    continue;
+                        continue;
                 }
             }
 
             let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
-            if (m) {
+            if (m && !l[5].includes('"')) { // Ensure we can't inject code by closing the string
                 prev.classList.remove("is-hidden");
-                prev.innerHTML += `<img class="image" src="${l[5]}"/>`;
+                prev.innerHTML += `<div class="preview"><img class="image ${behavior}" src="${l[5]}"/></div>`;
             }
             
             // Youtube check
-            let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z]+)/m);
+            let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
             if (yt) {
                 prev.classList.remove("is-hidden");
-                prev.innerHTML += `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe>`;
+                if (behavior === "") {
+                    prev.innerHTML += `<div class="preview"><iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe></div>`;
+                } else {
+                    prev.innerHTML += `<div class="preview"><img data-yt="${yt[1]}" class="image ${behavior}" src="https://img.youtube.com/vi/${yt[1]}/0.jpg"/></div>`;
+                }
             }
-            
+        }
+
+        // When we click on something that have a blur effect, we remove it
+        for (let p of prev.getElementsByClassName("preview")) {
+            p.addEventListener("click", e => {
+                e.target.classList.remove("blur");
+
+                if (e.target.dataset.yt) {
+                    e.target.parentNode.innerHTML = `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${e.target.dataset.yt}" frameborder="0"></iframe>`;
+                }
+            });
         }
     }
 

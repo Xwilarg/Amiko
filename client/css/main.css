@@ -1,3 +1,21 @@
+html {
+    overflow-y: hidden;
+}
+
+/* Image effects */
+.rich-preview img {
+    max-width: 256px;
+    max-height: 256px;
+}
+
+.preview {
+    overflow: hidden;
+}
+
+.blur {
+    filter: blur(20px);
+}
+
 /* Settings */
 .dropdown {
     position: absolute;
@@ -56,12 +74,21 @@
 }
 
 /* Send message textarea */
-#message-form, #send-message {
-    height: 75px;
+#message-form {
+    height: 65px;
+    margin-bottom: 10px;
 }
 
 #message-field {
-    min-height: 75px;
+    min-height: 100%;
+    resize: none;
+}
+
+#send-message {
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    margin: 5px 5px 5px 10px;
 }
 
 /* Markdown */
@@ -76,11 +103,12 @@ pre, code {
 
 #messages {
     padding: .5em;
-    height: calc(100dvh - 125px);
+    height: calc(100dvh - 127px);
     overflow-y: scroll;
     margin-left: 0;
     margin-right: 0;
     width: 100%;
+    scrollbar-color: rgb(52, 53, 66) transparent;
 }
 
 .content {
@@ -94,7 +122,7 @@ pre, code {
 }
 
 .message:hover {
-    background-color: rgb(43, 43, 43);
+    background-color: rgb(52, 53, 66);
 }
 
 .message.error {
@@ -107,11 +135,6 @@ pre, code {
 
 .message.sending {
     color: rgb(80, 80, 80);
-}
-
-.rich-preview img {
-    max-width: 256px;
-    max-height: 256px;
 }
 
 .is-flex {

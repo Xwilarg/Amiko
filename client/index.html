@@ -40,9 +40,9 @@
                         <small class="date"></small>
                         <h2 class="subtitle"></h2>
                         <p class="content"></p>
+                        <div class="rich-preview is-flex is-hidden"></div>
                     </div>
                 </div>
-                <div class="rich-preview is-flex is-hidden"></div>
             </div>
         </template>
         <nav class="navbar">
@@ -101,9 +101,11 @@
                     <legend class="label has-text-centered">Formatting</legend>
                     <p>**Bold Text** &gt; <span class="apply-markdown">**Bold Text**</span></p>
                     <p>*Italic Text* &gt; <span class="apply-markdown">*Italic Text*</span></p>
-                    <p>```Pre-formatted block``` &gt; <span class="apply-markdown">```Pre-formatted block```</span></p>
-                    <p>&gt; Pre-formatted line &gt; <span class="apply-markdown">&gt; Pre-formatted line</span></p>
                     <p>`In-lined code` &gt; <span class="apply-markdown">`In-lined code`</span></p>
+                    <p>```<br>Multi-lines<br>pre-formatted block<br>```<span class="apply-markdown">```Multi-lines<br>pre-formatted block```</span></p>
+                    <p>&gt; Pre-formatted line<span class="apply-markdown">&gt; Pre-formatted line</span></p>
+                    <p>&lt;link&gt; &gt; Don't preview an image</p>
+                    <p>&lt;b:link&gt; &gt; Blur an image preview</p>
                 </fieldset>
             </div>
         </div>
@@ -111,12 +113,14 @@
             <div class="is-flex is-flex-direction-column" id="messages">
             </div>
 
-            <form class="field has-addons" id="message-form">
+            <form class="field has-addons container" id="message-form">
                 <p class="control is-expanded">
                     <textarea class="textarea" placeholder="Your message" id="message-field"></textarea>
                 </p>
                 <p class="control">
-                    <input class="button is-link" type="submit" id="send-message" disabled>
+                    <button class="button is-link" type="submit" id="send-message" disabled>
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
                 </p>
             </form>
         </div>
