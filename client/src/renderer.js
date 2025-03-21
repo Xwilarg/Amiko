@@ -41,7 +41,6 @@ function sendMessageInternal(date, info, text, indications) {
 
     const instance = template.content.cloneNode(true);
     instance.querySelector(".date").innerHTML = date.toLocaleString();
-    instance.querySelector(".content").innerHTML = text;
 
     if (info) {
         instance.querySelector(".subtitle").innerHTML = info.username;
@@ -54,7 +53,7 @@ function sendMessageInternal(date, info, text, indications) {
         instance.querySelector(".message").classList.add(i);
     }
 
-    parseMessage(instance);
+    parseMessage(instance, text);
 
     container.appendChild(instance);
 
@@ -70,25 +69,44 @@ function getMarkdown(html) {
     return html;
 }
 
-function parseMessage(msg) {
+function parseMessage(msg, text) {
     msg.querySelector(".rich-preview").innerHTML = "";
-    const content = msg.querySelector(".content");
-    let finalHtml = content.innerHTML.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    let finalHtml = text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
-    let link = finalHtml.match(/https?:\/\/([^ \n]+)/gm);
+    // Pattern match urls
+    // Optionally at the start we can have <XXX:
+    // <> specify special formats (by default hide image)
+    // XXX: overrides behaviors
+
+    // Regex explanations:
+    // First look for "<" (optional)
+    // Then look for behavior specification "XXXXX:" (optional)
+    // Then we look for the URL, it matches until it find one of the following strings: '^', ' ', '\n', ')', ',', ';', '>', '[end of line]'
+    // We check if we have a ">" at the end (optional)
+    let link = finalHtml.matchAll(/((&lt;)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)(&gt;)?/gm);
     if (link) {
         const prev = msg.querySelector(".rich-preview");
-        console.log(link);
+        const behavior = null;
+
         for (let l of link) {
-            // Image check
-            let m = l.match(/(png|jpg|jpeg|gif|webp)$/m);
+            console.log(l);
+            if (l[2] === "&lt;" && l[6] === "&gt;")
+            {
+                switch (l[4])
+                {
+                    default: // Don't show the image
+                    continue;
+                }
+            }
+
+            let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
             if (m) {
                 prev.classList.remove("is-hidden");
-                prev.innerHTML += `<img class="image" src="${l}"/>`;
+                prev.innerHTML += `<img class="image" src="${l[5]}"/>`;
             }
             
             // Youtube check
-            let yt = l.match(/youtube\.com\/watch\?v=([0-9a-zA-Z]+)/m);
+            let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z]+)/m);
             if (yt) {
                 prev.classList.remove("is-hidden");
                 prev.innerHTML += `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe>`;
@@ -97,14 +115,14 @@ function parseMessage(msg) {
         }
     }
 
-    finalHtml = finalHtml.replaceAll(/(https?:\/\/([^ \n]+))/gm, '<span class="link">$1</span>');
+    finalHtml = finalHtml.replaceAll(/(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)/gm, '<span class="link">$1</span>$2');
 
     finalHtml = emoji.replace_colons(finalHtml);
 
     finalHtml = getMarkdown(finalHtml);
     finalHtml = finalHtml.replaceAll("\n", "<br>");
 
-    content.innerHTML = finalHtml;
+    msg.querySelector(".content").innerHTML = finalHtml;
 
     for (const link of msg.querySelectorAll(".link")) {
         link.addEventListener("click", (_) => {
@@ -284,8 +302,7 @@ export function acknowledgeMessage(msg) {
         }
     }
     if (msg.content) {
-        message.querySelector(".content").innerHTML = msg.content;
-        parseMessage(message);
+        parseMessage(message, msg.content);
     }
 }
 
