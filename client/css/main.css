@@ -31,7 +31,7 @@ html {
     }
 }
 
-#settings-dropdown > div, #help-dropdown > div {
+#settings-dropdown > div, #help-dropdown > div, #profile-dropdown > div {
     width: 100%;
 }
 
@@ -42,6 +42,10 @@ html {
 .profile {
     width: 75px;
     height: 75px;
+}
+
+.profile.selected {
+    border: 1px solid green;
 }
 
 .pfp {

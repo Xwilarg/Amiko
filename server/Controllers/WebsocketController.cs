@@ -118,6 +118,7 @@ namespace Amiko.Server.Controllers
                             else if (baseMsg.Type == MessageType.Message)
                             {
                                 // Parse actual message
+                                Console.WriteLine(Encoding.UTF8.GetString(buffer));
                                 var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
 
                                 var ctx = ContextInterpreter.Get(_dbContext);
@@ -131,24 +132,24 @@ namespace Amiko.Server.Controllers
                                 string content = prot.Content;
 
                                 List<UserContext>? authors = [];
-                                if (prot.Authors == null) // Author not specified, it means the author is the claimId
+                                if (prot.Authors == null || prot.Authors.Length == 0) // Author not specified, it means the author is the claimId
                                 {
                                     authors = [ ctx.TryGetUserFromId(claimId) ];
                                 }
                                 else
                                 {
-                                    foreach (var author in prot.Authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
+                                    var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
+                                    UserContext? targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id));;
+                                    if (targetUser != null) // We found a valid matching user with the prefix
                                     {
-                                        UserContext? targetUser = null;
-                                        var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
-                                        targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id));
-                                        if (targetUser != null) // We found a valid matching user with the prefix
+                                        content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
+                                        authors = [ targetUser ];
+                                    }
+                                    else
+                                    {
+                                        foreach (var author in prot.Authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
                                         {
-                                            content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
-                                        }
-                                        else
-                                        {
-                                            if (!ctx.DoesUserFillClaim(claimId, author))
+                                            if (!ctx.DoesUserFillClaim(claimId, author) || authors.Any(x => x.Id == author))
                                             {
                                                 var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
                                                 {
@@ -161,8 +162,8 @@ namespace Amiko.Server.Controllers
                                                 break;
                                             }
                                             targetUser = ctx.TryGetUserFromId(author);
+                                            authors.Add(targetUser);
                                         }
-                                        authors.Add(targetUser);
                                     }
                                 }
 

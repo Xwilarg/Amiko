@@ -31,7 +31,7 @@ export function sendMessageFromInput(content, servId, chanId) {
         id: currId,
         serverId: servId,
         channelId: chanId,
-        author: [ getCurrentAltUser() ]
+        authors: getCurrentAltUser()
     };
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(newMsg, content, currId);

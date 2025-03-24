@@ -78,7 +78,7 @@
             <div>
                 <fieldset class="box">
                     <legend class="label has-text-centered">Global Settings</legend>
-                    <div id="style-selection" class="select">
+                    <div class="select">
                         <select id="style-selection-select">
                             <option value="regular">Default</option>
                             <option value="minimalist">Minimalist</option>
@@ -92,7 +92,18 @@
             </div>
         </div>
         <div id="profile-dropdown" class="dropdown is-hidden">
-            <div id="profile-selection" class="is-flex is-flex-wrap-wrap">
+            <div>
+                <div>
+                    <div class="select">
+                        <select id="user-type-selection-select">
+                            <option value="0">Single user</option>
+                            <option value="1">Co-fronting</option>
+                        </select>
+                    </div>
+                </div>
+                <hr>
+                <div id="profile-selection" class="is-flex is-flex-wrap-wrap">
+                </div>
             </div>
         </div>
         <div id="help-dropdown" class="dropdown is-hidden">

@@ -1,3 +1,13 @@
+async function readPrefAsync(key, def) {
+    var match = document.cookie.match(new RegExp(`(^| )${key}=([^;]+)`));
+    if (match) return match[2];
+    return def;
+}
+
+async function writePrefAsync(key, value) {
+    document.cookie = `${key}=${value}; max-age=34560000; path=/; SameSite=Strict`;
+}
+
 function initBrowser() {
     Notification.requestPermission().then(function (permission) {
         console.log(`Permission status: ${permission}`);
@@ -20,14 +30,16 @@ function initBrowser() {
         writeTokenAsync: async (token) => {
             document.cookie = `token=${token}; max-age=2592000; path=/; SameSite=Strict`;
         },
-        readPrefAsync: async (key, def) => {
-            var match = document.cookie.match(new RegExp(`(^| )${key}=([^;]+)`));
-            if (match) return match[2];
-            return def;
+        readPrefAsync: readPrefAsync,
+        writePrefAsync: writePrefAsync,
+        readPrefArrayAsync: async (key) => {
+            const pref = await readPrefAsync(key, "");
+            if (pref === "") return [];
+            return pref.split(",");
         },
-        writePrefAsync: async (key, value) => {
-            document.cookie = `${key}=${value}; max-age=34560000; path=/; SameSite=Strict`;
-        },
+        writePrefArrayAsync: async (key, values) => {
+            await writePrefAsync(key, values.join(","));
+        }
     };
     notification = {
         isFocusedAsync: async () => document.hasFocus()
