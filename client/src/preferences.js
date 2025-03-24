@@ -19,45 +19,6 @@ export async function initPreferencesAsync() {
 
     // How we do user selection
     currentSelectionMode = parseInt(await filesystem.readPrefAsync("userSelection", USER_SELECTION_SINGLE));
-    document.getElementById("user-type-selection-select").addEventListener("change", async e => {
-        console.log("select change was triggered");
-        setSelectionMode(parseInt(e.target.value));
-
-        if (parseInt(e.target.value) === USER_SELECTION_SINGLE)
-        {
-            if (currentUser.length > 0) // If we are at null we don't care cause we keep our default user
-            {
-                setCurrentAltUser(currentUser[0]);
-            }
-            for (let p of document.getElementsByClassName("profile"))
-            {
-                if (currentUser.length === 0 && p.dataset.me === "1") {
-                    // No user specified, we take the "main" account
-                    p.disabled = true;
-                    p.classList.add("selected");
-                } else if (currentUser.length > 0 && p.dataset.id === currentUser[0].toString()) {
-                    // This user is the one currently selected
-                    p.disabled = true;
-                    p.classList.add("selected");
-                } else {
-                    p.disabled = false;
-                    p.classList.remove("selected");
-                }
-            }
-        }
-        else if (parseInt(e.target.value) === USER_SELECTION_MULTIPLE)
-        {
-            for (let p of document.getElementsByClassName("profile"))
-            {
-                if (currentUser.length <= 1 && p.classList.contains("selected")) {
-                    // This element is currently selected and it's the last one that is, we can't unselected it else we would have no current user
-                    p.disabled = true;
-                } else {
-                    p.disabled = false;
-                }
-            }
-        }
-    });
     document.getElementById("user-type-selection-select").value = currentSelectionMode.toString();
 }
 

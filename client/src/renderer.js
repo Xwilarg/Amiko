@@ -1,7 +1,8 @@
 import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
-import { getCurrentAltUser, getSelectionMode, setCurrentAltUser, USER_SELECTION_MULTIPLE, USER_SELECTION_SINGLE } from "./preferences";
+import { getCurrentAltUser } from "./preferences";
+import { getInfoFromId, resetUsers, userIdListToInfo } from "./user";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -12,17 +13,6 @@ export function sendErrorMessage(text) {
     sendMessageInternal(new Date(), [], text, [ "error" ]);
 }
 
-export function getInfoFromId(id) {
-    if (id in userInfo) {
-        return userInfo[id];
-    }
-    return {
-        username: id,
-        color: { r: 54, g: 54, b: 54 },
-        character: '?'
-    };
-}
-
 function sendIncomingMessage(date, ids, text) {
     sendMessageInternal(new Date(date * 1000), ids.map(getInfoFromId), text, []);
 }
@@ -30,9 +20,9 @@ function sendIncomingMessage(date, ids, text) {
 export function sendMyMessage(msg, text, id) {
     const now = new Date();
     msg.date = now;
-    msg.authors = myInfos.map(x => x.id);
+    msg.authors = getCurrentAltUser();
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(now, myInfos, text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(now, userIdListToInfo(getCurrentAltUser()), text, [ "sending", `message-${id}` ]);
 }
 
 function updateMessageAuthor(message, infos) {
@@ -213,11 +203,7 @@ function refreshChannelDisplay() {
 const emoji = new EmojiConvertor();
 emoji.replace_mode = "unified";
 
-// Current user username
-let myInfos = [];
-
 // All infos about various users
-let userInfo = {};
 let servInfo = {};
 let currChan = null;
 
@@ -235,7 +221,7 @@ export function updateReceivedMessage(msg) {
 
 export function resetInfo()
 {
-    userInfo = {};
+    resetUsers();
     servInfo = {};
     currChan = null;
     document.getElementById("export-button").disabled = true;
@@ -316,95 +302,6 @@ export function acknowledgeMessage(msg) {
     }
     if (msg.content) {
         parseMessage(message, msg.content);
-    }
-}
-
-export function updateUserInfo(msg) {
-    userInfo[msg.id] = {
-        username: msg.username,
-        color: msg.color,
-        character: msg.character
-    };
-    const me = getCurrentAltUser();
-    if (me.length === 0 && msg.isMe) {
-        myInfos = [ msg ];
-    } else if (me.length > 0 && me.includes(msg.id)) {
-        myInfos.push(msg);
-    }
-
-    if (msg.isMyGroup) {
-        // Update profile selection
-        const persoBtn = document.createElement("button");
-
-        persoBtn.dataset.id = msg.id.toString();
-        persoBtn.dataset.me = msg.isMe ? "1" : "0";
-
-        persoBtn.classList.add("button");
-        persoBtn.classList.add("profile")
-        persoBtn.classList.add("is-flex");
-        persoBtn.classList.add("is-flex-direction-column");
-        if (myInfos.some(x => x.id === msg.id)) {
-            persoBtn.disabled = true;
-            persoBtn.classList.add("selected");
-        }
-
-        persoBtn.addEventListener("click", async (e) => {
-            const selectionMode = getSelectionMode();
-
-            if (selectionMode === USER_SELECTION_SINGLE) { // We can only select one at a time
-                document.querySelector(".profile:disabled").classList.remove("selected");
-                document.querySelector(".profile:disabled").disabled = false;
-                persoBtn.disabled = true;
-                persoBtn.classList.add("selected");
-
-                myInfos = [ msg ];
-                setCurrentAltUser([ msg.id ]);
-            } else if (selectionMode === USER_SELECTION_MULTIPLE) { // We can select many users
-                const isActive = e.target.classList.contains("selected");
-
-                let curr = getCurrentAltUser();
-                if (isActive) { // We need to unselect
-                    curr = curr.filter(x => x != msg.id);
-                    myInfos = myInfos.filter(x => x.id != msg.id);
-                    if (curr.length === 0) // Not supposed to happen!
-                    {
-                        console.error("User tried to unset last profile");
-                    }
-                    else
-                    {
-                        if (curr.length === 1)
-                        {
-                            document.querySelector(".profile.selected").disabled = true;
-                        }
-                        setCurrentAltUser(curr);
-                        e.target.classList.remove("selected");
-                    }
-                } else { // We need to select it
-                    curr.push(msg.id);
-                    myInfos.push(msg);
-                    setCurrentAltUser(curr);
-
-                    if (curr.length === 2) // We had one element before, some profiles probably had "disabled true" on them
-                    {
-                        for (const elem of document.querySelectorAll(".profile.selected")) {
-                            elem.disabled = false;
-                        }
-                    }
-                    e.target.classList.add("selected");
-                }
-            }
-        });
-
-        const pfp = document.createElement("div");
-        pfp.classList.add("pfp");
-        pfp.style = `background: rgb(${msg.color.r}, ${msg.color.g}, ${msg.color.b});`;
-        pfp.innerHTML = msg.character;
-        persoBtn.appendChild(pfp);
-
-        const name = document.createElement("p");
-        name.innerHTML =  msg.username;
-        persoBtn.appendChild(name);
-        document.getElementById("profile-selection").appendChild(persoBtn);
     }
 }
 

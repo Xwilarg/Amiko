@@ -1,6 +1,7 @@
 import { createHttpUrl, openMessageConnection } from "./network";
 import { initPreferencesAsync } from "./preferences";
 import { initRenderer } from "./renderer";
+import { initUsers } from "./user";
 
 let token;
 let areSettingsOpen = false;
@@ -74,8 +75,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    await initPreferencesAsync();
+    await initPreferencesAsync(); // Need to be called first since the rest might depends of user preferences
     initRenderer();
+    initUsers();
 });
 
 export function closeSettings() {

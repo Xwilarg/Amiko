@@ -1,6 +1,7 @@
-import { addNotificationDiv, addPendingNotification, removeNotification } from "./notification";
+import { addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { acknowledgeMessage, finishSetup, getInfoFromId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { acknowledgeMessage, finishSetup, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
+import { getInfoFromId, updateUserInfo } from "./user";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
