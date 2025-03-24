@@ -91,7 +91,7 @@ namespace Amiko.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     CreationTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Message = table.Column<string>(type: "TEXT", nullable: false),
-                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Authors = table.Column<string>(type: "TEXT", nullable: false),
                     ChannelContextId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>

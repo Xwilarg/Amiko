@@ -1,6 +1,6 @@
 import { addNotificationDiv, addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { acknowledgeMessage, getInfoFromId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
+import { acknowledgeMessage, finishSetup, getInfoFromId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo, updateUserInfo } from "./renderer";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -31,7 +31,7 @@ export function sendMessageFromInput(content, servId, chanId) {
         id: currId,
         serverId: servId,
         channelId: chanId,
-        author: getCurrentAltUser()
+        author: [ getCurrentAltUser() ]
     };
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(newMsg, content, currId);
@@ -127,6 +127,7 @@ export function openMessageConnection(token) {
                         
                     }
                 }
+                finishSetup(); // TODO: Doesn't call it from here
                 break;
 
             case 2: // Message received

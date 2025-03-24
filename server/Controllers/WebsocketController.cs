@@ -130,46 +130,60 @@ namespace Amiko.Server.Controllers
 
                                 string content = prot.Content;
 
-                                UserContext? targetUser = null;
-                                var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
-                                targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id));
-                                if (targetUser != null) // We found a valid matching user with the prefix
+                                List<UserContext>? authors = [];
+                                if (prot.Authors == null) // Author not specified, it means the author is the claimId
                                 {
-                                    content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
-                                }
-                                else if (prot.Author != null)
-                                {
-                                    if (!ctx.DoesUserFillClaim(claimId, prot.Author.Value))
-                                    {
-                                        var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
-                                        {
-                                            Type = MessageType.Acknowledge,
-                                            Id = prot.Id,
-                                            IsError = true
-                                        }, Option));
-                                        await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
-                                        continue;
-                                    }
-                                    targetUser = ctx.TryGetUserFromId(prot.Author.Value);
+                                    authors = [ ctx.TryGetUserFromId(claimId) ];
                                 }
                                 else
                                 {
-                                    targetUser = ctx.TryGetUserFromId(claimId);
+                                    foreach (var author in prot.Authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
+                                    {
+                                        UserContext? targetUser = null;
+                                        var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
+                                        targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id));
+                                        if (targetUser != null) // We found a valid matching user with the prefix
+                                        {
+                                            content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
+                                        }
+                                        else
+                                        {
+                                            if (!ctx.DoesUserFillClaim(claimId, author))
+                                            {
+                                                var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
+                                                {
+                                                    Type = MessageType.Acknowledge,
+                                                    Id = prot.Id,
+                                                    IsError = true
+                                                }, Option));
+                                                await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                                authors = null;
+                                                break;
+                                            }
+                                            targetUser = ctx.TryGetUserFromId(author);
+                                        }
+                                        authors.Add(targetUser);
+                                    }
                                 }
 
-                                _logger.Log(LogLevel.Information, $"Received {content} by {targetUser.Username}");
+                                if (authors == null) continue; // Authors is set to null only in case of an error
+                                
+                                _logger.Log(LogLevel.Information, $"Received message of size {content.Length} by {string.Join(", ", authors.Select(x => x.Username))}");
 
                                 // Save to db
                                 ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                                 {
                                     CreationTime = now,
-                                    AuthorId = targetUser.Id,
+                                    Authors = authors.Select(x => x.Id).ToArray(),
                                     Message = content
                                 });
                                 var d = now.ToUniversalTime() - DateTime.UnixEpoch;
                                 prot.SentAt = (long)Math.Floor(d.TotalSeconds);
-                                prot.Author = targetUser.Id;
-                                prot.Content = content;
+                                prot.Authors = authors.Select(x => x.Id).ToArray();
+                                if (content != prot.Content)
+                                {
+                                    prot.Content = content;
+                                }
 
                                 // Send message back
                                 List<Task> tasks = [];
@@ -187,8 +201,8 @@ namespace Amiko.Server.Controllers
                                             Type = MessageType.Acknowledge,
                                             Id = prot.Id,
                                             IsError = false,
-                                            Content = content,
-                                            Author = targetUser.Id
+                                            Content = prot.Content,
+                                            Authors = prot.Authors
                                         }, Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);

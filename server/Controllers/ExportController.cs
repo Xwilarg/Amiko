@@ -43,7 +43,7 @@ public class ExportController : ControllerBase
         {
             var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dateTime = dateTime.AddSeconds(msg.SentAt);
-            str.AppendLine($"### [{dateTime:yyyy/MM/dd HH:mm:ss}] {ctx.TryGetUserFromId(msg.Author.Value)?.Username ?? "deleted"}");
+            str.AppendLine($"### [{dateTime:yyyy/MM/dd HH:mm:ss}] {string.Join(" / ", msg.Authors.Select(x => ctx.TryGetUserFromId(x)?.Username ?? "deleted"))}");
             str.AppendLine(msg.Content);
             str.AppendLine();
         }

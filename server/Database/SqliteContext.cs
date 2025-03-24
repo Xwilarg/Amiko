@@ -211,7 +211,7 @@ public class ContextInterpreter
                 .TakeLast(msgCount)
                 .Select(m => new Message()
                 {
-                    Author = m.AuthorId,
+                    Authors = m.Authors,
                     Content = m.Message,
                     SentAt = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
                     Id = m.Id
@@ -315,5 +315,5 @@ public class MessageContext
     public DateTime CreationTime { set; get; }
 
     public string Message { set; get; }
-    public int AuthorId { set; get; }
+    public int[] Authors { set; get; }
 }

@@ -57,7 +57,7 @@ public class Message : BaseMessage
     /// <summary>
     /// ID of the author of the message
     /// </summary>
-    public int? Author { set; get; }
+    public int[]? Authors { set; get; }
     /// <summary>
     /// Content of the message
     /// </summary>
@@ -82,7 +82,7 @@ public class Acknowledge : BaseMessage
     /// If we use a prefix to specify a second account, the author returned can be different than the sender
     /// </summary>
     public string? Content { set; get; }
-    public int? Author { set; get; }
+    public int[] Authors { set; get; }
     public bool IsError { set; get; }
 }
 

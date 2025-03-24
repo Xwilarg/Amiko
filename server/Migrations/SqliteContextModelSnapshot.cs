@@ -68,8 +68,9 @@ namespace Amiko.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Authors")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("ChannelContextId")
                         .HasColumnType("INTEGER");

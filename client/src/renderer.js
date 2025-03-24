@@ -5,11 +5,11 @@ import { getCurrentAltUser, setCurrentAltUser } from "./preferences";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
-    sendMessageInternal(new Date(), null, text, [ "system" ]);
+    sendMessageInternal(new Date(), [], text, [ "system" ]);
 }
 
 export function sendErrorMessage(text) {
-    sendMessageInternal(new Date(), null, text, [ "error" ]);
+    sendMessageInternal(new Date(), [], text, [ "error" ]);
 }
 
 export function getInfoFromId(id) {
@@ -23,31 +23,35 @@ export function getInfoFromId(id) {
     };
 }
 
-function sendIncomingMessage(date, id, text) {
-    sendMessageInternal(new Date(date * 1000), getInfoFromId(id), text, []);
+function sendIncomingMessage(date, ids, text) {
+    sendMessageInternal(new Date(date * 1000), ids.map(getInfoFromId), text, []);
 }
 
 export function sendMyMessage(msg, text, id) {
     const now = new Date();
     msg.date = now;
-    msg.author = myInfo.id;
+    msg.authors = [ myInfo.id ];
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(now, myInfo, text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(now, [ myInfo ], text, [ "sending", `message-${id}` ]);
 }
 
-function sendMessageInternal(date, info, text, indications) {
+function updateMessageAuthor(message, infos) {
+    message.querySelector(".subtitle").innerHTML = infos.map(x => x.username).join(" / ");
+    if (infos.length > 0) {
+        var pfp = message.querySelector(".pfp");
+        pfp.innerHTML = infos[0].character;
+        pfp.style = `background: rgb(${infos[0].color.r}, ${infos[0].color.g}, ${infos[0].color.b});`;
+    }
+}
+
+function sendMessageInternal(date, infos, text, indications) {
     const container = document.getElementById("messages");
     const template = document.getElementById("message-template");
 
     const instance = template.content.cloneNode(true);
+    updateMessageAuthor(instance, infos)
     instance.querySelector(".date").innerHTML = date.toLocaleString();
 
-    if (info) {
-        instance.querySelector(".subtitle").innerHTML = info.username;
-        var pfp = instance.querySelector(".pfp");
-        pfp.innerHTML = info.character;
-        pfp.style = `background: rgb(${info.color.r}, ${info.color.g}, ${info.color.b});`;
-    }
 
     for (let i of indications) {
         instance.querySelector(".message").classList.add(i);
@@ -174,7 +178,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, getInfoFromId(msg.author), msg.content, []);
+        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, []);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -225,7 +229,7 @@ export function isCurrentChannel(servId, chanId)
 export function updateReceivedMessage(msg) {
     servInfo[msg.serverId].channels[msg.channelId].messages.push(msg);
     if (currChan.servId === msg.serverId && currChan.chanId === msg.channelId) {
-        sendIncomingMessage(msg.sentAt, msg.author, msg.content);
+        sendIncomingMessage(msg.sentAt, msg.authors, msg.content);
     }
 }
 
@@ -263,7 +267,6 @@ export function updateServerInfo(msg) {
             refreshMessageDisplay();
         }
     }
-    refreshChannelDisplay(); // TODO: don't call that everytimes
 
     // Spawn buttons for server selection
     const servBtn = document.createElement("button");
@@ -308,15 +311,8 @@ export function acknowledgeMessage(msg) {
     message.classList.remove("sending");
     if (msg.isError) message.classList.add("error");
 
-    if (msg.author) {
-        const info = userInfo[msg.author];
-        if (info) { // TODO: merge code with similar ones
-            const usernameContainer = message.querySelector(".subtitle");
-            const pfp = message.querySelector(".pfp");
-            usernameContainer.innerHTML = info.username;
-            pfp.innerHTML = info.character;
-            pfp.style = `background: rgb(${info.color.r}, ${info.color.g}, ${info.color.b});`;
-        }
+    if (msg.author) { // TODO
+        updateMessageAuthor(message, msg.authors.map(getInfoFromId))
     }
     if (msg.content) {
         parseMessage(message, msg.content);
@@ -336,6 +332,7 @@ export function updateUserInfo(msg) {
     }
 
     if (msg.isMyGroup) {
+        // Update profile selection
         const persoBtn = document.createElement("button");
         persoBtn.classList.add("button");
         persoBtn.classList.add("profile")
@@ -363,17 +360,13 @@ export function updateUserInfo(msg) {
         persoBtn.appendChild(name);
         document.getElementById("profile-selection").appendChild(persoBtn);
     }
+}
 
-    for (const m of document.querySelectorAll(".message")) {
-        const usernameContainer = m.querySelector(".subtitle");
-        const pfp = m.querySelector(".pfp");
-        const info = userInfo[usernameContainer.innerHTML];
-        if (info) {
-            usernameContainer.innerHTML = info.username;
-            pfp.innerHTML = info.character;
-            pfp.style = `background: rgb(${info.color.r}, ${info.color.g}, ${info.color.b});`;
-        }
-    }
+// Once we received info about channels and users, we show everything properly
+export function finishSetup()
+{
+    refreshChannelDisplay();
+    refreshMessageDisplay();
 }
 
 export function initRenderer()
