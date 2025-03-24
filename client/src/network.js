@@ -128,7 +128,7 @@ export function openMessageConnection(token) {
                         
                     }
                 }
-                finishSetup(); // TODO: Doesn't call it from here
+                await finishSetup(); // TODO: Doesn't call it from here
                 break;
 
             case 2: // Message received
@@ -137,14 +137,14 @@ export function openMessageConnection(token) {
                 {
                     sendSeenUpdate(json.serverId, json.channelId);
                     if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
-                        new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
+                        new window.Notification(`Message from ${json.authors.map(x => getInfoFromId(x).username)}`, {
                             body: json.content
                         });
                     }
                 }
                 else { // Whenever we are currently looking at the window or not, the message have lend in another channel so we send a notification
                     addPendingNotification(json.serverId, json.channelId);
-                    new window.Notification(`Message from ${getInfoFromId(json.author).username}`, {
+                    new window.Notification(`Message from  ${json.authors.map(x => getInfoFromId(x).username)}`, {
                         body: json.content
                     });
                 }

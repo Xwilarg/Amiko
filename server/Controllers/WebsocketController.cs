@@ -132,38 +132,35 @@ namespace Amiko.Server.Controllers
                                 string content = prot.Content;
 
                                 List<UserContext>? authors = [];
-                                if (prot.Authors == null || prot.Authors.Length == 0) // Author not specified, it means the author is the claimId
+                                var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
+                                UserContext? targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id)); ;
+                                if (targetUser != null) // We found a valid matching user with the prefix
+                                {
+                                    content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
+                                    authors = [targetUser];
+                                }
+                                else if (prot.Authors == null || prot.Authors.Length == 0) // Author not specified, it means the author is the claimId
                                 {
                                     authors = [ ctx.TryGetUserFromId(claimId) ];
                                 }
                                 else
                                 {
-                                    var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
-                                    UserContext? targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id));;
-                                    if (targetUser != null) // We found a valid matching user with the prefix
+                                    foreach (var author in prot.Authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
                                     {
-                                        content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
-                                        authors = [ targetUser ];
-                                    }
-                                    else
-                                    {
-                                        foreach (var author in prot.Authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
+                                        if (!ctx.DoesUserFillClaim(claimId, author) || authors.Any(x => x.Id == author))
                                         {
-                                            if (!ctx.DoesUserFillClaim(claimId, author) || authors.Any(x => x.Id == author))
+                                            var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
                                             {
-                                                var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
-                                                {
-                                                    Type = MessageType.Acknowledge,
-                                                    Id = prot.Id,
-                                                    IsError = true
-                                                }, Option));
-                                                await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
-                                                authors = null;
-                                                break;
-                                            }
-                                            targetUser = ctx.TryGetUserFromId(author);
-                                            authors.Add(targetUser);
+                                                Type = MessageType.Acknowledge,
+                                                Id = prot.Id,
+                                                IsError = true
+                                            }, Option));
+                                            await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                            authors = null;
+                                            break;
                                         }
+                                        targetUser = ctx.TryGetUserFromId(author);
+                                        authors.Add(targetUser);
                                     }
                                 }
 

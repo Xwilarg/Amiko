@@ -20,51 +20,57 @@
  * For someone that switched to another account, this value of an empty array shouldn't happen again!
  */
 
-import { getCurrentAltUser, setCurrentAltUser, USER_SELECTION_MULTIPLE, USER_SELECTION_SINGLE } from "./preferences";
+import { getCurrentAltUser, getSelectionMode, setCurrentAltUser, setSelectionMode, USER_SELECTION_MULTIPLE, USER_SELECTION_SINGLE } from "./preferences";
 
 let userInfo = {};
 let mainUser = null; // User to which the account belong
 
 export function initUsers() {
     document.getElementById("user-type-selection-select").addEventListener("change", async e => {
-        setSelectionMode(parseInt(e.target.value));
+        await setSelectionMode(parseInt(e.target.value));
 
-        let currUsers = getCurrentAltUser();
-        if (parseInt(e.target.value) === USER_SELECTION_SINGLE)
-        {
-            if (currUsers.length > 0) // If we are at null we don't care cause we keep our default user
-            {
-                setCurrentAltUser(currUsers[0]);
-            }
-            for (let p of document.getElementsByClassName("profile"))
-            {
-                if (currUsers.length === 0 && p.dataset.me === "1") {
-                    // No user specified, we take the "main" account
-                    p.disabled = true;
-                    p.classList.add("selected");
-                } else if (currUsers.length > 0 && p.dataset.id === currUsers[0].toString()) {
-                    // This user is the one currently selected
-                    p.disabled = true;
-                    p.classList.add("selected");
-                } else {
-                    p.disabled = false;
-                    p.classList.remove("selected");
-                }
-            }
-        }
-        else if (parseInt(e.target.value) === USER_SELECTION_MULTIPLE)
-        {
-            for (let p of document.getElementsByClassName("profile"))
-            {
-                if (currUsers.length <= 1 && p.classList.contains("selected")) {
-                    // This element is currently selected and it's the last one that is, we can't unselected it else we would have no current user
-                    p.disabled = true;
-                } else {
-                    p.disabled = false;
-                }
-            }
-        }
+        updateProfileDisplay();
     });
+}
+
+export async function updateProfileDisplay() {
+    let displayMode = getSelectionMode();
+
+    let currUsers = getCurrentAltUser();
+    if (displayMode === USER_SELECTION_SINGLE)
+    {
+        if (currUsers.length > 1) // If we are at null we don't care cause we keep our default user
+        {
+            await setCurrentAltUser([ currUsers[0] ]);
+        }
+        for (let p of document.getElementsByClassName("profile"))
+        {
+            if (currUsers.length === 0 && p.dataset.me === "1") {
+                // No user specified, we take the "main" account
+                p.disabled = true;
+                p.classList.add("selected");
+            } else if (currUsers.length > 0 && p.dataset.id === currUsers[0].toString()) {
+                // This user is the one currently selected
+                p.disabled = true;
+                p.classList.add("selected");
+            } else {
+                p.disabled = false;
+                p.classList.remove("selected");
+            }
+        }
+    }
+    else if (displayMode === USER_SELECTION_MULTIPLE)
+    {
+        for (let p of document.getElementsByClassName("profile"))
+        {
+            if (currUsers.length <= 1 && p.classList.contains("selected")) {
+                // This element is currently selected and it's the last one that is, we can't unselected it else we would have no current user
+                p.disabled = true;
+            } else {
+                p.disabled = false;
+            }
+        }
+    }
 }
 
 export function resetUsers() {
@@ -109,21 +115,12 @@ export function updateUserInfo(msg) {
         persoBtn.classList.add("profile")
         persoBtn.classList.add("is-flex");
         persoBtn.classList.add("is-flex-direction-column");
-        if (getCurrentAltUser().includes(msg.id)) {
-            persoBtn.disabled = true;
-            persoBtn.classList.add("selected");
-        }
 
         persoBtn.addEventListener("click", async (e) => {
             const selectionMode = getSelectionMode();
 
             if (selectionMode === USER_SELECTION_SINGLE) { // We can only select one at a time
-                document.querySelector(".profile:disabled").classList.remove("selected");
-                document.querySelector(".profile:disabled").disabled = false;
-                persoBtn.disabled = true;
-                persoBtn.classList.add("selected");
-
-                setCurrentAltUser([ msg.id ]);
+                await setCurrentAltUser([ msg.id ]);
             } else if (selectionMode === USER_SELECTION_MULTIPLE) { // We can select many users
                 const isActive = e.target.classList.contains("selected");
 
@@ -136,12 +133,7 @@ export function updateUserInfo(msg) {
                     }
                     else
                     {
-                        if (curr.length === 1)
-                        {
-                            document.querySelector(".profile.selected").disabled = true;
-                        }
-                        setCurrentAltUser(curr);
-                        e.target.classList.remove("selected");
+                        await setCurrentAltUser(curr);
                     }
                 } else { // We need to select it
                     if (curr.length === 0) // Array was empty, this mean default user was selected
@@ -150,17 +142,10 @@ export function updateUserInfo(msg) {
                     }
 
                     curr.push(msg.id);
-                    setCurrentAltUser(curr);
-
-                    if (curr.length === 2) // We had one element before, some profiles probably had "disabled true" on them
-                    {
-                        for (const elem of document.querySelectorAll(".profile.selected")) {
-                            elem.disabled = false;
-                        }
-                    }
-                    e.target.classList.add("selected");
+                    await setCurrentAltUser(curr);
                 }
             }
+            await updateProfileDisplay();
         });
 
         const pfp = document.createElement("div");

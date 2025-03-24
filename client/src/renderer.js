@@ -2,7 +2,7 @@ import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { getInfoFromId, resetUsers, userIdListToInfo } from "./user";
+import { getInfoFromId, resetUsers, updateProfileDisplay, userIdListToInfo } from "./user";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -306,10 +306,11 @@ export function acknowledgeMessage(msg) {
 }
 
 // Once we received info about channels and users, we show everything properly
-export function finishSetup()
+export async function finishSetup()
 {
     refreshChannelDisplay();
     refreshMessageDisplay();
+    await updateProfileDisplay();
 }
 
 export function initRenderer()

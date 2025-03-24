@@ -15,7 +15,7 @@ export async function initPreferencesAsync() {
 
     // Current user
     var cU = await filesystem.readPrefArrayAsync("users");
-    currentUser = cU.map(parseInt);
+    currentUser = cU.map(x => parseInt(x));
 
     // How we do user selection
     currentSelectionMode = parseInt(await filesystem.readPrefAsync("userSelection", USER_SELECTION_SINGLE));
