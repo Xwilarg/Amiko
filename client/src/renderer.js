@@ -2,7 +2,7 @@ import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { getInfoFromId, resetUsers, updateProfileDisplayAsync, userIdListToInfo } from "./user";
+import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo } from "./user";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -20,7 +20,9 @@ function sendIncomingMessage(date, ids, text) {
 export function sendMyMessage(msg, text, id) {
     const now = new Date();
     msg.date = now;
-    msg.authors = getCurrentAltUser();
+    if (msg.authors.length === 0) {
+        msg.authors = [ getMainUserId() ];
+    }
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
     sendMessageInternal(now, userIdListToInfo(getCurrentAltUser()), text, [ "sending", `message-${id}` ]);
 }

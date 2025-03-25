@@ -102,6 +102,9 @@ export function getInfoFromId(id) {
     };
 }
 
+export function getMainUserId() {
+    return mainUser.id;
+}
 
 export function updateUserInfo(msg) {
     userInfo[msg.id] = {
