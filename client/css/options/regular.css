@@ -1,3 +1,7 @@
 .message .pfp {
     margin-top: 25px;
 }
+
+.link-image, .link-indicator {
+    display: none !important;
+}

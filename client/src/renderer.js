@@ -85,6 +85,11 @@ function getMarkdown(html) {
     return html;
 }
 
+function cleanString(str) {
+    if (str) return str;
+    return "";
+}
+
 function parseMessage(msg, text) {
     msg.querySelector(".rich-preview").innerHTML = "";
     let finalHtml = text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
@@ -99,56 +104,56 @@ function parseMessage(msg, text) {
     // Then look for behavior specification "XXXXX:" (optional)
     // Then we look for the URL, it matches until it find one of the following strings: '^', ' ', '\n', ')', ',', ';', '>', '[end of line]'
     // We check if we have a ">" at the end (optional)
-    let link = finalHtml.matchAll(/((&lt;)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)(&gt;)?/gm);
-    if (link) {
-        const prev = msg.querySelector(".rich-preview");
-        let behavior = "";
+    const regex = /((&lt;)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)(&gt;)?/gm
+    const prev = msg.querySelector(".rich-preview");
+    let behavior = "";
 
-        for (let l of link) {
-            if (l[2] === "&lt;" && l[6] === "&gt;")
+    finalHtml = finalHtml.replace(regex, function(match, _) {
+        let l = [...match.matchAll(regex)][0];
+        if (l[2] === "&lt;" && l[6] === "&gt;")
+        {
+            switch (l[4])
             {
-                switch (l[4])
-                {
-                    case "b":
-                        behavior = "blur";
-                        break;
+                case "b":
+                    behavior = "blur";
+                    break;
 
-                    default: // Don't show the image
-                        continue;
-                }
-            }
-
-            let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
-            if (m && !l[5].includes('"')) { // Ensure we can't inject code by closing the string
-                prev.classList.remove("is-hidden");
-                prev.innerHTML += `<div class="preview"><img class="image ${behavior}" src="${l[5]}"/></div>`;
-            }
-            
-            // Youtube check
-            let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
-            if (yt) {
-                prev.classList.remove("is-hidden");
-                if (behavior === "") {
-                    prev.innerHTML += `<div class="preview"><iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe></div>`;
-                } else {
-                    prev.innerHTML += `<div class="preview"><img data-yt="${yt[1]}" class="image ${behavior}" src="https://img.youtube.com/vi/${yt[1]}/0.jpg"/></div>`;
-                }
+                default: // Don't show the image
+                return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
             }
         }
 
-        // When we click on something that have a blur effect, we remove it
-        for (let p of prev.getElementsByClassName("preview")) {
-            p.addEventListener("click", e => {
-                e.target.classList.remove("blur");
-
-                if (e.target.dataset.yt) {
-                    e.target.parentNode.innerHTML = `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${e.target.dataset.yt}" frameborder="0"></iframe>`;
-                }
-            });
+        let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
+        if (m && !l[5].includes('"')) { // Ensure we can't inject code by closing the string
+            prev.classList.remove("is-hidden");
+            prev.innerHTML += `<div class="preview"><img class="image ${behavior}" src="${l[5]}"/></div>`;
+            return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link link-image">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
         }
+
+        // Youtube check
+        let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
+        if (yt) {
+            prev.classList.remove("is-hidden");
+            if (behavior === "") {
+                prev.innerHTML += `<div class="preview"><iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe></div>`;
+            } else {
+                prev.innerHTML += `<div class="preview"><img data-yt="${yt[1]}" class="image ${behavior}" src="https://img.youtube.com/vi/${yt[1]}/0.jpg"/></div>`;
+            }
+        }
+
+        return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
+    });
+
+    // When we click on something that have a blur effect, we remove it
+    for (let p of prev.getElementsByClassName("preview")) {
+        p.addEventListener("click", e => {
+            e.target.classList.remove("blur");
+
+            if (e.target.dataset.yt) {
+                e.target.parentNode.innerHTML = `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${e.target.dataset.yt}" frameborder="0"></iframe>`;
+            }
+        });
     }
-
-    finalHtml = finalHtml.replaceAll(/(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)/gm, '<span class="link">$1</span>$2');
 
     finalHtml = emoji.replace_colons(finalHtml);
 
