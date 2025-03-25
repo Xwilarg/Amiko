@@ -2,7 +2,7 @@ import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { getInfoFromId, resetUsers, updateProfileDisplay, userIdListToInfo } from "./user";
+import { getInfoFromId, resetUsers, updateProfileDisplayAsync, userIdListToInfo } from "./user";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -27,10 +27,32 @@ export function sendMyMessage(msg, text, id) {
 
 function updateMessageAuthor(message, infos) {
     message.querySelector(".subtitle").innerHTML = infos.map(x => x.username).join(" / ");
-    if (infos.length > 0) {
-        var pfp = message.querySelector(".pfp");
+    var pfp = message.querySelector(".pfp");
+    const r = infos.map(x => x.color.r).reduce((a, b) => a + b, 0) / infos.length;
+    const g = infos.map(x => x.color.g).reduce((a, b) => a + b, 0) / infos.length;
+    const b = infos.map(x => x.color.b).reduce((a, b) => a + b, 0) / infos.length;
+    pfp.style = `background: rgb(${r}, ${g}, ${b});`;
+    if (infos.length === 1) {
         pfp.innerHTML = infos[0].character;
-        pfp.style = `background: rgb(${infos[0].color.r}, ${infos[0].color.g}, ${infos[0].color.b});`;
+    } else {
+        let arr = [];
+        const characters = infos.map(x => x.character).sort((a, b) => b.length - a.length);
+        for (let i in characters[0])
+        {
+            arr.push(characters[0].codePointAt(i));
+        }
+        for (const c of characters.slice(1))
+        {
+            for (let i in c)
+            {
+                arr[i] += c.codePointAt(i);
+            }
+        }
+        for (let i in arr)
+        {
+            arr[i] = Math.floor(arr[i] / infos.length);
+        }
+        pfp.innerHTML = String.fromCodePoint(...arr);
     }
 }
 
@@ -306,11 +328,11 @@ export function acknowledgeMessage(msg) {
 }
 
 // Once we received info about channels and users, we show everything properly
-export async function finishSetup()
+export async function finishSetupAsync()
 {
     refreshChannelDisplay();
     refreshMessageDisplay();
-    await updateProfileDisplay();
+    await updateProfileDisplayAsync();
 }
 
 export function initRenderer()

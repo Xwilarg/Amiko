@@ -1,6 +1,6 @@
 import { addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { acknowledgeMessage, finishSetup, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
+import { acknowledgeMessage, finishSetupAsync, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
 import { getInfoFromId, updateUserInfo } from "./user";
 
 const apiTarget = "amiko.zirk.eu";
@@ -128,7 +128,7 @@ export function openMessageConnection(token) {
                         
                     }
                 }
-                await finishSetup(); // TODO: Doesn't call it from here
+                await finishSetupAsync(); // TODO: Doesn't call it from here
                 break;
 
             case 2: // Message received

@@ -25,7 +25,7 @@ export async function initPreferencesAsync() {
 let currentUser = null;
 let currentSelectionMode;
 
-export async function setSelectionMode(value)
+export async function setSelectionModeAsync(value)
 {
     await filesystem.writePrefAsync("userSelection", value);
     currentSelectionMode = value;
@@ -36,7 +36,7 @@ export function getSelectionMode()
     return currentSelectionMode;
 }
 
-export async function setCurrentAltUser(value)
+export async function setCurrentAltUserAsync(value)
 {
     await filesystem.writePrefArrayAsync("users", value);
     currentUser = value;

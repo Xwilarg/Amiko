@@ -20,20 +20,20 @@
  * For someone that switched to another account, this value of an empty array shouldn't happen again!
  */
 
-import { getCurrentAltUser, getSelectionMode, setCurrentAltUser, setSelectionMode, USER_SELECTION_MULTIPLE, USER_SELECTION_SINGLE } from "./preferences";
+import { getCurrentAltUser, getSelectionMode, setCurrentAltUserAsync, setSelectionModeAsync, USER_SELECTION_MULTIPLE, USER_SELECTION_SINGLE } from "./preferences";
 
 let userInfo = {};
 let mainUser = null; // User to which the account belong
 
-export function initUsers() {
+export async function initUsersAsync() {
     document.getElementById("user-type-selection-select").addEventListener("change", async e => {
-        await setSelectionMode(parseInt(e.target.value));
+        await setSelectionModeAsync(parseInt(e.target.value));
 
-        updateProfileDisplay();
+        await updateProfileDisplayAsync();
     });
 }
 
-export async function updateProfileDisplay() {
+export async function updateProfileDisplayAsync() {
     let displayMode = getSelectionMode();
 
     let currUsers = getCurrentAltUser();
@@ -41,7 +41,7 @@ export async function updateProfileDisplay() {
     {
         if (currUsers.length > 1) // If we are at null we don't care cause we keep our default user
         {
-            await setCurrentAltUser([ currUsers[0] ]);
+            await setCurrentAltUserAsync([ currUsers[0] ]);
         }
         for (let p of document.getElementsByClassName("profile"))
         {
@@ -63,11 +63,21 @@ export async function updateProfileDisplay() {
     {
         for (let p of document.getElementsByClassName("profile"))
         {
-            if (currUsers.length <= 1 && p.classList.contains("selected")) {
-                // This element is currently selected and it's the last one that is, we can't unselected it else we would have no current user
+            if (currUsers.length === 0 && p.dataset.me === "1") {
+                // No user specified, we take the "main" account
                 p.disabled = true;
+                p.classList.add("selected");
+            } else if (currUsers.includes(parseInt(p.dataset.id))) {
+                if (currUsers.length === 1) {
+                     // This element is currently selected and it's the last one that is, we can't unselected it else we would have no current user
+                    p.disabled = true;
+                } else {
+                    p.disabled = false;
+                }
+                p.classList.add("selected");
             } else {
                 p.disabled = false;
+                p.classList.remove("selected");
             }
         }
     }
@@ -120,9 +130,9 @@ export function updateUserInfo(msg) {
             const selectionMode = getSelectionMode();
 
             if (selectionMode === USER_SELECTION_SINGLE) { // We can only select one at a time
-                await setCurrentAltUser([ msg.id ]);
+                await setCurrentAltUserAsync([ msg.id ]);
             } else if (selectionMode === USER_SELECTION_MULTIPLE) { // We can select many users
-                const isActive = e.target.classList.contains("selected");
+                const isActive = getCurrentAltUser().includes(msg.id);
 
                 let curr = getCurrentAltUser();
                 if (isActive) { // We need to unselect
@@ -133,7 +143,7 @@ export function updateUserInfo(msg) {
                     }
                     else
                     {
-                        await setCurrentAltUser(curr);
+                        await setCurrentAltUserAsync(curr);
                     }
                 } else { // We need to select it
                     if (curr.length === 0) // Array was empty, this mean default user was selected
@@ -142,10 +152,10 @@ export function updateUserInfo(msg) {
                     }
 
                     curr.push(msg.id);
-                    await setCurrentAltUser(curr);
+                    await setCurrentAltUserAsync(curr);
                 }
             }
-            await updateProfileDisplay();
+            await updateProfileDisplayAsync();
         });
 
         const pfp = document.createElement("div");
