@@ -87,7 +87,7 @@ export function resetUsers() {
     userInfo = {};
 }
 
-export function getActiveUsers() {
+export function getActiveUsers() { // TODO
     const active = getCurrentAltUser();
     if (active.length == 0) return [ mainUser ];
     return active;

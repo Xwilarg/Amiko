@@ -70,6 +70,8 @@ export function downloadChanExport(chanName, servId, chanId) {
 }
 
 function sendNotification(json) {
+    if (!compatibility.notification()) return;
+
     let shouldSend;
 
     const notifSettings = getNotificationSettings();
