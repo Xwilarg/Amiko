@@ -8,11 +8,23 @@ async function writePrefAsync(key, value) {
     document.cookie = `${key}=${value}; max-age=34560000; path=/; SameSite=Strict`;
 }
 
+let canUseNotification = false;
 function initBrowser() {
-    Notification.requestPermission().then(function (permission) {
-        console.log(`Permission status: ${permission}`);
-    });
+    try
+    {
+        window.Notification.requestPermission().then(function (permission) {
+            console.log(`Permission status: ${permission}`);
+        });
+        canUseNotification = true;
+    }
+    catch
+    {
+        console.warn("Notification API not available");
+    }
     
+    compatibility = {
+        notification: () => canUseNotification
+    };
     versions = {
         node: () => null,
         chrome: () => navigator.userAgent,

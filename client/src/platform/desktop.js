@@ -17,6 +17,9 @@ async function writePrefAsync(key, value) {
     fs.writeFileSync(path, JSON.stringify(data));
 }
 
+contextBridge.exposeInMainWorld('compatibility', {
+    notification: () => true
+});
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
     chrome: () => process.versions.chrome,
