@@ -1,7 +1,7 @@
 import { addPendingNotification, removeNotification } from "./notification";
-import { getCurrentAltUser } from "./preferences";
+import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
 import { acknowledgeMessage, finishSetupAsync, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
-import { getInfoFromId, updateUserInfo } from "./user";
+import { getActiveUsers, getInfoFromId, updateUserInfo } from "./user";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -67,6 +67,42 @@ export function downloadChanExport(chanName, servId, chanId) {
         document.body.removeChild(e);
     })
     .catch((err) => { sendErrorMessage("Export failed: " + err) });
+}
+
+function sendNotification(json) {
+    let shouldSend;
+
+    const notifSettings = getNotificationSettings();
+
+    // If user want no notification, we can just return
+    if (notifSettings == NOTIF_SELECTION_NONE) return;
+    if (notifSettings == NOTIF_SELECTION_ALL) shouldSend = true;
+    else
+    {
+        shouldSend = false;
+        for (let username of getActiveUsers().map(x => x.username))
+        {
+            if (json.content.includes(`@${username}`))
+            {
+                shouldSend = true;
+                break;
+            }
+        }
+    }
+
+    if (shouldSend) {
+        const notifPrivacy = getNotificationPrivacySettings();
+
+        if (notifPrivacy == NOTIF_MODE_SHOW_ALL) {
+            new window.Notification(`Message from  ${json.authors.map(x => getInfoFromId(x).username)}`, {
+                body: json.content
+            });
+        }
+        else
+        {
+            new window.Notification("New message received");
+        }
+    }
 }
 
 export function openMessageConnection(token) {
@@ -137,16 +173,12 @@ export function openMessageConnection(token) {
                 {
                     sendSeenUpdate(json.serverId, json.channelId);
                     if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
-                        new window.Notification(`Message from ${json.authors.map(x => getInfoFromId(x).username)}`, {
-                            body: json.content
-                        });
+                        sendNotification(json);
                     }
                 }
                 else { // Whenever we are currently looking at the window or not, the message have lend in another channel so we send a notification
                     addPendingNotification(json.serverId, json.channelId);
-                    new window.Notification(`Message from  ${json.authors.map(x => getInfoFromId(x).username)}`, {
-                        body: json.content
-                    });
+                    sendNotification(json);
                 }
                 break;
 

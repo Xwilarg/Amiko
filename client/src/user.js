@@ -87,6 +87,16 @@ export function resetUsers() {
     userInfo = {};
 }
 
+export function getActiveUsers() {
+    const active = getCurrentAltUser();
+    if (active.length == 0) return [ mainUser ];
+    return active;
+}
+
+export function getMainUserId() {
+    return mainUser.id;
+}
+
 export function userIdListToInfo(ids) {
     return ids.map(x => userInfo[x]);
 }
@@ -100,10 +110,6 @@ export function getInfoFromId(id) {
         color: { r: 54, g: 54, b: 54 },
         character: '?'
     };
-}
-
-export function getMainUserId() {
-    return mainUser.id;
 }
 
 export function updateUserInfo(msg) {

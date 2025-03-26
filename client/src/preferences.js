@@ -20,10 +20,25 @@ export async function initPreferencesAsync() {
     // How we do user selection
     currentSelectionMode = parseInt(await filesystem.readPrefAsync("userSelection", USER_SELECTION_SINGLE));
     document.getElementById("user-type-selection-select").value = currentSelectionMode.toString();
+
+    // Notification settings
+    document.getElementById("notification-selection-select").addEventListener("change", async e => {
+        await setNotificationSettingsAsync(parseInt(e.target.value));
+    });
+    notificationSettings = parseInt(await filesystem.readPrefAsync("notification", NOTIF_SELECTION_PING));
+    document.getElementById("notification-selection-select").value = notificationSettings.toString();
+
+    document.getElementById("notification-privacy-selection-select").addEventListener("change", async e => {
+        await setNotificationPrivacySettingsAsync(parseInt(e.target.value));
+    });
+    notificationSettings = parseInt(await filesystem.readPrefAsync("notifPrivacy", NOTIF_MODE_SHOW_ALL));
+    document.getElementById("notification-privacy-selection-select").value = notificationSettings.toString();
 }
 
 let currentUser = null;
 let currentSelectionMode;
+let notificationSettings;
+let notificationPrivacySettings;
 
 export async function setSelectionModeAsync(value)
 {
@@ -34,6 +49,28 @@ export async function setSelectionModeAsync(value)
 export function getSelectionMode()
 {
     return currentSelectionMode;
+}
+
+export async function setNotificationSettingsAsync(value)
+{
+    await filesystem.writePrefAsync("notification", value);
+    notificationSettings = value;
+}
+
+export function getNotificationSettings()
+{
+    return notificationSettings;
+}
+
+export async function setNotificationPrivacySettingsAsync(value)
+{
+    await filesystem.writePrefAsync("notifPrivacy", value);
+    notificationPrivacySettings = value;
+}
+
+export function getNotificationPrivacySettings()
+{
+    return notificationPrivacySettings;
 }
 
 export async function setCurrentAltUserAsync(value)
@@ -50,3 +87,11 @@ export function getCurrentAltUser()
 // User selection mode
 export const USER_SELECTION_SINGLE = 0;
 export const USER_SELECTION_MULTIPLE = 1;
+
+// Notification settings
+export const NOTIF_SELECTION_NONE = 0;
+export const NOTIF_SELECTION_PING = 1;
+export const NOTIF_SELECTION_ALL = 2;
+
+export const NOTIF_MODE_SHOW_ALL = 0;
+export const NOTIF_MODE_HIDE_ALL = 1;
