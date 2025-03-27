@@ -1,5 +1,11 @@
+/* Remove the unusable spacebar that might appear on the page */
 html {
     overflow-y: hidden;
+}
+
+/* Prettier flex */
+.is-flex {
+    gap: 10px;
 }
 
 /* Image effects */
@@ -121,6 +127,7 @@ pre, code {
     word-break: break-word;
 }
 
+/* Make messages prettier */
 .message {
     margin-bottom: 0 !important;
     padding: .5em;
@@ -142,10 +149,15 @@ pre, code {
     color: rgb(80, 80, 80);
 }
 
-.is-flex {
-    gap: 10px;
+.message.mention {
+    background-color: rgb(102, 74, 53);
 }
 
+.message.mention:hover {
+    background-color: rgb(138, 104, 78);
+}
+
+/* Update display of links */
 .link {
     text-decoration: underline;
     color: lightcoral;

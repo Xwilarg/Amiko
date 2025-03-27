@@ -1,7 +1,7 @@
 import { addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_MODE_SHOW_ALL, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
 import { acknowledgeMessage, finishSetupAsync, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
-import { getActiveUsers, getInfoFromId, updateUserInfo } from "./user";
+import { getInfoFromId, getPossibleUsers, updateUserInfo, userIdListToInfo, wasIMentionned } from "./user";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -17,6 +17,10 @@ let sessionToken;
 
 // Current message ID
 let currId = 0;
+
+// Store when the last notification was received
+// Used when notification settings is set on all messages, to not spam the user
+let lastNotificationReceived = null;
 
 function createWebsocketUrl() {
     return `ws${isSecure ? 's' : ''}://${apiTarget}/ws`
@@ -77,20 +81,22 @@ function sendNotification(json) {
     const notifSettings = getNotificationSettings();
 
     // If user want no notification, we can just return
-    if (notifSettings == NOTIF_SELECTION_NONE) return;
-    if (notifSettings == NOTIF_SELECTION_ALL) shouldSend = true;
-    else
+    if (notifSettings == NOTIF_SELECTION_NONE) shouldSend = false;
+    if (notifSettings == NOTIF_SELECTION_ALL)
     {
-        shouldSend = false;
-        for (let username of getActiveUsers().map(x => x.username))
+        // Only ping once every 20s
+        if (lastNotificationReceived === null ||
+            new Date().getTime() - lastNotificationReceived > 20000)
         {
-            if (json.content.includes(`@${username}`))
-            {
-                shouldSend = true;
-                break;
-            }
+            lastNotificationReceived = new Date().getTime();
+            shouldSend = true;
+        }
+        else
+        {
+            shouldSend = false;
         }
     }
+    else shouldSend = wasIMentionned(json.content);
 
     if (shouldSend) {
         const notifPrivacy = getNotificationPrivacySettings();

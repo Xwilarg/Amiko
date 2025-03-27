@@ -37,7 +37,14 @@ namespace Amiko.Server.Controllers
 
         private class UserSocket
         {
+            /// <summary>
+            /// Claim associated with the socket, used to verify permissions
+            /// </summary>
             public int ClaimId { set; get; }
+
+            /// <summary>
+            /// Actual web socket
+            /// </summary>
             public WebSocket WebSocket { set; get; }
         }
         private static readonly List<UserSocket> _sockets = [];

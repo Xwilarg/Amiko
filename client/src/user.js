@@ -24,6 +24,7 @@ import { getCurrentAltUser, getSelectionMode, setCurrentAltUserAsync, setSelecti
 
 let userInfo = {};
 let mainUser = null; // User to which the account belong
+let possibleUsers = []; // Users belonging to the group
 
 export async function initUsersAsync() {
     document.getElementById("user-type-selection-select").addEventListener("change", async e => {
@@ -83,24 +84,31 @@ export async function updateProfileDisplayAsync() {
     }
 }
 
+// Does the content checked have @XXXX
+// Where XXXX is one of our possible user
+export function wasIMentionned(text) {
+    return possibleUsers.some(x => text.toLowerCase().includes(`@${userInfo[x].username.toLowerCase()}`));
+}
+
+// Reset internal variables
+// (Used when a disconnection happened and we will receive all users info again)
 export function resetUsers() {
     userInfo = {};
+    possibleUsers = [];
 }
 
-export function getActiveUsers() { // TODO
-    const active = getCurrentAltUser();
-    if (active.length == 0) return [ mainUser ];
-    return active;
-}
-
+// Return use "main" user (the one which the account password is attached to)
 export function getMainUserId() {
     return mainUser.id;
 }
 
+// Convert a list of IDs to their userinfo
 export function userIdListToInfo(ids) {
     return ids.map(x => userInfo[x]);
 }
 
+// Get a userinfo from an ID
+// If the ID doesn't exist, return a default user
 export function getInfoFromId(id) {
     if (id in userInfo) {
         return userInfo[id];
@@ -124,6 +132,8 @@ export function updateUserInfo(msg) {
     }
 
     if (msg.isMyGroup) {
+        possibleUsers.push(msg.id);
+
         // Update profile selection
         const persoBtn = document.createElement("button");
 

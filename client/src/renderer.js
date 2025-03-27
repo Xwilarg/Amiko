@@ -2,7 +2,7 @@ import { closeSettings } from ".";
 import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
-import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo } from "./user";
+import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -67,11 +67,19 @@ function sendMessageInternal(date, infos, text, indications) {
     instance.querySelector(".date").innerHTML = date.toLocaleString();
 
 
+    let msg = instance.querySelector(".message");
+
+    // Contains hints like is the message is an error, id so we can track that it's being sent, etc...
     for (let i of indications) {
-        instance.querySelector(".message").classList.add(i);
+        msg.classList.add(i);
     }
 
+    // Parse message content to show image preview, markdown, etc...
     parseMessage(instance, text);
+    if (wasIMentionned(text))
+    {
+        msg.classList.add("mention");
+    }
 
     container.appendChild(instance);
 
