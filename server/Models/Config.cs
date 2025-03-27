@@ -11,8 +11,13 @@
         public int Id { set; get; }
         public string Username { set; get; }
         public string? Password { set; get; }
+        /// <summary>
+        /// Alt account
+        /// </summary>
         public int? DependsOf { set; get; }
         public string? Prefix { set; get; }
+
+        public string? Webhook { set; get; }
 
         public Color? Color { set; get; }
         public string? Character { set; get; }

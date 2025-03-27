@@ -1,5 +1,6 @@
 using Amiko.Models;
 using Amiko.Server.Database;
+using Amiko.Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
@@ -15,11 +16,13 @@ namespace Amiko.Server.Controllers
     {
         private readonly ILogger<WebsocketController> _logger;
         private SqliteContext _dbContext;
+        private HttpClient _httpClient;
 
-        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext)
+        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext, HttpClient httpClient)
         {
             _logger = logger;
             _dbContext = dbContext;
+            _httpClient = httpClient;
         }
 
         private static JsonSerializerOptions _option;
@@ -194,6 +197,7 @@ namespace Amiko.Server.Controllers
                                 List<Task> tasks = [];
                                 lock (_sockets)
                                 {
+                                    // Connected users
                                     foreach (var s in _sockets.Where(x => x.WebSocket != client && ctx.CanAccessServer(prot.ServerId, x.ClaimId))) // Send the message to every users
                                     {
                                         var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, Option));
@@ -210,6 +214,12 @@ namespace Amiko.Server.Controllers
                                             Authors = prot.Authors
                                         }, Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                        tasks.Add(t);
+                                    }
+                                    // Webhooks
+                                    foreach (var hook in ctx.GetAllWebhooks().Where(x => ctx.CanAccessServer(prot.ServerId, x.Id)))
+                                    {
+                                        Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", authors.Select(x => x.Username)) }, Option);
                                         tasks.Add(t);
                                     }
                                 }

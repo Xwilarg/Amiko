@@ -16,6 +16,7 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddDbContext<SqliteContext>();
+        builder.Services.AddHttpClient();
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();

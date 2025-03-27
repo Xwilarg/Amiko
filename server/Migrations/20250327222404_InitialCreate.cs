@@ -36,7 +36,8 @@ namespace Amiko.Server.Migrations
                     DependsOf = table.Column<int>(type: "INTEGER", nullable: true),
                     Color = table.Column<int>(type: "INTEGER", nullable: false),
                     Character = table.Column<string>(type: "TEXT", nullable: false),
-                    Prefix = table.Column<string>(type: "TEXT", nullable: true)
+                    Prefix = table.Column<string>(type: "TEXT", nullable: true),
+                    Webhook = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
