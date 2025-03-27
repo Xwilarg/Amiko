@@ -1,5 +1,5 @@
 import { addPendingNotification, removeNotification } from "./notification";
-import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
+import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_MODE_SHOW_ALL, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
 import { acknowledgeMessage, finishSetupAsync, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
 import { getActiveUsers, getInfoFromId, updateUserInfo } from "./user";
 

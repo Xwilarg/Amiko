@@ -31,8 +31,8 @@ export async function initPreferencesAsync() {
     document.getElementById("notification-privacy-selection-select").addEventListener("change", async e => {
         await setNotificationPrivacySettingsAsync(parseInt(e.target.value));
     });
-    notificationSettings = parseInt(await filesystem.readPrefAsync("notifPrivacy", NOTIF_MODE_SHOW_ALL));
-    document.getElementById("notification-privacy-selection-select").value = notificationSettings.toString();
+    notificationPrivacySettings = parseInt(await filesystem.readPrefAsync("notifPrivacy", NOTIF_MODE_SHOW_ALL));
+    document.getElementById("notification-privacy-selection-select").value = notificationPrivacySettings.toString();
 }
 
 let currentUser = null;
