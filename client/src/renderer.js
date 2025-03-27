@@ -201,7 +201,7 @@ function refreshMessageDisplay() {
     for (const msg of servInfo[currChan.servId].channels[currChan.chanId].messages) {
         let date;
         if (msg.sentAt) {
-            date = new Date(msg.sentAt * 1000)
+            date = new Date((msg.sentAt - (new Date().getTimezoneOffset() * 60)) * 1000);
         } else {
             date = msg.date;
         }
