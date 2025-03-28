@@ -206,7 +206,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, [], msg.id);
+        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, [], `msg-${msg.id}`);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -333,26 +333,27 @@ export function acknowledgeMessage(msg) {
     const message = document.getElementById(`msg-tmp-${msg.ackId}`);
 
     message.classList.remove("sending");
-    message.id = `message-${msg.id}`;
+    message.id = `msg-${msg.newId}`;
 
     if (msg.isError) {
         message.classList.add("error");
 
         // Msg is errored, we remove it from the list
-        servInfo[currChan.servId].channels[currChan.chanId].messages = servInfo[currChan.servId].channels[currChan.chanId].messages.filter(x => x.ackId != ackId);
+        servInfo[currChan.servId].channels[currChan.chanId].messages = servInfo[currChan.servId].channels[currChan.chanId].messages.filter(x => x.ackId != msg.ackId);
         return;
     }
 
     // Update messages and data stored
+    const oldMsg = servInfo[currChan.servId].channels[currChan.chanId].messages.find(x => x.ackId === msg.ackId);
     if (msg.authors) {
         updateMessageAuthor(message, msg.authors.map(getInfoFromId))
-        servInfo[currChan.servId].channels[currChan.chanId].authors = msg.authors;
+        oldMsg.authors = msg.authors;
     }
     if (msg.content) {
         parseMessage(message, msg.content);
-        servInfo[currChan.servId].channels[currChan.chanId].content = msg.content;
+        oldMsg.content = msg.content;
     }
-    servInfo[currChan.servId].channels[currChan.chanId].id = msg.id;
+    oldMsg.id = msg.newId;
 }
 
 // Once we received info about channels and users, we show everything properly
