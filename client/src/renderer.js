@@ -190,10 +190,6 @@ function refreshMessageDisplay() {
     // Update export button to work with current channel
     // TODO: Don't do that everytimes
     document.getElementById("channel-title").innerHTML = chanName;
-    document.getElementById("export-button").disabled = false;
-    document.getElementById("export-button").onclick = () => {
-        downloadChanExport(chanName, currChan.servId, currChan.chanId);
-    };
 
     // Update all messages
     const container = document.getElementById("messages");
@@ -352,6 +348,7 @@ export async function finishSetupAsync()
 
 export function initRenderer()
 {
+    // Sending messages
     document.getElementById("send-message").addEventListener("click", e => {
         e.preventDefault();
         const content = document.getElementById("message-field");
@@ -367,9 +364,17 @@ export function initRenderer()
         }
     });
 
+    // Help section that display markdown previews
     for (const spMd of document.getElementsByClassName("apply-markdown"))
     {
         spMd.innerHTML = getMarkdown(spMd.innerHTML);
     }
+
+    // Channel settings
+    document.getElementById("export-button").onclick = () => {
+        if (currChan === null) return;
+
+        downloadChanExport(servInfo[currChan.servId].channels[currChan.chanId].name, currChan.servId, currChan.chanId);
+    };
 }
 
