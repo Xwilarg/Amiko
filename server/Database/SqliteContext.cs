@@ -63,7 +63,8 @@ public class ContextInterpreter
                     DependsOf = u.DependsOf,
                     Prefix = u.Prefix,
                     Color = (color.R << 16) | (color.G << 8) | color.B,
-                    Character = u.Character ?? u.Username[0].ToString()
+                    Character = u.Character ?? u.Username[0].ToString(),
+                    Webhook = u.Webhook
                 });
                 _ctx.SaveChanges();
             }
@@ -200,6 +201,9 @@ public class ContextInterpreter
         _ctx.SaveChanges();
     }
 
+    public IEnumerable<UserContext> GetAllWebhooks()
+        => _ctx.Users.Where(x => x.Webhook != null);
+
     public Message[] GetMessages(int servId, int chanId, int msgCount)
     {
         var msgs =
@@ -278,6 +282,8 @@ public class UserContext
     public int Color { set; get; }
     public string Character { set; get; }
     public string? Prefix { set; get; }
+
+    public string? Webhook { set; get; }
 
     public List<ChannelSeen> LastSeens { set; get; } = [];
 }

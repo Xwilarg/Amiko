@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20250324094135_InitialCreate")]
+    [Migration("20250327222404_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -134,6 +134,9 @@ namespace Amiko.Server.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Webhook")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
