@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20250327222404_InitialCreate")]
+    [Migration("20250328100750_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,6 +19,30 @@ namespace Amiko.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
+
+            modelBuilder.Entity("Amiko.Server.Database.AttachmentContext", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("MessageContextId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageContextId");
+
+                    b.ToTable("AttachmentContext");
+                });
 
             modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
                 {
@@ -89,7 +113,7 @@ namespace Amiko.Server.Migrations
 
                     b.HasIndex("ChannelContextId");
 
-                    b.ToTable("MessageContext");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>
@@ -144,6 +168,13 @@ namespace Amiko.Server.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Amiko.Server.Database.AttachmentContext", b =>
+                {
+                    b.HasOne("Amiko.Server.Database.MessageContext", null)
+                        .WithMany("Attachments")
+                        .HasForeignKey("MessageContextId");
+                });
+
             modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
                 {
                     b.HasOne("Amiko.Server.Database.ServerContext", null)
@@ -168,6 +199,11 @@ namespace Amiko.Server.Migrations
             modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
+                {
+                    b.Navigation("Attachments");
                 });
 
             modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>

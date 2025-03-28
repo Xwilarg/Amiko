@@ -189,7 +189,7 @@ public class ContextInterpreter
         return chan.Id;
     }
 
-    public void AddMessage(int servId, int chanId, MessageContext msg) // TODO: Check writing perms
+    public int AddMessage(int servId, int chanId, MessageContext msg) // TODO: Check writing perms
     {
         var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).FirstOrDefault(x => x.Id == servId);
         if (serv == null) throw new InvalidOperationException("Server not found");
@@ -199,10 +199,29 @@ public class ContextInterpreter
 
         chan.Messages.Add(msg);
         _ctx.SaveChanges();
+
+        return msg.Id;
     }
 
     public IEnumerable<UserContext> GetAllWebhooks()
         => _ctx.Users.Where(x => x.Webhook != null);
+
+    public int? TryAddAttachment(int msgId, int claimId, string filename, byte[] data)
+    {
+        var msg = _ctx.Messages.FirstOrDefault(x => x.Id == msgId);
+        if (msg == null) return null; // Invalid ID
+
+        if (!msg.Authors.Any(x => !DoesUserFillClaim(claimId, x))) return null; // Permission check
+
+        msg.Attachments.Add(new AttachmentContext()
+        {
+            Filename = filename,
+            Data = data
+        });
+
+        _ctx.SaveChanges();
+        return msg.Id;
+    }
 
     public Message[] GetMessages(int servId, int chanId, int msgCount)
     {
@@ -218,7 +237,11 @@ public class ContextInterpreter
                     Authors = m.Authors,
                     Content = m.Message,
                     SentAt = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
-                    Id = m.Id
+                    Id = m.Id,
+                    Attachments = m.Attachments.Select(a => new AttachmentInfo() {
+                        Name = a.Filename,
+                        Id = a.Id
+                    }).ToArray()
                 });
         return msgs.OrderBy(x => x.Id).ToArray();
     }
@@ -268,9 +291,17 @@ public class SqliteContext : DbContext
 {
     public DbSet<ServerContext> Servers { set; get; }
     public DbSet<UserContext> Users { set; get; }
+    public DbSet<MessageContext> Messages { set; get; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.UseSqlite("Data Source=Sqlite.db");
+}
+
+public class AttachmentContext
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
+    public byte[] Data { set; get; }
+    public string Filename { set; get; }
 }
 
 public class UserContext
@@ -322,4 +353,5 @@ public class MessageContext
 
     public string Message { set; get; }
     public int[] Authors { set; get; }
+    public List<AttachmentContext> Attachments { set; get; } = [];
 }

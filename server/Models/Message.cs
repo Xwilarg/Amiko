@@ -67,7 +67,27 @@ public class Message : BaseMessage
     /// </summary>
     public long SentAt { set; get; }
     /// <summary>
-    /// ID of the message, used for acknowledgement
+    /// ID of the message, used for future actions (attachment upload, deletion, etc...)
+    /// </summary>
+    public int Id { set; get; }
+
+    /// <summary>
+    /// Temporary ID sent by the client, sent back in <seealso cref="Acknowledge"/> message to confirm things were well sent
+    /// </summary>
+    public int AckId { set; get; }
+
+    public AttachmentInfo[] Attachments { set; get; }
+}
+
+public class AttachmentInfo
+{
+    /// <summary>
+    /// Filename of the attachment
+    /// </summary>
+    public string Name { set; get; }
+
+    /// <summary>
+    /// ID to find back the attachment in DB
     /// </summary>
     public int Id { set; get; }
 }
@@ -77,7 +97,16 @@ public class Message : BaseMessage
 /// </summary>
 public class Acknowledge : BaseMessage
 {
-    public int Id { set; get; }
+    /// <summary>
+    /// New definitive ID of the message
+    /// </summary>
+    public int NewId { set; get; }
+
+    /// <summary>
+    /// AckId received
+    /// </summary>
+    public int AckId { set; get; }
+
     /// <summary>
     /// If we use a prefix to specify a second account, the author returned can be different than the sender
     /// </summary>

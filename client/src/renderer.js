@@ -6,15 +6,15 @@ import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, us
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
-    sendMessageInternal(new Date(), [], text, [ "system" ]);
+    sendMessageInternal(new Date(), [], text, [ "system" ], null);
 }
 
 export function sendErrorMessage(text) {
-    sendMessageInternal(new Date(), [], text, [ "error" ]);
+    sendMessageInternal(new Date(), [], text, [ "error" ], null);
 }
 
-function sendIncomingMessage(date, ids, text) {
-    sendMessageInternal(new Date(date * 1000), ids.map(getInfoFromId), text, []);
+function sendIncomingMessage(date, ids, text, id) {
+    sendMessageInternal(new Date(date * 1000), ids.map(getInfoFromId), text, [], `msg-${id}`);
 }
 
 export function sendMyMessage(msg, text, id) {
@@ -23,8 +23,41 @@ export function sendMyMessage(msg, text, id) {
     if (msg.authors.length === 0) {
         msg.authors = [ getMainUserId() ];
     }
+    msg.ackId = id;
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(now, userIdListToInfo(getCurrentAltUser()), text, [ "sending", `message-${id}` ]);
+    sendMessageInternal(now, userIdListToInfo(getCurrentAltUser()), text, [ "sending" ], `msg-tmp-${id}`);
+}
+
+function sendMessageInternal(date, infos, text, indications, id) {
+    const container = document.getElementById("messages");
+    const template = document.getElementById("message-template");
+
+    const instance = template.content.cloneNode(true);
+    updateMessageAuthor(instance, infos)
+    instance.querySelector(".date").innerHTML = date.toLocaleString();
+
+
+    let msg = instance.querySelector(".message");
+
+    if (id !== null) { // System messages don't have an ID
+        msg.id = id;
+    }
+
+    // Contains hints like is the message is an error, id so we can track that it's being sent, etc...
+    for (let i of indications) {
+        msg.classList.add(i);
+    }
+
+    // Parse message content to show image preview, markdown, etc...
+    parseMessage(instance, text);
+    if (wasIMentionned(text))
+    {
+        msg.classList.add("mention");
+    }
+
+    container.appendChild(instance);
+
+    scrollToBottom();
 }
 
 function updateMessageAuthor(message, infos) {
@@ -56,34 +89,6 @@ function updateMessageAuthor(message, infos) {
         }
         pfp.innerHTML = String.fromCodePoint(...arr);
     }
-}
-
-function sendMessageInternal(date, infos, text, indications) {
-    const container = document.getElementById("messages");
-    const template = document.getElementById("message-template");
-
-    const instance = template.content.cloneNode(true);
-    updateMessageAuthor(instance, infos)
-    instance.querySelector(".date").innerHTML = date.toLocaleString();
-
-
-    let msg = instance.querySelector(".message");
-
-    // Contains hints like is the message is an error, id so we can track that it's being sent, etc...
-    for (let i of indications) {
-        msg.classList.add(i);
-    }
-
-    // Parse message content to show image preview, markdown, etc...
-    parseMessage(instance, text);
-    if (wasIMentionned(text))
-    {
-        msg.classList.add("mention");
-    }
-
-    container.appendChild(instance);
-
-    scrollToBottom();
 }
 
 function getMarkdown(html) {
@@ -201,7 +206,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, []);
+        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, [], msg.id);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -248,7 +253,7 @@ export function isCurrentChannel(servId, chanId)
 export function updateReceivedMessage(msg) {
     servInfo[msg.serverId].channels[msg.channelId].messages.push(msg);
     if (currChan.servId === msg.serverId && currChan.chanId === msg.channelId) {
-        sendIncomingMessage(msg.sentAt, msg.authors, msg.content);
+        sendIncomingMessage(msg.sentAt, msg.authors, msg.content, msg.id);
     }
 }
 
@@ -325,17 +330,29 @@ export function updateServerInfo(msg) {
 }
 
 export function acknowledgeMessage(msg) {
-    const message = document.querySelector(`.message-${msg.id}`);
+    const message = document.getElementById(`msg-tmp-${msg.ackId}`);
 
     message.classList.remove("sending");
-    if (msg.isError) message.classList.add("error");
+    message.id = `message-${msg.id}`;
 
+    if (msg.isError) {
+        message.classList.add("error");
+
+        // Msg is errored, we remove it from the list
+        servInfo[currChan.servId].channels[currChan.chanId].messages = servInfo[currChan.servId].channels[currChan.chanId].messages.filter(x => x.ackId != ackId);
+        return;
+    }
+
+    // Update messages and data stored
     if (msg.authors) {
         updateMessageAuthor(message, msg.authors.map(getInfoFromId))
+        servInfo[currChan.servId].channels[currChan.chanId].authors = msg.authors;
     }
     if (msg.content) {
         parseMessage(message, msg.content);
+        servInfo[currChan.servId].channels[currChan.chanId].content = msg.content;
     }
+    servInfo[currChan.servId].channels[currChan.chanId].id = msg.id;
 }
 
 // Once we received info about channels and users, we show everything properly

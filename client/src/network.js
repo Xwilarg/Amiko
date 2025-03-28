@@ -33,7 +33,7 @@ export function sendMessageFromInput(content, servId, chanId) {
     var newMsg = {
         type: 2,
         content: content,
-        id: currId,
+        ackId: currId,
         serverId: servId,
         channelId: chanId,
         authors: getCurrentAltUser()

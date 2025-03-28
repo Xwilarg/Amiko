@@ -52,6 +52,37 @@ namespace Amiko.Server.Controllers
         }
         private static readonly List<UserSocket> _sockets = [];
 
+        public static async Task PropagateAttachment(int msgId, AttachmentInfo[] attachments)
+        {
+            List<Task> tasks = [];
+            lock (_sockets)
+            {
+                foreach (var s in _sockets)
+                {
+                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Message()
+                    {
+                        Type = MessageType.MessageUpdate,
+                        Id = msgId,
+                        Attachments = attachments
+                    }, Option));
+                    tasks.Add(s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None));
+                }
+            }
+            foreach (var t in tasks)
+            {
+                try
+                {
+                    await t;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    return;
+                    //_logger.LogError(e.ToString());
+                }
+            }
+        }
+
         [Route("/ws"), Authorize]
         public async Task Get()
         {
@@ -162,7 +193,7 @@ namespace Amiko.Server.Controllers
                                             var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
                                             {
                                                 Type = MessageType.Acknowledge,
-                                                Id = prot.Id,
+                                                AckId = prot.AckId,
                                                 IsError = true
                                             }, Option));
                                             await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -179,19 +210,19 @@ namespace Amiko.Server.Controllers
                                 _logger.Log(LogLevel.Information, $"Received message of size {content.Length} by {string.Join(", ", authors.Select(x => x.Username))}");
 
                                 // Save to db
-                                ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
+                                var finalId = ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                                 {
                                     CreationTime = now,
                                     Authors = authors.Select(x => x.Id).ToArray(),
                                     Message = content
                                 });
+
+                                // Update message data with actual values
                                 var d = now.ToUniversalTime() - DateTime.UnixEpoch;
                                 prot.SentAt = (long)Math.Floor(d.TotalSeconds);
                                 prot.Authors = authors.Select(x => x.Id).ToArray();
-                                if (content != prot.Content)
-                                {
-                                    prot.Content = content;
-                                }
+                                prot.Content = content; // Updated content (like when a prefix was removed or so)
+                                prot.Id = finalId;
 
                                 // Send message back
                                 List<Task> tasks = [];
@@ -208,9 +239,10 @@ namespace Amiko.Server.Controllers
                                         var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
                                         {
                                             Type = MessageType.Acknowledge,
-                                            Id = prot.Id,
+                                            AckId = prot.AckId,
+                                            NewId = finalId,
                                             IsError = false,
-                                            Content = prot.Content,
+                                            Content = prot.Content, // TODO: Only send if updated
                                             Authors = prot.Authors
                                         }, Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);

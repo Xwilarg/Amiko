@@ -85,7 +85,7 @@ namespace Amiko.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MessageContext",
+                name: "Messages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -97,13 +97,38 @@ namespace Amiko.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MessageContext", x => x.Id);
+                    table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MessageContext_ChannelContext_ChannelContextId",
+                        name: "FK_Messages_ChannelContext_ChannelContextId",
                         column: x => x.ChannelContextId,
                         principalTable: "ChannelContext",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateTable(
+                name: "AttachmentContext",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Data = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Filename = table.Column<string>(type: "TEXT", nullable: false),
+                    MessageContextId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AttachmentContext", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AttachmentContext_Messages_MessageContextId",
+                        column: x => x.MessageContextId,
+                        principalTable: "Messages",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AttachmentContext_MessageContextId",
+                table: "AttachmentContext",
+                column: "MessageContextId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChannelContext_ServerContextId",
@@ -116,8 +141,8 @@ namespace Amiko.Server.Migrations
                 column: "UserContextId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MessageContext_ChannelContextId",
-                table: "MessageContext",
+                name: "IX_Messages_ChannelContextId",
+                table: "Messages",
                 column: "ChannelContextId");
         }
 
@@ -125,10 +150,13 @@ namespace Amiko.Server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AttachmentContext");
+
+            migrationBuilder.DropTable(
                 name: "ChannelSeen");
 
             migrationBuilder.DropTable(
-                name: "MessageContext");
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Users");

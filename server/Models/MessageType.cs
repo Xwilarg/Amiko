@@ -20,5 +20,6 @@ public enum MessageType
     /// <summary>
     /// Update the server to tell it a channel was seen recently
     /// </summary>
-    SeenUpdate
+    SeenUpdate,
+    MessageUpdate
 }
