@@ -95,6 +95,14 @@ html {
     resize: none;
 }
 
+#attach-file-container {
+    height: calc(75px - 10px);
+}
+
+#attach-file {
+    display: none;
+}
+
 #send-message {
     border-radius: 50%;
     width: 55px;

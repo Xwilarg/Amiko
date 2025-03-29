@@ -1,5 +1,5 @@
 import { closeSettings } from ".";
-import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
+import { downloadChanExport, sendAttachments, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getCurrentAltUser } from "./preferences";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
@@ -192,8 +192,6 @@ function scrollToBottom() {
 function refreshMessageDisplay() {
     const chanName = servInfo[currChan.servId].channels[currChan.chanId].name;
 
-    // Update export button to work with current channel
-    // TODO: Don't do that everytimes
     document.getElementById("channel-title").innerHTML = chanName;
 
     // Update all messages
@@ -206,7 +204,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, [], `msg-${msg.id}`);
+        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content + (msg.attachments.length > 0 ? `(File attached)` : ""), [], `msg-${msg.id}`);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -263,7 +261,7 @@ export function resetInfo()
     servInfo = {};
     currChan = null;
     document.getElementById("export-button").disabled = true;
-    document.getElementById("send-message").disabled = true;
+    document.getElementById("message-form").disabled = true;
     document.getElementById("servers").innerHTML = "";
     document.getElementById("channels").innerHTML = "";
     document.getElementById("profile-selection").innerHTML = "";
@@ -287,7 +285,7 @@ export function updateServerInfo(msg) {
                 chanId: msg.channels[0].id
             }
             console.log(`Automatically load channel ${currChan.servId} / ${currChan.chanId}`);
-            document.getElementById("send-message").disabled = false;
+            document.getElementById("message-form").disabled = false;
             refreshMessageDisplay();
         }
     }
@@ -372,13 +370,34 @@ export function initRenderer()
         const content = document.getElementById("message-field");
         if (content.value) {
             sendMessageFromInput(content.value, currChan.servId, currChan.chanId);
+            const fileInput = document.getElementById("attach-file");
+            if (fileInput.value) {
+                // sendAttachments(fileInput.files); // TODO: Move to ack
+            }
+
+            // Unset send field
             content.value = "";
+
+            // Unset attachment
+            fileInput.value = "";
+            document.getElementById("attach-file-container").classList.remove("is-primary");
         }
     });
     document.getElementById("message-field").addEventListener("keypress", (e) => {
         if (e.key == 'Enter' && !e.shiftKey) {
             document.getElementById("send-message").click();
             e.preventDefault();
+        }
+    });
+    document.getElementById("attach-file").addEventListener("change", e => {
+        if (e.target.files[0].size > 2000000) {
+            e.target.value = "";
+            alert("File must be smaller than 2MB")
+        }
+        if (e.target.value) {
+            document.getElementById("attach-file-container").classList.add("is-primary");
+        } else {
+            document.getElementById("attach-file-container").classList.remove("is-primary");
         }
     });
 

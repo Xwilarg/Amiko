@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace Amiko.Server.Controllers;
 
 [ApiController]
-[Route("/api/export/")]
+[Route("/api/message/")]
 public class MessageController : ControllerBase
 {
     private readonly ILogger<WebsocketController> _logger;
@@ -21,7 +21,7 @@ public class MessageController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("attach/{msgId}")]
+    [HttpPost("attach/{msgId}")]
     [RequestSizeLimit(2_000_000)]
     public async Task<IActionResult> AddAttachment([Required] int msgId, [Required, FromForm] IFormFile[] files)
     {

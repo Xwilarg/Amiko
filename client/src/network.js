@@ -16,7 +16,7 @@ let networkInterval = null;
 let sessionToken;
 
 // Current message ID
-let currId = 0;
+let currId = 1;
 
 // Store when the last notification was received
 // Used when notification settings is set on all messages, to not spam the user
@@ -50,6 +50,22 @@ export function sendSeenUpdate(servId, chanId) {
         channelId: chanId,
     }));
     removeNotification(servId, chanId); // We saw the message so we discard related notifications
+}
+
+export function sendAttachments(msgId, files) {
+    const data = new FormData();
+    data.append("files", files);
+
+    fetch(createHttpUrl(`message/attach/${msgId}`), {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`
+        },
+        body: data
+    })
+    .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+    .then(text => {})
+    .catch((err) => { sendErrorMessage("Attachment upload failed: " + err) });
 }
 
 export function downloadChanExport(chanName, servId, chanId) {

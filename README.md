@@ -10,7 +10,7 @@ Chat software aiming to put the user first
 ### Backend
 Run `dotnet build Amiko.sln` in the `server/` folder, then move all the files in your server and create the appropriate configuration
 #### nginx
-```
+```nginx
 server {
 	root /home/path/to/amiko;
 
