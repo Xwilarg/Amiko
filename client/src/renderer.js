@@ -1,7 +1,8 @@
 import { closeSettings } from ".";
-import { downloadChanExport, sendAttachments, sendMessageFromInput, sendSeenUpdate } from "./network";
+import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
+import { marked } from "marked";
 var EmojiConvertor = require('emoji-js');
 
 export function sendSystemMessage(text) {
@@ -92,12 +93,7 @@ function updateMessageAuthor(message, infos) {
 }
 
 function getMarkdown(html) {
-    html = html.replaceAll(/```\n?(.+)```/gm, '<pre>$1</pre>');
-    html = html.replaceAll(/`(.+)`/gm, '<code>$1</code>');
-    html = html.replaceAll(/^&gt; (.+)(\n|$)/gm, '<blockquote>$1</blockquote>');
-    html = html.replaceAll(/\*\*(.+)\*\*/gm, '<b>$1</b>');
-    html = html.replaceAll(/\*(.+)\*/gm, '<i>$1</i>');
-    return html;
+    return marked.parse(html);
 }
 
 function cleanString(str) {
@@ -107,7 +103,7 @@ function cleanString(str) {
 
 function parseMessage(msg, text) {
     msg.querySelector(".rich-preview").innerHTML = "";
-    let finalHtml = text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    let finalHtml = text;
 
     // Pattern match urls
     // Optionally at the start we can have <XXX:

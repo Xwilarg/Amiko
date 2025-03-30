@@ -20,7 +20,8 @@
   "dependencies": {
     "bulma": "^1.0.3",
     "electron-squirrel-startup": "^1.0.1",
-    "emoji-js": "^3.8.1"
+    "emoji-js": "^3.8.1",
+    "marked": "^15.0.7"
   },
   "version": "1.0.0-beta",
   "author": "Xwilarg",
