@@ -153,6 +153,7 @@ namespace Amiko.Server.Controllers
                                 var d = now.ToUniversalTime() - DateTime.UnixEpoch;
                                 prot.SentAt = (long)Math.Floor(d.TotalSeconds);
                                 prot.Id = finalId;
+                                prot.Attachments = [];
                                 if (wereAuthorsUpdated) prot.Authors = authorsIds;
                                 if (wasContentUpdated) prot.Content = updatedData.Content;
 
