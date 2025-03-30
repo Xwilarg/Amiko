@@ -23,6 +23,7 @@ export function sendMyMessage(msg, text, id) {
         msg.authors = [ getMainUserId() ];
     }
     msg.ackId = id;
+    msg.attachments = [];
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
     sendMessageInternal(now, userIdListToInfo(msg.authors), text, [ "sending" ], `msg-tmp-${id}`);
 }
