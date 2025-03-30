@@ -19,6 +19,7 @@
   "main": "main.js",
   "dependencies": {
     "bulma": "^1.0.3",
+    "dompurify": "^3.2.4",
     "electron-squirrel-startup": "^1.0.1",
     "emoji-js": "^3.8.1",
     "marked": "^15.0.7"

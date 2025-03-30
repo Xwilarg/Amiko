@@ -3,7 +3,14 @@ import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./netw
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
 import { marked } from "marked";
+import DOMPurify from 'dompurify';
 var EmojiConvertor = require('emoji-js');
+
+marked.use({
+    tokenizer: {
+      link() {}
+    }
+});
 
 export function sendSystemMessage(text) {
     sendMessageInternal(new Date(), [], text, [ "system" ], null);
@@ -92,10 +99,6 @@ function updateMessageAuthor(message, infos) {
     }
 }
 
-function getMarkdown(html) {
-    return marked.parse(html);
-}
-
 function cleanString(str) {
     if (str) return str;
     return "";
@@ -168,8 +171,7 @@ function parseMessage(msg, text) {
 
     finalHtml = emoji.replace_colons(finalHtml);
 
-    finalHtml = getMarkdown(finalHtml);
-    finalHtml = finalHtml.replaceAll("\n", "<br>");
+    finalHtml = DOMPurify.sanitize(marked.parse(finalHtml));
 
     msg.querySelector(".content").innerHTML = finalHtml;
 
@@ -396,12 +398,6 @@ export function initRenderer()
             document.getElementById("attach-file-container").classList.remove("is-primary");
         }
     });
-
-    // Help section that display markdown previews
-    for (const spMd of document.getElementsByClassName("apply-markdown"))
-    {
-        spMd.innerHTML = getMarkdown(spMd.innerHTML);
-    }
 
     // Channel settings
     document.getElementById("export-button").onclick = () => {
