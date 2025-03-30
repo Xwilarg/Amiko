@@ -92,11 +92,11 @@ function updateMessageAuthor(message, infos) {
 }
 
 function getMarkdown(html) {
-    html = html.replaceAll(/```\n?(([^`]+`{0,2})*)```/gm, '<pre>$1</pre>');
-    html = html.replaceAll(/`([^*]+)`/gm, '<code>$1</code>');
-    html = html.replaceAll(/^&gt; ([^\n]+)/gm, '<pre>$1</pre>');
-    html = html.replaceAll(/\*\*(([^*]+\*{0,1})*)\*\*/gm, '<b>$1</b>');
-    html = html.replaceAll(/\*([^*]+)\*/gm, '<i>$1</i>');
+    html = html.replaceAll(/```\n?(.+)```/gm, '<pre>$1</pre>');
+    html = html.replaceAll(/`(.+)`/gm, '<code>$1</code>');
+    html = html.replaceAll(/^&gt; (.+)(\n|$)/gm, '<blockquote>$1</blockquote>');
+    html = html.replaceAll(/\*\*(.+)\*\*/gm, '<b>$1</b>');
+    html = html.replaceAll(/\*(.+)\*/gm, '<i>$1</i>');
     return html;
 }
 
