@@ -1,7 +1,6 @@
 import { closeSettings } from ".";
 import { downloadChanExport, sendAttachments, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
-import { getCurrentAltUser } from "./preferences";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
 var EmojiConvertor = require('emoji-js');
 
@@ -25,7 +24,7 @@ export function sendMyMessage(msg, text, id) {
     }
     msg.ackId = id;
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(now, userIdListToInfo(getCurrentAltUser()), text, [ "sending" ], `msg-tmp-${id}`);
+    sendMessageInternal(now, userIdListToInfo(msg.authors), text, [ "sending" ], `msg-tmp-${id}`);
 }
 
 function sendMessageInternal(date, infos, text, indications, id) {
