@@ -1,6 +1,7 @@
 using Amiko.Models;
 using Amiko.Server.Database;
 using Amiko.Server.Models;
+using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
@@ -17,71 +18,16 @@ namespace Amiko.Server.Controllers
         private readonly ILogger<WebsocketController> _logger;
         private SqliteContext _dbContext;
         private HttpClient _httpClient;
+        private ConnectionManager _connManager;
 
-        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext, HttpClient httpClient)
+        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext, HttpClient httpClient, ConnectionManager connManager)
         {
             _logger = logger;
             _dbContext = dbContext;
             _httpClient = httpClient;
+            _connManager = connManager;
         }
 
-        private static JsonSerializerOptions _option;
-        private static JsonSerializerOptions Option
-        {
-            get
-            {
-                _option ??= new()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                };
-                return _option;
-            }
-        }
-
-        private class UserSocket
-        {
-            /// <summary>
-            /// Claim associated with the socket, used to verify permissions
-            /// </summary>
-            public int ClaimId { set; get; }
-
-            /// <summary>
-            /// Actual web socket
-            /// </summary>
-            public WebSocket WebSocket { set; get; }
-        }
-        private static readonly List<UserSocket> _sockets = [];
-
-        public static async Task PropagateAttachment(int msgId, AttachmentInfo[] attachments)
-        {
-            List<Task> tasks = [];
-            lock (_sockets)
-            {
-                foreach (var s in _sockets)
-                {
-                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Message()
-                    {
-                        Type = MessageType.MessageUpdate,
-                        Id = msgId,
-                        Attachments = attachments
-                    }, Option));
-                    tasks.Add(s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None));
-                }
-            }
-            foreach (var t in tasks)
-            {
-                try
-                {
-                    await t;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                    return;
-                    //_logger.LogError(e.ToString());
-                }
-            }
-        }
 
         [Route("/ws"), Authorize]
         public async Task Get()
@@ -92,9 +38,9 @@ namespace Amiko.Server.Controllers
                 var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
                 var client = await HttpContext.WebSockets.AcceptWebSocketAsync("client");
-                lock (_sockets)
+                lock (_connManager.Sockets)
                 {
-                    _sockets.Add(new() { WebSocket = client, ClaimId = claimId });
+                    _connManager.Sockets.Add(new() { WebSocket = client, ClaimId = claimId });
                 }
 
                 // First connection from user!
@@ -105,7 +51,7 @@ namespace Amiko.Server.Controllers
                 {
                     Type = MessageType.Array,
                     Data = ContextInterpreter.Get(_dbContext).GetStartingServerInfo(50, claimId)
-                }, Option));
+                }, _connManager.Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
                 // Send information about all users existing
@@ -113,7 +59,7 @@ namespace Amiko.Server.Controllers
                 {
                     Type = MessageType.Array,
                     Data = ContextInterpreter.Get(_dbContext).GetStartingUserInfo(claimId)
-                }, Option));
+                }, _connManager.Option));
                 await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
                 while (true)
@@ -127,9 +73,9 @@ namespace Amiko.Server.Controllers
                     }
                     catch (WebSocketException)
                     {
-                        lock (_sockets)
+                        lock (_connManager.Sockets)
                         {
-                            _sockets.RemoveAll(x => x.WebSocket == client);
+                            _connManager.Sockets.RemoveAll(x => x.WebSocket == client);
                         }
                         break;
                     }
@@ -144,7 +90,7 @@ namespace Amiko.Server.Controllers
 
                         try
                         {
-                            var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), Option);
+                            var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _connManager.Option);
 
                             if (baseMsg.Type == MessageType.Heartbeat)
                             {
@@ -152,7 +98,7 @@ namespace Amiko.Server.Controllers
                             }
                             else if (baseMsg.Type == MessageType.SeenUpdate)
                             {
-                                var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), Option);
+                                var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _connManager.Option);
                                 var ctx = ContextInterpreter.Get(_dbContext);
                                 ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
@@ -160,7 +106,7 @@ namespace Amiko.Server.Controllers
                             {
                                 // Parse actual message
                                 Console.WriteLine(Encoding.UTF8.GetString(buffer));
-                                var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), Option);
+                                var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), _connManager.Option);
 
                                 var ctx = ContextInterpreter.Get(_dbContext);
 
@@ -195,7 +141,7 @@ namespace Amiko.Server.Controllers
                                                 Type = MessageType.Acknowledge,
                                                 AckId = prot.AckId,
                                                 IsError = true
-                                            }, Option));
+                                            }, _connManager.Option));
                                             await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                             authors = null;
                                             break;
@@ -226,12 +172,12 @@ namespace Amiko.Server.Controllers
 
                                 // Send message back
                                 List<Task> tasks = [];
-                                lock (_sockets)
+                                lock (_connManager.Sockets)
                                 {
                                     // Connected users
-                                    foreach (var s in _sockets.Where(x => x.WebSocket != client && ctx.CanAccessServer(prot.ServerId, x.ClaimId))) // Send the message to every users
+                                    foreach (var s in _connManager.Sockets.Where(x => x.WebSocket != client && ctx.CanAccessServer(prot.ServerId, x.ClaimId))) // Send the message to every users
                                     {
-                                        var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, Option));
+                                        var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _connManager.Option));
                                         Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);
                                     }
@@ -244,14 +190,14 @@ namespace Amiko.Server.Controllers
                                             IsError = false,
                                             Content = prot.Content, // TODO: Only send if updated
                                             Authors = prot.Authors
-                                        }, Option));
+                                        }, _connManager.Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);
                                     }
                                     // Webhooks
                                     foreach (var hook in ctx.GetAllWebhooks().Where(x => ctx.CanAccessServer(prot.ServerId, x.Id)))
                                     {
-                                        Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", authors.Select(x => x.Username)) }, Option);
+                                        Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", authors.Select(x => x.Username)) }, _connManager.Option);
                                         tasks.Add(t);
                                     }
                                 }
@@ -277,9 +223,9 @@ namespace Amiko.Server.Controllers
                     }
                     else if (response.MessageType == WebSocketMessageType.Close)
                     {
-                        lock (_sockets)
+                        lock (_connManager.Sockets)
                         {
-                            _sockets.RemoveAll(x => x.WebSocket == client);
+                            _connManager.Sockets.RemoveAll(x => x.WebSocket == client);
                         }
                         break;
                     }

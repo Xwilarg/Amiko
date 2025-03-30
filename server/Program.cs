@@ -1,4 +1,5 @@
 using Amiko.Server.Database;
+using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -18,6 +19,7 @@ public class Program
         builder.Services.AddDbContext<SqliteContext>();
         builder.Services.AddHttpClient();
         builder.Services.AddControllers();
+        builder.Services.AddSingleton<ConnectionManager>();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 

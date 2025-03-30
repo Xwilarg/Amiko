@@ -1,5 +1,6 @@
 using Amiko.Models;
 using Amiko.Server.Database;
+using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -8,16 +9,18 @@ using System.Security.Claims;
 namespace Amiko.Server.Controllers;
 
 [ApiController]
-[Route("/api/message/")]
-public class MessageController : ControllerBase
+[Route("/api/attachment/")]
+public class AttachmentController : ControllerBase
 {
     private readonly ILogger<WebsocketController> _logger;
     private SqliteContext _dbContext;
+    private ConnectionManager _connManager;
 
-    public MessageController(ILogger<WebsocketController> logger, SqliteContext dbContext)
+    public AttachmentController(ILogger<WebsocketController> logger, SqliteContext dbContext, ConnectionManager connManager)
     {
         _logger = logger;
         _dbContext = dbContext;
+        _connManager = connManager;
     }
 
     [Authorize]
@@ -41,7 +44,7 @@ public class MessageController : ControllerBase
             return StatusCode(StatusCodes.Status403Forbidden);
         }
 
-        await WebsocketController.PropagateAttachment(msgId, [ new AttachmentInfo() { Id = id.Value, Name = files[0].FileName } ]);
+        await _connManager.PropagateAttachment(msgId, [ new AttachmentInfo() { Id = id.Value, Name = files[0].FileName } ]);
 
         return StatusCode(StatusCodes.Status200OK);
     }
