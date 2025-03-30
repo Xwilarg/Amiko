@@ -71,7 +71,7 @@ namespace Amiko.Server.Controllers
 
                 while (true)
                 {
-                    var buffer = new byte[1024];
+                    var buffer = new byte[4096];
                     WebSocketReceiveResult? response;
                     
                     try
