@@ -20,6 +20,7 @@ public class Program
         builder.Services.AddHttpClient();
         builder.Services.AddControllers();
         builder.Services.AddSingleton<ConnectionManager>();
+        builder.Services.AddSingleton<MessageManager>();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 

@@ -19,13 +19,20 @@ namespace Amiko.Server.Controllers
         private SqliteContext _dbContext;
         private HttpClient _httpClient;
         private ConnectionManager _connManager;
+        private MessageManager _msgManager;
 
-        public WebsocketController(ILogger<WebsocketController> logger, SqliteContext dbContext, HttpClient httpClient, ConnectionManager connManager)
+        public WebsocketController(
+            ILogger<WebsocketController> logger,
+            SqliteContext dbContext,
+            HttpClient httpClient,
+            ConnectionManager connManager,
+            MessageManager msgManager)
         {
             _logger = logger;
             _dbContext = dbContext;
             _httpClient = httpClient;
             _connManager = connManager;
+            _msgManager = msgManager;
         }
 
 
@@ -93,11 +100,11 @@ namespace Amiko.Server.Controllers
                             var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _connManager.Option);
 
                             if (baseMsg.Type == MessageType.Heartbeat)
-                            {
+                            { // Heartbeat, we just send one back
                                 await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
                             }
                             else if (baseMsg.Type == MessageType.SeenUpdate)
-                            {
+                            { // Seen update, we update the db
                                 var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _connManager.Option);
                                 var ctx = ContextInterpreter.Get(_dbContext);
                                 ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
@@ -105,70 +112,49 @@ namespace Amiko.Server.Controllers
                             else if (baseMsg.Type == MessageType.Message)
                             {
                                 // Parse actual message
-                                Console.WriteLine(Encoding.UTF8.GetString(buffer));
                                 var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), _connManager.Option);
 
                                 var ctx = ContextInterpreter.Get(_dbContext);
-
                                 if (!ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
                                 {
                                     // If this fail, it means we don't have the permissions to view this channel
                                     continue;
                                 }
 
-                                string content = prot.Content;
+                                var updatedData = _msgManager.ParseMessage(prot.Content, prot.Authors, claimId);
 
-                                List<UserContext>? authors = [];
-                                var prefix = prot.Content.Split(' ')[0].ToLowerInvariant();
-                                UserContext? targetUser = ctx.GetUsersFromPrefix(prefix).FirstOrDefault(x => ctx.DoesUserFillClaim(claimId, x.Id)); ;
-                                if (targetUser != null) // We found a valid matching user with the prefix
+                                if (updatedData == null)
                                 {
-                                    content = prot.Content[prefix.Length..].TrimStart(); // We remove the prefix from the message
-                                    authors = [targetUser];
-                                }
-                                else if (prot.Authors == null || prot.Authors.Length == 0) // Author not specified, it means the author is the claimId
-                                {
-                                    authors = [ ctx.TryGetUserFromId(claimId) ];
-                                }
-                                else
-                                {
-                                    foreach (var author in prot.Authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
+                                    var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
                                     {
-                                        if (!ctx.DoesUserFillClaim(claimId, author) || authors.Any(x => x.Id == author))
-                                        {
-                                            var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
-                                            {
-                                                Type = MessageType.Acknowledge,
-                                                AckId = prot.AckId,
-                                                IsError = true
-                                            }, _connManager.Option));
-                                            await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
-                                            authors = null;
-                                            break;
-                                        }
-                                        targetUser = ctx.TryGetUserFromId(author);
-                                        authors.Add(targetUser);
-                                    }
+                                        Type = MessageType.Acknowledge,
+                                        AckId = prot.AckId,
+                                        IsError = true
+                                    }, _connManager.Option));
+                                    await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                    continue;
                                 }
-
-                                if (authors == null) continue; // Authors is set to null only in case of an error
                                 
-                                _logger.Log(LogLevel.Information, $"Received message of size {content.Length} by {string.Join(", ", authors.Select(x => x.Username))}");
+                                _logger.Log(LogLevel.Information, $"Received message of size {updatedData.Content.Length} by {string.Join(", ", updatedData.Authors.Select(x => x.Username))}");
 
                                 // Save to db
                                 var finalId = ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
                                 {
                                     CreationTime = now,
-                                    Authors = authors.Select(x => x.Id).ToArray(),
-                                    Message = content
+                                    Authors = updatedData.Authors.Select(x => x.Id).ToArray(),
+                                    Message = updatedData.Content
                                 });
+
+                                var authorsIds = updatedData.Authors.Select(x => x.Id).ToArray();
+                                bool wereAuthorsUpdated = prot.Authors == null || !Enumerable.SequenceEqual(prot.Authors, authorsIds);
+                                bool wasContentUpdated = prot.Content != updatedData.Content;
 
                                 // Update message data with actual values
                                 var d = now.ToUniversalTime() - DateTime.UnixEpoch;
                                 prot.SentAt = (long)Math.Floor(d.TotalSeconds);
-                                prot.Authors = authors.Select(x => x.Id).ToArray();
-                                prot.Content = content; // Updated content (like when a prefix was removed or so)
                                 prot.Id = finalId;
+                                if (wereAuthorsUpdated) prot.Authors = authorsIds;
+                                if (wasContentUpdated) prot.Content = updatedData.Content;
 
                                 // Send message back
                                 List<Task> tasks = [];
@@ -188,8 +174,8 @@ namespace Amiko.Server.Controllers
                                             AckId = prot.AckId,
                                             NewId = finalId,
                                             IsError = false,
-                                            Content = prot.Content, // TODO: Only send if updated
-                                            Authors = prot.Authors
+                                            Content = wasContentUpdated ? prot.Content : null,
+                                            Authors = wereAuthorsUpdated ? prot.Authors : null,
                                         }, _connManager.Option));
                                         Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                         tasks.Add(t);
@@ -197,7 +183,7 @@ namespace Amiko.Server.Controllers
                                     // Webhooks
                                     foreach (var hook in ctx.GetAllWebhooks().Where(x => ctx.CanAccessServer(prot.ServerId, x.Id)))
                                     {
-                                        Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", authors.Select(x => x.Username)) }, _connManager.Option);
+                                        Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", updatedData.Authors.Select(x => x.Username)) }, _connManager.Option);
                                         tasks.Add(t);
                                     }
                                 }
