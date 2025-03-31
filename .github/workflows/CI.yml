@@ -16,16 +16,16 @@ jobs:
       with:
         dotnet-version: '9.0.x'
     - name: Install dependencies
-      run: dotnet restore Amiko.sln
+      run: dotnet restore
     - name: Build
-      run: dotnet build Amiko.sln --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore
     - name: Create release
-      run: dotnet publish Amiko.sln -c Release -r linux-x64
+      run: dotnet publish -c Release -r linux-x64
 
     - uses: actions/upload-artifact@v4
       with:
         name: back
-        path: server/bin/Release/net9.0/linux-x64/publish/
+        path: server/Amiko.Server/bin/Release/net9.0/linux-x64/publish/
         if-no-files-found: error
 
   front:
