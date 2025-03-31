@@ -12,16 +12,19 @@ namespace Amiko.Server.Database;
 public class ContextInterpreter
 {
     private SqliteContext _ctx;
-    private static bool _firstInit = true; // TODO: ugh
 
     private ContextInterpreter(SqliteContext ctx)
     {
         _ctx = ctx;
+    }
 
-        if (!_firstInit) return;
-        _firstInit = false;
+    public static ContextInterpreter Get(SqliteContext ctx)
+    {
+        return new(ctx);
+    }
 
-        // Load/Update db from config
+    public void Init()
+    {
         if (!File.Exists("config.json"))
         {
             throw new InvalidOperationException();
@@ -76,11 +79,6 @@ public class ContextInterpreter
                 _ctx.SaveChanges();
             }
         }
-    }
-
-    public static ContextInterpreter Get(SqliteContext ctx)
-    {
-        return new(ctx);
     }
 
     /// <summary>
