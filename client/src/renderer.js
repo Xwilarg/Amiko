@@ -4,9 +4,11 @@ import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
+import { discardAttachment, sendAttachment } from "./attachment";
 var EmojiConvertor = require('emoji-js');
 
 marked.use({
+    breaks: true,
     tokenizer: {
       link() {}
     }
@@ -202,7 +204,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content + (msg.attachments.length > 0 ? `(File attached)` : ""), [], `msg-${msg.id}`);
+        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content + (msg.attachments.length > 0 ? ` (File attached)` : ""), [], `msg-${msg.id}`);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -334,10 +336,15 @@ export function acknowledgeMessage(msg) {
     if (msg.isError) {
         message.classList.add("error");
 
+        // Message wasn't sent so we don't send the attachments
+        discardAttachment(msg.ackId);
+
         // Msg is errored, we remove it from the list
         servInfo[currChan.servId].channels[currChan.chanId].messages = servInfo[currChan.servId].channels[currChan.chanId].messages.filter(x => x.ackId != msg.ackId);
         return;
     }
+
+    sendAttachment(msg.newId, msg.ackId);
 
     // Update messages and data stored
     const oldMsg = servInfo[currChan.servId].channels[currChan.chanId].messages.find(x => x.ackId === msg.ackId);
@@ -367,11 +374,8 @@ export function initRenderer()
         e.preventDefault();
         const content = document.getElementById("message-field");
         if (content.value) {
-            sendMessageFromInput(content.value, currChan.servId, currChan.chanId);
             const fileInput = document.getElementById("attach-file");
-            if (fileInput.value) {
-                // sendAttachments(fileInput.files); // TODO: Move to ack
-            }
+            sendMessageFromInput(content.value, currChan.servId, currChan.chanId, fileInput.value ? fileInput.files : []);
 
             // Unset send field
             content.value = "";

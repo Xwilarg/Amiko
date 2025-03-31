@@ -2,6 +2,7 @@
 using Amiko.Server.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
@@ -85,19 +86,18 @@ public class ContextInterpreter
     /// Does the identity given (who the user pretend to be) allowed by current claim
     /// This mean targetted account is either us or an account that depends on us
     /// </summary>
-    public bool DoesUserFillClaim(int rawId, int identity)
+    public bool DoesUserFillClaim(int claimId, int identity)
     {
-        if (rawId == identity) // User is claim
+        if (claimId == identity) // User is claim
             return true;
 
-        var rawTarget = _ctx.Users.FirstOrDefault(x => x.Id == rawId);
+        var rawTarget = _ctx.Users.FirstOrDefault(x => x.Id == claimId);
         var identityTarget = _ctx.Users.FirstOrDefault(x => x.Id == identity);
-
         if (rawTarget == null || identityTarget == null)
             return false; // User doesn't exists
 
         // Check dependencies
-        return identityTarget.DependsOf == rawId || rawTarget.DependsOf == identity;
+        return identityTarget.DependsOf == claimId || rawTarget.DependsOf == identity;
     }
 
     /// <summary>
@@ -204,21 +204,38 @@ public class ContextInterpreter
     public IEnumerable<UserContext> GetAllWebhooks()
         => _ctx.Users.Where(x => x.Webhook != null);
 
-    public int? TryAddAttachment(int msgId, int claimId, string filename, byte[] data)
+    private MessageContext? TryGetMessage(int msgId, int claimId)
     {
-        var msg = _ctx.Messages.FirstOrDefault(x => x.Id == msgId);
+        var msg = _ctx.Messages.Include(x => x.Attachments).FirstOrDefault(x => x.Id == msgId);
         if (msg == null) return null; // Invalid ID
 
-        if (!msg.Authors.Any(x => !DoesUserFillClaim(claimId, x))) return null; // Permission check
+        if (!msg.Authors.Any(x => DoesUserFillClaim(claimId, x))) return null; // Permission check
+
+        return msg;
+    }
+
+    public int? TryAddAttachment(int msgId, int claimId, string filename, string contentType, byte[] data)
+    {
+        var msg = TryGetMessage(msgId, claimId);
+        if (msg == null) return null;
 
         msg.Attachments.Add(new AttachmentContext()
         {
             Filename = filename,
+            Mimetype = contentType,
             Data = data
         });
 
         _ctx.SaveChanges();
         return msg.Id;
+    }
+
+    public List<AttachmentContext> TryGetAttachment(int msgId, int claimId)
+    {
+        var msg = TryGetMessage(msgId, claimId);
+        if (msg == null) return [];
+
+        return msg.Attachments;
     }
 
     public Message[] GetMessages(int servId, int chanId, int msgCount)
@@ -227,6 +244,7 @@ public class ContextInterpreter
             _ctx.Servers
                 .Include(s => s.Channels)
                 .ThenInclude(c => c.Messages)
+                .ThenInclude(m => m.Attachments)
                 .First(x => x.Id == servId).Channels
                 .First(x => x.Id == chanId).Messages
                 .TakeLast(msgCount)
@@ -300,6 +318,7 @@ public class AttachmentContext
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
     public byte[] Data { set; get; }
     public string Filename { set; get; }
+    public string Mimetype { set; get; }
 }
 
 public class UserContext

@@ -34,6 +34,10 @@ namespace Amiko.Server.Migrations
                     b.Property<int?>("MessageContextId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Mimetype")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MessageContextId");

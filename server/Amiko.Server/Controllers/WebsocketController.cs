@@ -224,8 +224,4 @@ namespace Amiko.Server.Controllers
             }
         }
     }
-
-    internal class ContextUser
-    {
-    }
 }

@@ -113,6 +113,7 @@ namespace Amiko.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Data = table.Column<byte[]>(type: "BLOB", nullable: false),
                     Filename = table.Column<string>(type: "TEXT", nullable: false),
+                    Mimetype = table.Column<string>(type: "TEXT", nullable: false),
                     MessageContextId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>

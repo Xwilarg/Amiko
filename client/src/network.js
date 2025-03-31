@@ -1,3 +1,4 @@
+import { addAttachment } from "./attachment";
 import { addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_MODE_SHOW_ALL, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
 import { acknowledgeMessage, finishSetupAsync, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
@@ -29,7 +30,7 @@ export function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
 
-export function sendMessageFromInput(content, servId, chanId) {
+export function sendMessageFromInput(content, servId, chanId, attachedFiles) {
     var newMsg = {
         type: 2,
         content: content,
@@ -40,6 +41,9 @@ export function sendMessageFromInput(content, servId, chanId) {
     };
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(newMsg, content, currId);
+    if (attachedFiles.length > 0) {
+        addAttachment(currId, attachedFiles);
+    }
     currId++;
 }
 
@@ -52,11 +56,14 @@ export function sendSeenUpdate(servId, chanId) {
     removeNotification(servId, chanId); // We saw the message so we discard related notifications
 }
 
-export function sendAttachments(msgId, files) {
+export function sendAttachmentOverNetwork(msgId, files) {
     const data = new FormData();
-    data.append("files", files);
+    console.log(files);
+    for (const f of files) {
+        data.append("files", f);
+    }
 
-    fetch(createHttpUrl(`message/attach/${msgId}`), {
+    fetch(createHttpUrl(`attachment/attach/${msgId}`), {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`

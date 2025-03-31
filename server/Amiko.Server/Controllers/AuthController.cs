@@ -55,6 +55,6 @@ public class AuthController : ControllerBase
     [HttpPost("validate")]
     public IActionResult ValidateToken()
     {
-        return StatusCode(StatusCodes.Status200OK);
+        return StatusCode(StatusCodes.Status204NoContent);
     }
 }

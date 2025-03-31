@@ -24,6 +24,31 @@ public class AttachmentController : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("get/{msgId}")]
+    public async Task<IActionResult> GetAttachment([Required] int msgId)
+    {
+        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var ctx = ContextInterpreter.Get(_dbContext);
+
+        var att = ctx.TryGetAttachment(msgId, claimId);
+        if (att.Count == 0)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        var file = att[0];
+        var cd = new System.Net.Mime.ContentDisposition
+        {
+            FileName = file.Filename,
+            Inline = true,
+        };
+
+        Response.Headers.Append("Content-Disposition", cd.ToString());
+
+        return File(file.Data, file.Mimetype);
+    }
+
+    [Authorize]
     [HttpPost("attach/{msgId}")]
     [RequestSizeLimit(2_000_000)]
     public async Task<IActionResult> AddAttachment([Required] int msgId, [Required, FromForm] IFormFile[] files)
@@ -31,6 +56,10 @@ public class AttachmentController : ControllerBase
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
         var ctx = ContextInterpreter.Get(_dbContext);
 
+        if (files.Length == 0)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, "At least one file must be submitted");
+        }
         if (files.Length > 1)
         {
             return StatusCode(StatusCodes.Status400BadRequest, "Multiple attachment isn't supported yet");
@@ -38,7 +67,7 @@ public class AttachmentController : ControllerBase
 
         using var ms = new MemoryStream();
         files[0].CopyTo(ms);
-        var id = ctx.TryAddAttachment(msgId, claimId, files[0].FileName, ms.ToArray());
+        var id = ctx.TryAddAttachment(msgId, claimId, files[0].FileName, files[0].ContentType, ms.ToArray());
         if (id == null)
         {
             return StatusCode(StatusCodes.Status403Forbidden);
@@ -46,6 +75,6 @@ public class AttachmentController : ControllerBase
 
         await _connManager.PropagateAttachment(msgId, [ new AttachmentInfo() { Id = id.Value, Name = files[0].FileName } ]);
 
-        return StatusCode(StatusCodes.Status200OK);
+        return StatusCode(StatusCodes.Status204NoContent);
     }
 }
