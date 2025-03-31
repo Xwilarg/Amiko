@@ -148,6 +148,9 @@ function parseMessage(msg, text) {
 
         // Youtube check
         let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
+        if (!yt) {
+            yt = l[5].match(/youtu\.be\/([0-9a-zA-Z_]+)/m); 
+        }
         if (yt) {
             prev.classList.remove("is-hidden");
             if (behavior === "") {
