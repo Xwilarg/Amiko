@@ -5,6 +5,7 @@ import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, us
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
 import { discardAttachment, hasAttachment, sendAttachment, setAttachment } from "./attachment";
+import { createRichPreviewImage, initPreview } from "./preview";
 var EmojiConvertor = require('emoji-js');
 
 marked.use({
@@ -139,9 +140,8 @@ function parseMessage(msg, text, attachments, id) {
         const indicatorRight = behavior === "" ? "" : `<span class="link-indicator">${l[6]}</span>`;
 
         let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
-        if (m && !l[5].includes('"')) { // Ensure we can't inject code by closing the string
-            prev.classList.remove("is-hidden");
-            prev.innerHTML += `<div class="preview"><img class="image ${behavior}" src="${l[5]}"/></div>`;
+        if (m) { // Ensure we can't inject code by closing the string
+            createRichPreviewImage(l[5], prev, behavior);
             return `${indicatorLeft}<span class="link link-image">${l[5]}</span>${indicatorRight}`;
         }
 
@@ -164,11 +164,7 @@ function parseMessage(msg, text, attachments, id) {
 
     if (attachments.length > 0) {
         getAttachmentOverNetwork(currChan.servId, currChan.chanId, id, (blob) => {
-            const img = document.createElement("img");
-            prev.classList.remove("is-hidden");
-            var imageUrl = window.URL.createObjectURL(blob);
-            img.src = imageUrl;
-            prev.appendChild(img);
+            createRichPreviewImage(window.URL.createObjectURL(blob), prev, null);
         });
         const attachmentInfo = msg.querySelector(".attachment-info");
         attachmentInfo.classList.remove("is-hidden");
@@ -397,6 +393,7 @@ export async function finishSetupAsync()
     refreshChannelDisplay();
     refreshMessageDisplay();
     await updateProfileDisplayAsync();
+    initPreview();
 }
 
 export function initRenderer()

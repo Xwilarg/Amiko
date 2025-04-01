@@ -3,6 +3,17 @@ html {
     overflow-y: hidden;
 }
 
+/* Contains preview in screen */
+#modal-preview img {
+    max-height: 90vh;
+}
+
+#modal-preview .modal-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Prettier flex */
 .is-flex {
     gap: 10px;

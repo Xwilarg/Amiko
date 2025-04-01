@@ -126,6 +126,13 @@ namespace Amiko.Server.Migrations
                     b.Property<string>("AllowedUsers")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Character")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Color")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");

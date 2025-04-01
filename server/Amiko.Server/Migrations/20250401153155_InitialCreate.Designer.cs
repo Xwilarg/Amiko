@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20250331140903_InitialCreate")]
+    [Migration("20250401153155_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -128,6 +128,13 @@ namespace Amiko.Server.Migrations
 
                     b.Property<string>("AllowedUsers")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("Character")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Color")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()

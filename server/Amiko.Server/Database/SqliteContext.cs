@@ -2,7 +2,6 @@
 using Amiko.Server.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
@@ -38,11 +37,14 @@ public class ContextInterpreter
         {
             if (!_ctx.Servers.Any(x => x.Name == s.Name))
             {
-                AddServer(s.Name, s.AllowedUsers);
+                AddServer(s.Name, s.AllowedUsers, s.Color, s.Character);
             }
             else
             {
-                _ctx.Servers.First(x => x.Name == s.Name).AllowedUsers = s.AllowedUsers?.ToList();
+                var currServ = _ctx.Servers.First(x => x.Name == s.Name);
+                currServ.AllowedUsers = s.AllowedUsers?.ToList();
+                if (s.Color != null) currServ.Color = (s.Color.R << 16) | (s.Color.G << 8) | s.Color.B;
+                if (s.Character != null) currServ.Character = s.Character;
                 _ctx.SaveChanges();
             }
             foreach (var c in s.Channels)
@@ -172,9 +174,16 @@ public class ContextInterpreter
     }
 
 
-    private int AddServer(string name, int[]? allowedUsers)
+    private int AddServer(string name, int[]? allowedUsers, Color? color, string? character)
     {
-        var serv = new ServerContext() { Name = name, AllowedUsers = allowedUsers?.ToList() };
+        color ??= new Color() { R = 54, G = 54, B = 54 };
+        var serv = new ServerContext()
+        {
+            Name = name,
+            AllowedUsers = allowedUsers?.ToList(),
+            Color = (color.R << 16) | (color.G << 8) | color.B,
+            Character = character ?? name[0].ToString()
+        };
         _ctx.Servers.Add(serv);
         _ctx.SaveChanges();
 
@@ -346,6 +355,8 @@ public class ServerContext
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public string Name { set; get; }
+    public int Color { set; get; }
+    public string Character { set; get; }
     public List<ChannelContext> Channels { set; get; } = [];
     public List<int>? AllowedUsers { set; get; } = null;
 }

@@ -35,6 +35,9 @@
         public string Name { set; get; }
         public ChannelConfig[] Channels { set; get; }
         public int[]? AllowedUsers { set; get; }
+
+        public Color? Color { set; get; }
+        public string? Character { set; get; }
     }
 
     public class ChannelConfig

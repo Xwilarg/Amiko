@@ -18,6 +18,8 @@ namespace Amiko.Server.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Color = table.Column<int>(type: "INTEGER", nullable: false),
+                    Character = table.Column<string>(type: "TEXT", nullable: false),
                     AllowedUsers = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
