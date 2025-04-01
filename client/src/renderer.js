@@ -101,11 +101,6 @@ function updateMessageAuthor(message, infos) {
     }
 }
 
-function cleanString(str) {
-    if (str) return str;
-    return "";
-}
-
 function parseMessage(msg, text, attachments, id) {
     msg.querySelector(".rich-preview").innerHTML = "";
     let finalHtml = text;
@@ -120,7 +115,7 @@ function parseMessage(msg, text, attachments, id) {
     // Then look for behavior specification "XXXXX:" (optional)
     // Then we look for the URL, it matches until it find one of the following strings: '^', ' ', '\n', ')', ',', ';', '>', '[end of line]'
     // We check if we have a ">" at the end (optional)
-    const regex = /((&lt;)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|&gt;|$)(&gt;)?/gm
+    const regex = /((<)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|>|$)(>)?/gm
     const prev = msg.querySelector(".rich-preview");
     let behavior = "";
 
@@ -135,19 +130,25 @@ function parseMessage(msg, text, attachments, id) {
                     break;
 
                 default: // Don't show the image
-                return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
+                return `<span class="link-indicator">${l[1]}</span><span class="link">${l[5]}</span><span class="link-indicator">${l[6]}</span>`;
             }
         }
+
+        const indicatorLeft = behavior === "" ? "" : `<span class="link-indicator">${l[2]}</span>`;
+        const indicatorRight = behavior === "" ? "" : `<span class="link-indicator">${l[6]}</span>`;
 
         let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
         if (m && !l[5].includes('"')) { // Ensure we can't inject code by closing the string
             prev.classList.remove("is-hidden");
             prev.innerHTML += `<div class="preview"><img class="image ${behavior}" src="${l[5]}"/></div>`;
-            return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link link-image">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
+            return `${indicatorLeft}<span class="link link-image">${l[5]}</span>${indicatorRight}`;
         }
 
         // Youtube check
         let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
+        if (!yt) {
+            yt = l[5].match(/youtu\.be\/([0-9a-zA-Z_]+)/m); 
+        }
         if (yt) {
             prev.classList.remove("is-hidden");
             if (behavior === "") {
@@ -157,7 +158,7 @@ function parseMessage(msg, text, attachments, id) {
             }
         }
 
-        return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
+        return `${indicatorLeft}<span class="link">${l[5]}</span>${indicatorRight}`;
     });
 
     if (attachments.length > 0) {
