@@ -85,7 +85,7 @@ namespace Amiko.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Messages",
+                name: "MessageContext",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -97,9 +97,9 @@ namespace Amiko.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.PrimaryKey("PK_MessageContext", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Messages_ChannelContext_ChannelContextId",
+                        name: "FK_MessageContext_ChannelContext_ChannelContextId",
                         column: x => x.ChannelContextId,
                         principalTable: "ChannelContext",
                         principalColumn: "Id");
@@ -120,9 +120,9 @@ namespace Amiko.Server.Migrations
                 {
                     table.PrimaryKey("PK_AttachmentContext", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AttachmentContext_Messages_MessageContextId",
+                        name: "FK_AttachmentContext_MessageContext_MessageContextId",
                         column: x => x.MessageContextId,
-                        principalTable: "Messages",
+                        principalTable: "MessageContext",
                         principalColumn: "Id");
                 });
 
@@ -142,8 +142,8 @@ namespace Amiko.Server.Migrations
                 column: "UserContextId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_ChannelContextId",
-                table: "Messages",
+                name: "IX_MessageContext_ChannelContextId",
+                table: "MessageContext",
                 column: "ChannelContextId");
         }
 
@@ -157,7 +157,7 @@ namespace Amiko.Server.Migrations
                 name: "ChannelSeen");
 
             migrationBuilder.DropTable(
-                name: "Messages");
+                name: "MessageContext");
 
             migrationBuilder.DropTable(
                 name: "Users");

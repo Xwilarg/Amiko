@@ -5,3 +5,7 @@
 .link-image, .link-indicator {
     display: none !important;
 }
+
+.attachment-info {
+    display: none !important;
+}

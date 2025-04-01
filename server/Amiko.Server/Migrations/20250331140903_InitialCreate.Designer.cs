@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20250331120745_InitialCreate")]
+    [Migration("20250331140903_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -117,7 +117,7 @@ namespace Amiko.Server.Migrations
 
                     b.HasIndex("ChannelContextId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("MessageContext");
                 });
 
             modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>

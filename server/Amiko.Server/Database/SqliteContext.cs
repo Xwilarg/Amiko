@@ -141,10 +141,16 @@ public class ContextInterpreter
 
     public ChannelContext? GetChannel(int servId, int chanId, int claimId)
     {
-
         var serv = _ctx.Servers.Include(s => s.Channels).First(x => x.Id == servId);
         if (!CanAccessServer(serv.Id, claimId)) return null;
         return serv.Channels.First(x => x.Id == chanId);
+    }
+
+    public MessageContext? GetMessage(int servId, int chanId, int msgId, int claimId)
+    {
+        var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments).First(x => x.Id == servId);
+        if (!CanAccessServer(serv.Id, claimId)) return null;
+        return serv.Channels.First(x => x.Id == chanId).Messages.First(x => x.Id == msgId);
     }
 
     public bool UpdateLastSeen(int servId, int chanId, int claimId, long now)
@@ -204,20 +210,11 @@ public class ContextInterpreter
     public IEnumerable<UserContext> GetAllWebhooks()
         => _ctx.Users.Where(x => x.Webhook != null);
 
-    private MessageContext? TryGetMessage(int msgId, int claimId)
+    public int? TryAddAttachment(int servId, int chanId, int msgId, int claimId, string filename, string contentType, byte[] data)
     {
-        var msg = _ctx.Messages.Include(x => x.Attachments).FirstOrDefault(x => x.Id == msgId);
-        if (msg == null) return null; // Invalid ID
-
-        if (!msg.Authors.Any(x => DoesUserFillClaim(claimId, x))) return null; // Permission check
-
-        return msg;
-    }
-
-    public int? TryAddAttachment(int msgId, int claimId, string filename, string contentType, byte[] data)
-    {
-        var msg = TryGetMessage(msgId, claimId);
+        var msg = GetMessage(servId, chanId, msgId, claimId);
         if (msg == null) return null;
+        if (!msg.Authors.Any(x => DoesUserFillClaim(claimId, x))) return null;
 
         msg.Attachments.Add(new AttachmentContext()
         {
@@ -230,9 +227,9 @@ public class ContextInterpreter
         return msg.Id;
     }
 
-    public List<AttachmentContext> TryGetAttachment(int msgId, int claimId)
+    public List<AttachmentContext> TryGetAttachment(int servId, int chanId, int msgId, int claimId)
     {
-        var msg = TryGetMessage(msgId, claimId);
+        var msg = GetMessage(servId, chanId, msgId, claimId);
         if (msg == null) return [];
 
         return msg.Attachments;
@@ -307,7 +304,6 @@ public class SqliteContext : DbContext
 {
     public DbSet<ServerContext> Servers { set; get; }
     public DbSet<UserContext> Users { set; get; }
-    public DbSet<MessageContext> Messages { set; get; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.UseSqlite("Data Source=Sqlite.db");

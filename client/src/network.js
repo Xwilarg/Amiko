@@ -1,8 +1,8 @@
 import { addAttachment } from "./attachment";
 import { addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_MODE_SHOW_ALL, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
-import { acknowledgeMessage, finishSetupAsync, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
-import { getInfoFromId, getPossibleUsers, updateUserInfo, userIdListToInfo, wasIMentionned } from "./user";
+import { acknowledgeMessage, editMessage, finishSetupAsync, getChanId, getServId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
+import { getInfoFromId, updateUserInfo, wasIMentionned } from "./user";
 
 const apiTarget = "amiko.zirk.eu";
 const isSecure = true;
@@ -42,7 +42,7 @@ export function sendMessageFromInput(content, servId, chanId, attachedFiles) {
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(newMsg, content, currId);
     if (attachedFiles.length > 0) {
-        addAttachment(currId, attachedFiles);
+        addAttachment(currId, getServId(), getChanId(), attachedFiles);
     }
     currId++;
 }
@@ -56,14 +56,25 @@ export function sendSeenUpdate(servId, chanId) {
     removeNotification(servId, chanId); // We saw the message so we discard related notifications
 }
 
-export function sendAttachmentOverNetwork(msgId, files) {
+export function getAttachmentOverNetwork(servId, chanId, msgId, onDone) {
+    fetch(createHttpUrl(`attachment/get/${servId}/${chanId}/${msgId}`), {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${sessionToken}`
+        }
+    })
+    .then(resp => resp.ok ? resp.blob() : Promise.reject(`${resp.status}`))
+    .then(blob => onDone(blob))
+    .catch((err) => { sendErrorMessage("Attachment get failed: " + err) });
+}
+
+export function sendAttachmentOverNetwork(servId, chanId, msgId, files) {
     const data = new FormData();
-    console.log(files);
     for (const f of files) {
         data.append("files", f);
     }
 
-    fetch(createHttpUrl(`attachment/attach/${msgId}`), {
+    fetch(createHttpUrl(`attachment/attach/${servId}/${chanId}/${msgId}`), {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${sessionToken}`
@@ -141,7 +152,6 @@ export function openMessageConnection(token) {
     document.getElementById("messages").innerHTML = "";
 
     // TODO: Move on refresh
-    sendSystemMessage(`Chrome v${versions.chrome()}, Node v${versions.node()}, Electron v${versions.electron()}`);
     sendSystemMessage(`Connecting...`);
 
     socket = new WebSocket(createWebsocketUrl(), ["client", token]);
@@ -215,6 +225,10 @@ export function openMessageConnection(token) {
 
             case 3: // Acknowledgement of a message sent
                 acknowledgeMessage(json);
+                break;
+
+            case 7: // A message was modified
+                editMessage(json);
                 break;
         }
     });

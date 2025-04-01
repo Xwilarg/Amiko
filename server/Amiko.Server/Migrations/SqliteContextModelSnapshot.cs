@@ -114,7 +114,7 @@ namespace Amiko.Server.Migrations
 
                     b.HasIndex("ChannelContextId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("MessageContext");
                 });
 
             modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>

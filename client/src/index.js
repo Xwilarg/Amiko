@@ -6,7 +6,7 @@ import { initUsersAsync } from "./user";
 let token;
 let areSettingsOpen = false;
 
-const settings = [ "home", "settings", "profile", "help" ];
+const settings = [ "home", "settings", "profile", "help", "debug" ];
 
 window.addEventListener('DOMContentLoaded', async () => {
     const pwd = document.getElementById("password");
@@ -74,6 +74,10 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    document.getElementById("version-electron").innerHTML = versions.electron();
+    document.getElementById("version-node").innerHTML = versions.node();
+    document.getElementById("version-browser").innerHTML = versions.chrome();
 
     await initPreferencesAsync(); // Need to be called first since the rest might depends of user preferences
     initRenderer();

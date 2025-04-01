@@ -41,6 +41,7 @@
                         <h2 class="subtitle"></h2>
                         <p class="content"></p>
                         <div class="rich-preview is-flex is-hidden"></div>
+                        <div class="attachment-info is-hidden"></div>
                     </div>
                 </div>
             </div>
@@ -61,6 +62,9 @@
                 </button>
                 <button class="navbar-item" id="toggle-help">
                     <span class="material-symbols-outlined">help</span>
+                </button>
+                <button class="navbar-item" id="toggle-debug">
+                    <span class="material-symbols-outlined">bug_report</span>
                 </button>
                 <div class="level is-mobile">
                     <h3 class="subtitle" id="channel-title"></h3>
@@ -130,6 +134,17 @@
                     <p>&lt;link&gt; &gt; Don't preview an image</p>
                     <p>&lt;b:link&gt; &gt; Blur an image preview</p>
                 </fieldset>
+                <fieldset class="box">
+                    <legend class="label has-text-centered">Credits</legend>
+                    <a href="https://github.com/Xwilarg/Amiko" target="_blank">GitHub</a><br>
+                </fieldset>
+            </div>
+        </div>
+        <div id="debug-dropdown" class="dropdown is-hidden">
+            <div>
+                Electron: <span id="version-electron"></span><br>
+                Node: <span id="version-node"></span><br>
+                Browser: <span id="version-browser"></span><br>
             </div>
         </div>
         <div>

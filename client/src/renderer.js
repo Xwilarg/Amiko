@@ -1,10 +1,10 @@
 import { closeSettings } from ".";
-import { downloadChanExport, sendMessageFromInput, sendSeenUpdate } from "./network";
+import { downloadChanExport, getAttachmentOverNetwork, sendMessageFromInput, sendSeenUpdate } from "./network";
 import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
-import { discardAttachment, sendAttachment } from "./attachment";
+import { discardAttachment, sendAttachment, setAttachment } from "./attachment";
 var EmojiConvertor = require('emoji-js');
 
 marked.use({
@@ -15,15 +15,15 @@ marked.use({
 });
 
 export function sendSystemMessage(text) {
-    sendMessageInternal(new Date(), [], text, [ "system" ], null);
+    sendMessageInternal(new Date(), [], text, [], [ "system" ], null, null);
 }
 
 export function sendErrorMessage(text) {
-    sendMessageInternal(new Date(), [], text, [ "error" ], null);
+    sendMessageInternal(new Date(), [], text, [], [ "error" ], null, null);
 }
 
-function sendIncomingMessage(date, ids, text, id) {
-    sendMessageInternal(new Date(date * 1000), ids.map(getInfoFromId), text, [], `msg-${id}`);
+function sendIncomingMessage(date, ids, text, attachments, id) {
+    sendMessageInternal(new Date(date * 1000), ids.map(getInfoFromId), text, attachments, [], `msg-${id}`, id);
 }
 
 export function sendMyMessage(msg, text, id) {
@@ -35,10 +35,10 @@ export function sendMyMessage(msg, text, id) {
     msg.ackId = id;
     msg.attachments = [];
     servInfo[currChan.servId].channels[currChan.chanId].messages.push(msg);
-    sendMessageInternal(now, userIdListToInfo(msg.authors), text, [ "sending" ], `msg-tmp-${id}`);
+    sendMessageInternal(now, userIdListToInfo(msg.authors), text, [], [ "sending" ], `msg-tmp-${id}`, null);
 }
 
-function sendMessageInternal(date, infos, text, indications, id) {
+function sendMessageInternal(date, infos, text, attachments, indications, id, msgId) {
     const container = document.getElementById("messages");
     const template = document.getElementById("message-template");
 
@@ -59,7 +59,7 @@ function sendMessageInternal(date, infos, text, indications, id) {
     }
 
     // Parse message content to show image preview, markdown, etc...
-    parseMessage(instance, text);
+    parseMessage(instance, text, attachments, msgId);
     if (wasIMentionned(text))
     {
         msg.classList.add("mention");
@@ -106,7 +106,7 @@ function cleanString(str) {
     return "";
 }
 
-function parseMessage(msg, text) {
+function parseMessage(msg, text, attachments, id) {
     msg.querySelector(".rich-preview").innerHTML = "";
     let finalHtml = text;
 
@@ -160,6 +160,21 @@ function parseMessage(msg, text) {
         return `<span class="link-indicator">${cleanString(l[1])}</span><span class="link">${l[5]}</span><span class="link-indicator">${cleanString(l[6])}</span>`;
     });
 
+    if (attachments.length > 0) {
+        getAttachmentOverNetwork(currChan.servId, currChan.chanId, id, (blob) => {
+            const img = document.createElement("img");
+            prev.classList.remove("is-hidden");
+            var imageUrl = window.URL.createObjectURL(blob);
+            img.src = imageUrl;
+            prev.appendChild(img);
+        });
+        const attachmentInfo = msg.querySelector(".attachment-info");
+        attachmentInfo.classList.remove("is-hidden");
+        attachmentInfo.innerHTML = "1 file attached";
+    }
+    for (let a of attachments) { // TODO: handle multiple attachments
+    }
+
     // When we click on something that have a blur effect, we remove it
     for (let p of prev.getElementsByClassName("preview")) {
         p.addEventListener("click", e => {
@@ -204,7 +219,7 @@ function refreshMessageDisplay() {
         } else {
             date = msg.date;
         }
-        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content + (msg.attachments.length > 0 ? ` (File attached)` : ""), [], `msg-${msg.id}`);
+        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, msg.attachments, [], `msg-${msg.id}`, msg.id);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -243,6 +258,9 @@ emoji.replace_mode = "unified";
 let servInfo = {};
 let currChan = null;
 
+export function getServId() { return currChan?.servId; }
+export function getChanId() { return currChan?.chanId; }
+
 export function isCurrentChannel(servId, chanId)
 {
     return servId === currChan.servId && chanId === currChan.chanId;
@@ -251,7 +269,7 @@ export function isCurrentChannel(servId, chanId)
 export function updateReceivedMessage(msg) {
     servInfo[msg.serverId].channels[msg.channelId].messages.push(msg);
     if (currChan.servId === msg.serverId && currChan.chanId === msg.channelId) {
-        sendIncomingMessage(msg.sentAt, msg.authors, msg.content, msg.id);
+        sendIncomingMessage(msg.sentAt, msg.authors, msg.content, msg.attachments, msg.id);
     }
 }
 
@@ -353,10 +371,20 @@ export function acknowledgeMessage(msg) {
         oldMsg.authors = msg.authors;
     }
     if (msg.content) {
-        parseMessage(message, msg.content);
+        parseMessage(message, msg.content, [], msg.newId);
         oldMsg.content = msg.content;
     }
     oldMsg.id = msg.newId;
+}
+
+export function editMessage(msg) {
+    const message = document.getElementById(`msg-${msg.id}`);
+
+    const oldMsg = servInfo[currChan.servId].channels[currChan.chanId].messages.find(x => x.id === msg.id);
+    if (msg.attachments.length > 0) {
+        oldMsg.attachments = msg.attachments;
+        parseMessage(message, oldMsg.content, msg.attachments, msg.id);
+    }
 }
 
 // Once we received info about channels and users, we show everything properly
@@ -373,8 +401,8 @@ export function initRenderer()
     document.getElementById("send-message").addEventListener("click", e => {
         e.preventDefault();
         const content = document.getElementById("message-field");
-        if (content.value) {
-            const fileInput = document.getElementById("attach-file");
+        const fileInput = document.getElementById("attach-file");
+        if (content.value || fileInput.value) {
             sendMessageFromInput(content.value, currChan.servId, currChan.chanId, fileInput.value ? fileInput.files : []);
 
             // Unset send field
@@ -382,7 +410,7 @@ export function initRenderer()
 
             // Unset attachment
             fileInput.value = "";
-            document.getElementById("attach-file-container").classList.remove("is-primary");
+            setAttachment([]);
         }
     });
     document.getElementById("message-field").addEventListener("keypress", (e) => {
@@ -391,15 +419,20 @@ export function initRenderer()
             e.preventDefault();
         }
     });
+    document.addEventListener("paste", e => {
+        console.log(Array.from(e.clipboardData.items));
+    })
     document.getElementById("attach-file").addEventListener("change", e => {
-        if (e.target.files[0].size > 2000000) {
-            e.target.value = "";
-            alert("File must be smaller than 2MB")
-        }
         if (e.target.value) {
-            document.getElementById("attach-file-container").classList.add("is-primary");
+            if (e.target.files[0].size > 2000000) {
+                e.target.value = "";
+                setAttachment([]);
+                alert("File must be smaller than 2MB");
+            } else {
+                setAttachment(e.target.files);
+            }
         } else {
-            document.getElementById("attach-file-container").classList.remove("is-primary");
+            setAttachment([]);
         }
     });
 

@@ -24,13 +24,13 @@ public class AttachmentController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("get/{msgId}")]
-    public async Task<IActionResult> GetAttachment([Required] int msgId)
+    [HttpGet("get/{servId}/{chanId}/{msgId}")]
+    public async Task<IActionResult> GetAttachment([Required] int servId, [Required] int chanId, [Required] int msgId)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
         var ctx = ContextInterpreter.Get(_dbContext);
 
-        var att = ctx.TryGetAttachment(msgId, claimId);
+        var att = ctx.TryGetAttachment(servId, chanId, msgId, claimId);
         if (att.Count == 0)
         {
             return StatusCode(StatusCodes.Status403Forbidden);
@@ -49,9 +49,9 @@ public class AttachmentController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("attach/{msgId}")]
+    [HttpPost("attach/{servId}/{chanId}/{msgId}")]
     [RequestSizeLimit(2_000_000)]
-    public async Task<IActionResult> AddAttachment([Required] int msgId, [Required, FromForm] IFormFile[] files)
+    public async Task<IActionResult> AddAttachment([Required] int servId, [Required] int chanId, [Required] int msgId, [Required, FromForm] IFormFile[] files)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
         var ctx = ContextInterpreter.Get(_dbContext);
@@ -67,7 +67,7 @@ public class AttachmentController : ControllerBase
 
         using var ms = new MemoryStream();
         files[0].CopyTo(ms);
-        var id = ctx.TryAddAttachment(msgId, claimId, files[0].FileName, files[0].ContentType, ms.ToArray());
+        var id = ctx.TryAddAttachment(servId, chanId, msgId, claimId, files[0].FileName, files[0].ContentType, ms.ToArray());
         if (id == null)
         {
             return StatusCode(StatusCodes.Status403Forbidden);
