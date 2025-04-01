@@ -4,10 +4,10 @@ import { sendAttachmentOverNetwork } from "./network";
 
 let attachments = {};
 
-let currAttachments;
+let currAttachments = [];
 
 export function setAttachment(files) {
-    currAttachments = files;
+    currAttachments = [...files];
 
     if (files.length > 0) {
         document.getElementById("attach-file-container").classList.add("is-primary");
@@ -16,12 +16,15 @@ export function setAttachment(files) {
     }
 }
 
-export function addAttachment(tempId, servId, chanId, files) {
-    console.log(servId);
+export function hasAttachment() {
+    return currAttachments.length > 0;
+}
+
+export function addAttachment(tempId, servId, chanId) {
     attachments[tempId] = {
         servId: servId,
         chanId: chanId,
-        files: [...files]
+        files: currAttachments
     };
 }
 

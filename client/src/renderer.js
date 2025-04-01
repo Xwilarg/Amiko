@@ -4,13 +4,14 @@ import { addNotificationDiv, addPendingNotification } from "./notification";
 import { getInfoFromId, getMainUserId, resetUsers, updateProfileDisplayAsync, userIdListToInfo, wasIMentionned } from "./user";
 import { marked } from "marked";
 import DOMPurify from 'dompurify';
-import { discardAttachment, sendAttachment, setAttachment } from "./attachment";
+import { discardAttachment, hasAttachment, sendAttachment, setAttachment } from "./attachment";
 var EmojiConvertor = require('emoji-js');
 
 marked.use({
     breaks: true,
     tokenizer: {
-      link() {}
+      link() {},
+      url() {}
     }
 });
 
@@ -173,8 +174,6 @@ function parseMessage(msg, text, attachments, id) {
         attachmentInfo.classList.remove("is-hidden");
         attachmentInfo.innerHTML = "1 file attached";
     }
-    for (let a of attachments) { // TODO: handle multiple attachments
-    }
 
     // When we click on something that have a blur effect, we remove it
     for (let p of prev.getElementsByClassName("preview")) {
@@ -278,7 +277,6 @@ export function resetInfo()
 {
     resetUsers();
     servInfo = {};
-    currChan = null;
     document.getElementById("export-button").disabled = true;
     document.getElementById("message-form").disabled = true;
     document.getElementById("servers").innerHTML = "";
@@ -304,6 +302,11 @@ export function updateServerInfo(msg) {
                 chanId: msg.channels[0].id
             }
             console.log(`Automatically load channel ${currChan.servId} / ${currChan.chanId}`);
+            document.getElementById("message-form").disabled = false;
+            refreshMessageDisplay();
+        }
+        else if (currChan.servId === msg.id && currChan.chanId === chan.id) { // We reconnect to the previous channel we were in
+            console.log(`Recovering session at channel ${currChan.servId} / ${currChan.chanId}`);
             document.getElementById("message-form").disabled = false;
             refreshMessageDisplay();
         }
@@ -403,7 +406,7 @@ export function initRenderer()
         e.preventDefault();
         const content = document.getElementById("message-field");
         const fileInput = document.getElementById("attach-file");
-        if (content.value || fileInput.value) {
+        if (content.value || hasAttachment()) {
             sendMessageFromInput(content.value, currChan.servId, currChan.chanId, fileInput.value ? fileInput.files : []);
 
             // Unset send field
@@ -415,14 +418,30 @@ export function initRenderer()
         }
     });
     document.getElementById("message-field").addEventListener("keypress", (e) => {
-        if (e.key == 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             document.getElementById("send-message").click();
             e.preventDefault();
         }
     });
-    document.addEventListener("paste", e => {
-        console.log(Array.from(e.clipboardData.items));
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            setAttachment([]);
+        }
     })
+    document.addEventListener("paste", e => {
+        for (var item of e.clipboardData.items) {
+            if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file.size > 2000000) {
+                    setAttachment([]);
+                    alert("File must be smaller than 2MB");
+                } else {
+                    setAttachment([ file ]);
+                }
+                break;
+            }
+        }
+    });
     document.getElementById("attach-file").addEventListener("change", e => {
         if (e.target.value) {
             if (e.target.files[0].size > 2000000) {

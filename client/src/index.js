@@ -1,4 +1,4 @@
-import { createHttpUrl, openMessageConnection } from "./network";
+import { closeConnection, createHttpUrl, openMessageConnection } from "./network";
 import { initPreferencesAsync } from "./preferences";
 import { initRenderer } from "./renderer";
 import { initUsersAsync } from "./user";
@@ -78,6 +78,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById("version-electron").innerHTML = versions.electron();
     document.getElementById("version-node").innerHTML = versions.node();
     document.getElementById("version-browser").innerHTML = versions.chrome();
+    document.getElementById("reset-conn").addEventListener("click", _ => {
+        closeConnection();
+    })
 
     await initPreferencesAsync(); // Need to be called first since the rest might depends of user preferences
     initRenderer();

@@ -13,7 +13,7 @@ function initBrowser() {
     try
     {
         window.Notification.requestPermission().then(function (permission) {
-            console.log(`Permission status: ${permission}`);
+            console.log(`Notification perm status: ${permission}`);
         });
         canUseNotification = true;
     }
@@ -21,6 +21,13 @@ function initBrowser() {
     {
         console.warn("Notification API not available");
     }
+
+    navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
+        console.log(`Clipboard perm status: ${result.state}`);
+        if (result.state === "prompt") { // Show prompt right away so no need to ask in the future
+            navigator.clipboard.read();
+        }
+    });
     
     compatibility = {
         notification: () => canUseNotification

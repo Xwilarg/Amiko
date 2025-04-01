@@ -42,7 +42,7 @@ html {
     }
 }
 
-#settings-dropdown > div, #help-dropdown > div, #profile-dropdown > div {
+#settings-dropdown > div, #help-dropdown > div, #profile-dropdown > div, #debug-dropdown > div {
     width: 100%;
 }
 

@@ -1,4 +1,4 @@
-import { addAttachment } from "./attachment";
+import { addAttachment, hasAttachment } from "./attachment";
 import { addPendingNotification, removeNotification } from "./notification";
 import { getCurrentAltUser, getNotificationPrivacySettings, getNotificationSettings, NOTIF_MODE_SHOW_ALL, NOTIF_SELECTION_ALL, NOTIF_SELECTION_NONE } from "./preferences";
 import { acknowledgeMessage, editMessage, finishSetupAsync, getChanId, getServId, isCurrentChannel, resetInfo, sendErrorMessage, sendMyMessage, sendSystemMessage, updateReceivedMessage, updateServerInfo } from "./renderer";
@@ -30,7 +30,7 @@ export function createHttpUrl(endpoint) {
     return `http${isSecure ? 's' : ''}://${apiTarget}/api/${endpoint}`
 }
 
-export function sendMessageFromInput(content, servId, chanId, attachedFiles) {
+export function sendMessageFromInput(content, servId, chanId) {
     var newMsg = {
         type: 2,
         content: content,
@@ -41,9 +41,7 @@ export function sendMessageFromInput(content, servId, chanId, attachedFiles) {
     };
     socket.send(JSON.stringify(newMsg));
     sendMyMessage(newMsg, content, currId);
-    if (attachedFiles.length > 0) {
-        addAttachment(currId, getServId(), getChanId(), attachedFiles);
-    }
+    if (hasAttachment()) addAttachment(currId, getServId(), getChanId());
     currId++;
 }
 
@@ -147,6 +145,10 @@ function sendNotification(json) {
     }
 }
 
+export function closeConnection() {
+    socket.close();
+}
+
 export function openMessageConnection(token) {
     sessionToken = token;
     document.getElementById("messages").innerHTML = "";
@@ -169,9 +171,10 @@ export function openMessageConnection(token) {
         }, 10_000);
     });
 
-    socket.addEventListener("close", (_) => {
+    socket.addEventListener("close", async (_) => {
         resetInfo();
         sendErrorMessage("Connection closed");
+        await new Promise(resolve => setTimeout(resolve, 1000));
         openMessageConnection(token);
     });
 
