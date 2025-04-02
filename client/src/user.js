@@ -44,30 +44,30 @@ export async function updateProfileDisplayAsync() {
         {
             await setCurrentAltUserAsync([ currUsers[0] ]);
         }
-        for (let p of document.getElementsByClassName("profile"))
+        for (let p of document.querySelectorAll("#profile-selection > .profile"))
         {
             if (currUsers.length === 0 && p.dataset.me === "1") {
                 // No user specified, we take the "main" account
                 p.disabled = true;
-                p.classList.add("selected");
+                p.classList.add("is-primary");
             } else if (currUsers.length > 0 && p.dataset.id === currUsers[0].toString()) {
                 // This user is the one currently selected
                 p.disabled = true;
-                p.classList.add("selected");
+                p.classList.add("is-primary");
             } else {
                 p.disabled = false;
-                p.classList.remove("selected");
+                p.classList.remove("is-primary");
             }
         }
     }
     else if (displayMode === USER_SELECTION_MULTIPLE)
     {
-        for (let p of document.getElementsByClassName("profile"))
+        for (let p of document.querySelectorAll("#profile-selection > .profile"))
         {
             if (currUsers.length === 0 && p.dataset.me === "1") {
                 // No user specified, we take the "main" account
                 p.disabled = true;
-                p.classList.add("selected");
+                p.classList.add("is-primary");
             } else if (currUsers.includes(parseInt(p.dataset.id))) {
                 if (currUsers.length === 1) {
                      // This element is currently selected and it's the last one that is, we can't unselected it else we would have no current user
@@ -75,10 +75,10 @@ export async function updateProfileDisplayAsync() {
                 } else {
                     p.disabled = false;
                 }
-                p.classList.add("selected");
+                p.classList.add("is-primary");
             } else {
                 p.disabled = false;
-                p.classList.remove("selected");
+                p.classList.remove("is-primary");
             }
         }
     }
@@ -135,15 +135,14 @@ export function updateUserInfo(msg) {
         possibleUsers.push(msg.id);
 
         // Update profile selection
-        const persoBtn = document.createElement("button");
+        const container = document.getElementById("profile-selection");
+        const template = document.getElementById("profile-template");
+        const instance = template.content.cloneNode(true);
+
+        const persoBtn = instance.querySelector("button");
 
         persoBtn.dataset.id = msg.id.toString();
         persoBtn.dataset.me = msg.isMe ? "1" : "0";
-
-        persoBtn.classList.add("button");
-        persoBtn.classList.add("profile")
-        persoBtn.classList.add("is-flex");
-        persoBtn.classList.add("is-flex-direction-column");
 
         persoBtn.addEventListener("click", async (e) => {
             const selectionMode = getSelectionMode();
@@ -177,15 +176,12 @@ export function updateUserInfo(msg) {
             await updateProfileDisplayAsync();
         });
 
-        const pfp = document.createElement("div");
-        pfp.classList.add("pfp");
+        const pfp = instance.querySelector("div");
         pfp.style = `background: rgb(${msg.color.r}, ${msg.color.g}, ${msg.color.b});`;
         pfp.innerHTML = msg.character;
-        persoBtn.appendChild(pfp);
 
-        const name = document.createElement("p");
+        const name = instance.querySelector("p");
         name.innerHTML =  msg.username;
-        persoBtn.appendChild(name);
-        document.getElementById("profile-selection").appendChild(persoBtn);
+        container.appendChild(instance);
     }
 }

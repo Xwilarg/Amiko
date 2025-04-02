@@ -21,6 +21,8 @@ public class ServerInfo : BaseMessage
     public int Id { set; get; }
     public string Name { set; get; }
     public ChannelInfo[] Channels { set; get; }
+    public Color Color { set; get; }
+    public string Character { set; get; }
 }
 public class ChannelInfo
 {

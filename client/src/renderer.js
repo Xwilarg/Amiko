@@ -238,7 +238,7 @@ function refreshChannelDisplay() {
             document.querySelector("#channels > .is-primary").classList.remove("is-primary");
             e.target.classList.add("is-primary");
 
-            closeSettings();
+            document.getElementById("channel-list").classList.add("is-hidden");
         });
 
         addNotificationDiv(chanBtn, `notif-channel-${currChan.servId}-${key}`);
@@ -309,9 +309,20 @@ export function updateServerInfo(msg) {
     }
 
     // Spawn buttons for server selection
-    const servBtn = document.createElement("button");
-    servBtn.innerHTML = msg.name;
-    servBtn.classList.add("button");
+    const container = document.getElementById("servers");
+    const template = document.getElementById("profile-template");
+    const instance = template.content.cloneNode(true);
+
+    const servBtn = instance.querySelector("button");
+    servBtn.id = `btn-serv-${msg.id}`;
+
+    const pfp = instance.querySelector("div");
+    pfp.style = `background: rgb(${msg.color.r}, ${msg.color.g}, ${msg.color.b});`;
+    pfp.innerHTML = msg.character;
+
+    const name = instance.querySelector("p");
+    name.innerHTML =  msg.name;
+
     if (currChan.servId == msg.id) servBtn.classList.add("is-primary");
 
     servBtn.addEventListener("click", (e) => { // We clicked on a button to switch server...
@@ -326,12 +337,14 @@ export function updateServerInfo(msg) {
 
         // Update server display UI
         document.querySelector("#servers > .is-primary").classList.remove("is-primary");
-        e.target.classList.add("is-primary");
+        document.getElementById(`btn-serv-${msg.id}`).classList.add("is-primary");
+
+        document.getElementById("channel-list").classList.remove("is-hidden");
     });
 
     addNotificationDiv(servBtn, `notif-server-${msg.id}`);
 
-    document.getElementById("servers").appendChild(servBtn);
+    container.appendChild(instance);
 
     // Check if we have any unread message
     for (const chan of msg.channels)

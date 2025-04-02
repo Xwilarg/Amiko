@@ -19,7 +19,6 @@ export function addPendingNotification(servId, chanId) {
         pendingNotifications.push({ servId: servId, chanId: chanId });
         console.log(`Add notification in ${servId}/${chanId}`);
 
-        document.getElementById("notif-global").classList.remove("is-hidden");
         document.getElementById(`notif-server-${servId}`).classList.remove("is-hidden");
         document.getElementById(`notif-channel-${servId}-${chanId}`)?.classList?.remove("is-hidden");
     }
@@ -28,7 +27,6 @@ export function addPendingNotification(servId, chanId) {
 export function removeNotification(servId, chanId) {
     pendingNotifications = pendingNotifications.filter(x => x.servId != servId || x.chanId != chanId);
 
-    if (pendingNotifications.length === 0) document.getElementById("notif-global").classList.add("is-hidden");
     document.getElementById(`notif-server-${servId}`)?.classList?.add("is-hidden");
     document.getElementById(`notif-channel-${servId}-${chanId}`)?.classList?.add("is-hidden");
 
@@ -37,7 +35,6 @@ export function removeNotification(servId, chanId) {
 
 function updateNotifications() {
     for (let n of pendingNotifications) {
-        document.getElementById("notif-global").classList.remove("is-hidden");
         document.getElementById(`notif-server-${n.servId}`).classList.remove("is-hidden");
         document.getElementById(`notif-channel-${n.servId}-${n.chanId}`)?.classList?.remove("is-hidden");
     }

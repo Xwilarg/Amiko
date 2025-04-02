@@ -38,6 +38,29 @@ html {
     filter: blur(20px);
 }
 
+/* Main part */
+#main-screen {
+    width: calc(100% - 75px);
+}
+
+#server-list, #channel-list {
+    width: 75px;
+    background-color: var(--bulma-scheme-main);
+}
+
+#server-list button, #channel-list button {
+    overflow: hidden;
+}
+
+@media screen and (max-width: 750px) {
+    #channel-list {
+        position: absolute;
+        width: calc(100% - 75px);
+        left: 75px;
+        z-index: 1;
+    }
+}
+
 /* Settings */
 .dropdown {
     position: absolute;
@@ -64,10 +87,6 @@ html {
 .profile {
     width: 75px;
     height: 75px;
-}
-
-.profile.selected {
-    border: 1px solid green;
 }
 
 .pfp {

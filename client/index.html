@@ -54,14 +54,14 @@
                 </div>
             </div>
         </template>
+        <template id="profile-template">
+            <button class="button profile is-flex is-flex-wrap-wrap">
+                <div class="pfp"></div>
+                <p></p>
+            </button>
+        </template>
         <nav class="navbar">
             <div class="navbar-brand">
-                <button class="navbar-item" id="toggle-home">
-                    <span class="material-symbols-outlined notif-container">
-                        home
-                        <span id="notif-global" class="notif is-hidden"></span>
-                    </span>
-                </button>
                 <button class="navbar-item" id="toggle-settings">
                     <span class="material-symbols-outlined">settings</span>
                 </button>
@@ -79,13 +79,6 @@
                 </div>
             </div>
         </nav>
-        <div id="home-dropdown" class="dropdown is-hidden">
-            <div>
-                <div id="servers"></div>
-                <hr>
-                <div id="channels"></div>
-            </div>
-        </div>
         <div id="settings-dropdown" class="dropdown is-hidden">
             <div>
                 <fieldset class="box">
@@ -161,26 +154,34 @@
                 </div>
             </div>
         </div>
-        <div>
-            <div class="is-flex is-flex-direction-column" id="messages">
+        <div class="is-flex">
+            <div id="server-list">
+                <div id="servers" class="is-flex is-flex-direction-column"></div>
             </div>
+            <div id="channel-list" class="is-hidden">
+                <div id="channels" class="is-flex is-flex-direction-column"></div>
+            </div>
+            <div id="main-screen">
+                <div class="is-flex is-flex-direction-column" id="messages">
+                </div>
 
-            <form class="field has-addons container" id="message-form" disabled>
-                <p class="control">
-                    <label for="attach-file" class="button" id="attach-file-container">
-                        <span class="material-symbols-outlined">attach_file</span>
-                        <input type="file" id="attach-file">
-                    </label>
-                </p>
-                <p class="control is-expanded">
-                    <textarea maxlength="3000" class="textarea" placeholder="Your message" id="message-field"></textarea>
-                </p>
-                <p class="control">
-                    <button class="button is-link" type="submit" id="send-message">
-                        <span class="material-symbols-outlined">send</span>
-                    </button>
-                </p>
-            </form>
+                <form class="field has-addons container" id="message-form" disabled>
+                    <p class="control">
+                        <label for="attach-file" class="button" id="attach-file-container">
+                            <span class="material-symbols-outlined">attach_file</span>
+                            <input type="file" id="attach-file">
+                        </label>
+                    </p>
+                    <p class="control is-expanded">
+                        <textarea maxlength="3000" class="textarea" placeholder="Your message" id="message-field"></textarea>
+                    </p>
+                    <p class="control">
+                        <button class="button is-link" type="submit" id="send-message">
+                            <span class="material-symbols-outlined">send</span>
+                        </button>
+                    </p>
+                </form>
+            </div>
         </div>
     </body>
 </html>

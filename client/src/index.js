@@ -6,7 +6,7 @@ import { initUsersAsync } from "./user";
 let token;
 let areSettingsOpen = false;
 
-const settings = [ "home", "settings", "profile", "help", "debug" ];
+const settings = [ "settings", "profile", "help", "debug" ];
 
 window.addEventListener('DOMContentLoaded', async () => {
     const pwd = document.getElementById("password");

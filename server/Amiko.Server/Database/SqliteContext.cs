@@ -276,6 +276,13 @@ public class ContextInterpreter
             Type = MessageType.ServerInfo,
             Id = s.Id,
             Name = s.Name,
+            Color = new Color()
+            {
+                R = (byte)((s.Color >> 16) & 0xff), 
+                G = (byte)((s.Color >> 8) & 0xff), 
+                B = (byte)((s.Color >> 0) & 0xff)
+            },
+            Character = s.Character,
             Channels = s.Channels.Select(c => new ChannelInfo()
             {
                 Id = c.Id,
