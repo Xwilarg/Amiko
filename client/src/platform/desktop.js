@@ -31,12 +31,19 @@ contextBridge.exposeInMainWorld('interaction', {
 contextBridge.exposeInMainWorld('filesystem', {
     readTokenAsync: async () => {
         const path = (await ipcRenderer.invoke('path')) + "/token.dat";
-        if (!fs.existsSync(path)) return null;
-        return fs.readFileSync(path, 'utf8');
+        if (!fs.existsSync(path)) return [];
+        return JSON.parse(fs.readFileSync(path, 'utf8'));
     },
-    writeTokenAsync: async (token) => {
+    writeTokenAsync: async (token, website) => {
         const path = (await ipcRenderer.invoke('path')) + "/token.dat";
-        fs.writeFileSync(path, token);
+        let data;
+        if (!fs.existsSync(path)) {
+            data = {};
+        } else {
+            data = JSON.parse(fs.readFileSync(path, 'utf8'))
+        }
+        data[website] = token;
+        fs.writeFileSync(path, JSON.stringify(data));
     },
     readPrefAsync: readPrefAsync,
     writePrefAsync: writePrefAsync,

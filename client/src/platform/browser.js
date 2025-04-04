@@ -42,12 +42,25 @@ function initBrowser() {
     };
     filesystem = {
         readTokenAsync: async () => {
-            var match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
-            if (match) return match[2];
-            return null;
+            const pref = await readPrefAsync("websites", "");
+            if (pref === "") return {};
+
+            let data = {};
+            for (let website of pref.split(','))
+            {
+                data[website] = await readPrefAsync(`token-${website}`, "");
+            }
+            return data;
         },
-        writeTokenAsync: async (token) => {
-            document.cookie = `token=${token}; max-age=2592000; path=/; SameSite=Strict`;
+        writeTokenAsync: async (token, website) => {
+            const pref = await readPrefAsync("websites", "");
+            let websites;
+            if (pref === "") websites = [];
+            else websites = pref.split(',');
+            websites.push(website);
+
+            await writePrefAsync("websites", websites.join(','));
+            await writePrefAsync(`website-${website}`, token);
         },
         readPrefAsync: readPrefAsync,
         writePrefAsync: writePrefAsync,

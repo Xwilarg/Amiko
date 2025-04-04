@@ -3,7 +3,7 @@
 export function initPreview() {
     document.getElementById("close-preview").addEventListener("click", _ => {
         document.getElementById("modal-preview").classList.remove("is-active");
-    })
+    });
 }
 
 function showImage(link) {
