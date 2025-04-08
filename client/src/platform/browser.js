@@ -48,7 +48,7 @@ function initBrowser() {
             let data = {};
             for (let website of pref.split(','))
             {
-                data[website] = await readPrefAsync(`token-${website}`, "");
+                data[website] = await readPrefAsync(`website-${website}`, "");
             }
             return data;
         },

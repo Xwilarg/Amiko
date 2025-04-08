@@ -7,8 +7,8 @@
         <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5129 ws://localhost:5129 https://amiko.zirk.eu ws://amiko.zirk.eu; script-src 'self' 'unsafe-eval'">-->
         <title>Amiko</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="./js/index.js"></script>
         <script src="./js/platform/browser.js"></script>
+        <script src="./js/index.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0">
         <link rel="stylesheet" href="./node_modules/bulma/css/bulma.min.css">
         <link rel="stylesheet" href="./css/main.css">
@@ -19,6 +19,12 @@
             <div class="modal-background"></div>
             <div class="modal-content">
                 <form class="field">
+                    <div class="field">
+                        <label class="label">Website</label>
+                        <div class="control">
+                            <input id="website" class="input" type="text" readonly/>
+                        </div>
+                    </div>
                     <div class="field">
                         <label class="label">Password</label>
                         <div class="control">
