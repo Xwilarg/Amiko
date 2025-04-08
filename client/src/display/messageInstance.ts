@@ -1,11 +1,17 @@
-import UserInfo from "../userInfo";
+import UserInfo from "../models/userInfo";
+import { parsingHelper_parseEmojis, parsingHelper_parseMarkdown } from "./parsingHelper";
+// @ts-ignore
+import DOMPurify from 'dompurify';
 
 export default class MessageInstance
 {
+    element: HTMLElement;
+
     constructor(
         container: HTMLElement, // Object that will contain the final message object
         date: Date, // Date at which the message was sent
-        infos: UserInfo[] // Authors that sent the message
+        infos: UserInfo[], // Authors that sent the message
+        text: string // Content of the message
     ) {
         const template = document.getElementById("message-template") as HTMLTemplateElement;
 
@@ -14,8 +20,9 @@ export default class MessageInstance
         this.updateMessageAuthor(instance, infos);
         instance.querySelector(".date").innerHTML = date.toLocaleString();
 
-       /* l
-        */ // TODO?
+        this.parseMessage(instance, text, []);
+
+        this.element = container.appendChild(instance);
     }
 
     // Update the author of a message
@@ -121,8 +128,21 @@ export default class MessageInstance
                 target.classList.remove("blur");
 
                 if (target.dataset.yt) {
-                    (target.parentNode as HTMLElement).innerHTML = `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${e.target.dataset.yt}" frameborder="0"></iframe>`;
+                    (target.parentNode as HTMLElement).innerHTML = `<iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${target.dataset.yt}" frameborder="0"></iframe>`;
                 }
+            });
+        }
+
+        finalHtml = parsingHelper_parseEmojis(finalHtml);
+        finalHtml = parsingHelper_parseMarkdown(finalHtml);
+        finalHtml = DOMPurify.sanitize(finalHtml);
+
+        msg.querySelector(".content").innerHTML = finalHtml;
+
+        for (const link of msg.querySelectorAll(".link")) {
+            link.addEventListener("click", (_) => {
+                // @ts-ignore
+                interaction.open(link.innerHTML);
             });
         }
     }

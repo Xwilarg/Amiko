@@ -1,4 +1,5 @@
 const EmojiConvertor = require('emoji-js');
+// @ts-ignore
 import { marked } from "marked";
 
 const emoji = new EmojiConvertor();
@@ -10,3 +11,11 @@ marked.use({
       url() {}
     }
 });
+
+export function parsingHelper_parseEmojis(str: string): string {
+  return emoji.replace_colons(str);
+}
+
+export function parsingHelper_parseMarkdown(str: string): string {
+  return marked.parse(str);
+}

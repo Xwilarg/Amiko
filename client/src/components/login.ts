@@ -1,5 +1,5 @@
-import Network from "../models/network";
-import { session_addNetworkSession } from "../models/session";
+import Network from "../instance/network";
+import { session_addNetworkSession } from "../network/sessionManager";
 
 export async function login_initAsync() {
     const websiteElem = (document.getElementById("website")! as HTMLInputElement);

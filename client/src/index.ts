@@ -1,6 +1,6 @@
 import { login_initAsync } from "./components/login";
 import { sidebar_initAsync } from "./components/sidebar";
-import { preferences_initAsync } from "./models/preferences";
+import { preferences_initAsync } from "./persistancy/preferences";
 
 window.addEventListener('DOMContentLoaded', async () => {
     const inits = [

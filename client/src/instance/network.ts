@@ -1,11 +1,6 @@
-import Renderer from "./display/renderer";
+import Renderer from "./renderer";
 
-// Current message ID
-let currId = 1;
-
-// Store when the last notification was received
-// Used when notification settings is set on all messages, to not spam the user
-let lastNotificationReceived: number | null = null;
+// Represent the network connection of an instance
 
 export default class Network
 {
@@ -22,7 +17,7 @@ export default class Network
     constructor(website: string, isSecure: boolean) {
         this.website = website;
 
-        this.websocketEndpoint = `ws${isSecure ? 's' : ''}://${website}/ws`;
+        this.websocketEndpoint = `ws${isSecure ? 's' : ''}://${website}/ws/`;
         this.httpEndpoint =  `http${isSecure ? 's' : ''}://${website}/api`;
 
         this.token = null;
@@ -40,8 +35,8 @@ export default class Network
             }
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
-        .then(async text => {
-            this.token = text;
+        .then(async _ => {
+            this.token = token;
             this.openMessageConnection();
 
             onSuccess();
@@ -105,6 +100,7 @@ export default class Network
             this.renderer.sendErrorMessage("Websocket error");
         });
 
+        const self = this;
         // Listen for messages
         this.socket.addEventListener("message", async function(event) {
             const json = JSON.parse(event.data);
@@ -117,26 +113,22 @@ export default class Network
                     for (const c of json.data) {
                         switch (c.type)
                         {
-                            /*case 2: // Message
-                                sendMessage(c.sentAt, c.author, c.content);
-                                break;*/
-                            
                             case 4: // Server info
-                                updateServerInfo(c);
+                                self.renderer.updateServerInfo(c);
                                 break;
 
                             case 5: // User info
-                                updateUserInfo(c);
+                                //updateUserInfo(c);
                                 break;
                             
                         }
                     }
-                    await finishSetupAsync(); // TODO: Doesn't call it from here
+                    //await finishSetupAsync(); // TODO: Doesn't call it from here
                     break;
 
                 case 2: // Message received
-                    updateReceivedMessage(json);
-                    if (isCurrentChannel(json.serverId, json.channelId))
+                    //updateReceivedMessage(json);
+                    /*if (isCurrentChannel(json.serverId, json.channelId))
                     {
                         sendSeenUpdate(json.serverId, json.channelId);
                         if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
@@ -146,15 +138,15 @@ export default class Network
                     else { // Whenever we are currently looking at the window or not, the message have lend in another channel so we send a notification
                         addPendingNotification(json.serverId, json.channelId);
                         sendNotification(json);
-                    }
+                    }*/
                     break;
 
                 case 3: // Acknowledgement of a message sent
-                    acknowledgeMessage(json);
+                    //acknowledgeMessage(json);
                     break;
 
                 case 7: // A message was modified
-                    editMessage(json);
+                    //editMessage(json);
                     break;
             }
         });

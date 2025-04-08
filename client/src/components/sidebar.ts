@@ -1,4 +1,4 @@
-import { session_resetAllConnections } from "../models/session";
+import { session_resetAllConnections } from "../network/sessionManager";
 
 let areSettingsOpen = false;
 const settings = [ "settings", "profile", "help", "debug" ];
