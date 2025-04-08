@@ -1,3 +1,5 @@
+import Renderer from "../instance/renderer";
+import Message from "../models/message";
 import UserInfo from "../models/user";
 import { parsingHelper_parseEmojis, parsingHelper_parseMarkdown } from "./parsingHelper";
 // @ts-ignore
@@ -9,18 +11,24 @@ export default class MessageInstance
 
     constructor(
         container: HTMLElement, // Object that will contain the final message object
-        date: Date, // Date at which the message was sent
-        infos: UserInfo[], // Authors that sent the message
-        text: string // Content of the message
+        m: Message,
+        r: Renderer
     ) {
         const template = document.getElementById("message-template") as HTMLTemplateElement;
 
         const instance = template.content.cloneNode(true) as HTMLElement;
+        let msg = instance.querySelector(".message");
 
-        this.updateMessageAuthor(instance, infos);
-        instance.querySelector(".date").innerHTML = date.toLocaleString();
+        if (m.ackId) { // If we have an acknowledgement id, it mean we didn't get a read confirmation yet from the server
+            msg.classList.add("pending");
+        } else if (r.wasIMentionned(m.content)) {
+            msg.classList.add("mention");
+        }
 
-        this.parseMessage(instance, text, []);
+        this.updateMessageAuthor(instance, r.getInfoFromIdList(m.authors));
+        instance.querySelector(".date").innerHTML = m.date.toLocaleString();
+
+        this.parseMessage(instance, m.content, m.attachments);
 
         this.element = container.appendChild(instance);
     }

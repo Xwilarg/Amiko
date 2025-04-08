@@ -72,6 +72,10 @@ export default class Network
         this.socket.close();
     }
 
+    sendMessage(msg) {
+        this.socket.send(JSON.stringify(msg));
+    }
+
     openMessageConnection() {
         document.getElementById("messages").innerHTML = "";
 
