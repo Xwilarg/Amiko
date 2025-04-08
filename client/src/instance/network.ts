@@ -118,7 +118,7 @@ export default class Network
                                 break;
 
                             case 5: // User info
-                                //updateUserInfo(c);
+                                self.renderer.updateUserInfo(c);
                                 break;
                             
                         }

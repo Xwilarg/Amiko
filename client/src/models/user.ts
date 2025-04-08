@@ -1,5 +1,5 @@
 // Represent an user on the application
-export default interface UserInfo
+export default interface User
 {
     // Display name of the user
     username: string;

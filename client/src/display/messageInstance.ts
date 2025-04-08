@@ -1,4 +1,4 @@
-import UserInfo from "../models/userInfo";
+import UserInfo from "../models/user";
 import { parsingHelper_parseEmojis, parsingHelper_parseMarkdown } from "./parsingHelper";
 // @ts-ignore
 import DOMPurify from 'dompurify';

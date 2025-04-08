@@ -1,5 +1,5 @@
 import Renderer from "../instance/renderer";
-import UserInfo from "../models/userInfo";
+import Message from "../models/message";
 import MessageInstance from "./messageInstance";
 
 interface TargettedChannel {
@@ -23,20 +23,14 @@ function refreshMessageDisplay() {
     const container = document.getElementById("messages");
     container.innerHTML = "";
     for (const msg of targetChannel.messages) {
-        let date;
-        if (msg.sentAt) {
-            date = new Date((msg.sentAt - (new Date().getTimezoneOffset() * 60)) * 1000);
-        } else {
-            date = msg.date;
-        }
-        sendMessageInternal(date, msg.authors.map(getInfoFromId), msg.content, msg.attachments, [], `msg-${msg.id}`, msg.id);
+        renderer_sendMessageInternal(msg);
     }
 }
 
-export function renderer_sendMessageInternal(date: Date, infos: UserInfo[], text: string) {
+export function renderer_sendMessageInternal(msg: Message) {
     const container = document.getElementById("messages");
 
-    new MessageInstance(container, date, infos, text);
+    new MessageInstance(container, msg.date, msg.authors.map(currentChannel.renderer.getInfoFromId), msg.content);
     scrollToBottom();
 }
 
