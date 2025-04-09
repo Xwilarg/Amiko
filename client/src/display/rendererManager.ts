@@ -145,7 +145,7 @@ export async function renderer_initAsync() {
                 ackId: currId,
                 serverId: currentChannel.serverId,
                 channelId: currentChannel.channelId,
-                authors: preferences_getCurrentAltUser()
+                authors: preferences_getCurrentAltUser(currentChannel.renderer.network.website)
             };
             const msgInst = currentChannel.renderer.addMyMessage(currentChannel.serverId, currentChannel.channelId, newMsg)
             renderer_sendMessageInternal(msgInst);

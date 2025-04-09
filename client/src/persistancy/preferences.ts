@@ -21,7 +21,7 @@ export async function preferences_initAsync() {
     for (let website of websites) {
         // @ts-ignore
         const data = (await filesystem.readPrefArrayAsync(`users-${website}`)).map((x: string) => parseInt(x));
-        currentUser[website] = data.length === 0 ? null : data;
+        currentUser[website] = data;
     }
 
     // How we do user selection
@@ -99,7 +99,7 @@ export async function preferences_setCurrentAltUserAsync(website: string, value:
 
 export function preferences_getCurrentAltUser(website: string): number[] | null
 {
-    return website in currentUser ? currentUser[website] : null;
+    return website in currentUser ? currentUser[website] : [];
 }
 
 export enum UserSelectionMode {

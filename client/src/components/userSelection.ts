@@ -1,3 +1,4 @@
+import { renderer_getCurrentRenderer } from "../display/rendererManager";
 import User from "../models/user";
 import { preferences_getCurrentAltUser, preferences_getUserSelectionMode, preferences_setCurrentAltUserAsync, preferences_setUserSelectionModeAsync, UserSelectionMode } from "../persistancy/preferences";
 
@@ -18,8 +19,9 @@ export async function userSelection_initAsync() {
         await updateProfileDisplayAsync();
     });
 
-    document.getElementById("toggle-profile").addEventListener("click", _ => {
-        updateDisplay()
+    document.getElementById("toggle-profile").addEventListener("click", async _ => {
+        const website = renderer_getCurrentRenderer().network.website;
+        await updateDisplayAsync(website, renderer_getCurrentRenderer().getInfoFromIdList(renderer_getCurrentRenderer().possibleUsers), renderer_getCurrentRenderer().mainUser);
     });
 }
 
@@ -78,14 +80,15 @@ export async function updateProfileDisplayAsync() {
     }
 }
 
-function updateDisplay(website: string, possibleUsers: User[], mainUser: number) {
+async function updateDisplayAsync(website: string, possibleUsers: User[], mainUser: number) {
     currentWebsite = website;
     buttons = [];
+    const container = document.getElementById("profile-selection");
+    const template = document.getElementById("profile-template") as HTMLTemplateElement;
+    container.innerHTML = "";
 
     for (const u of possibleUsers) {
         // Update profile selection
-        const container = document.getElementById("profile-selection");
-        const template = document.getElementById("profile-template") as HTMLTemplateElement;
         const instance = template.content.cloneNode(true) as HTMLElement;
     
         const persoBtn = instance.querySelector("button");
@@ -136,4 +139,5 @@ function updateDisplay(website: string, possibleUsers: User[], mainUser: number)
             isMainUser: u.id === mainUser
         });
     }
+    await updateProfileDisplayAsync();
 }
