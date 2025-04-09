@@ -1,6 +1,9 @@
 // Represent an user on the application
 export default interface User
 {
+    // Unique identifier of the user
+    id: number;
+
     // Display name of the user
     username: string;
 

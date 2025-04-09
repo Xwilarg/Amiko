@@ -17,8 +17,12 @@ export async function preferences_initAsync() {
 
     // Current user
     // @ts-ignore
-    const cU: string[] = await filesystem.readPrefArrayAsync("users");
-    currentUser = cU.map(x => parseInt(x));
+    const websites: string[] = await filesystem.readPrefArrayAsync("websites");
+    for (let website of websites) {
+        // @ts-ignore
+        const data = (await filesystem.readPrefArrayAsync(`users-${website}`)).map((x: string) => parseInt(x));
+        currentUser[website] = data.length === 0 ? null : data;
+    }
 
     // How we do user selection
     // @ts-ignore
@@ -27,14 +31,14 @@ export async function preferences_initAsync() {
 
     // Notification settings
     document.getElementById("notification-selection-select")!.addEventListener("change", async e => {
-        await setNotificationPingModeAsync(parseInt((e.target as HTMLInputElement).value));
+        await preferences_setNotificationPingModeAsync(parseInt((e.target as HTMLInputElement).value));
     });
     // @ts-ignore
     notificationPingMode = parseInt(await filesystem.readPrefAsync("notification", NotificationPingMode.PingOnly));
     (document.getElementById("notification-selection-select") as HTMLInputElement).value = notificationPingMode.toString();
 
     document.getElementById("notification-privacy-selection-select")!.addEventListener("change", async e => {
-        await setNotificationPrivacySettingsAsync(parseInt((e.target as HTMLInputElement).value));
+        await preferences_setNotificationDisplayModeAsync(parseInt((e.target as HTMLInputElement).value));
     });
     // @ts-ignore
     notificationDisplayMode = parseInt(await filesystem.readPrefAsync("notifPrivacy", NotificationDisplayMode.ShowAll));
@@ -42,57 +46,60 @@ export async function preferences_initAsync() {
 
 }
 
-let currentUser: number[] | null = null;
+// Users for each website
+let currentUser: { [website: string]: number[] | null; } = {};
+
+// Settings global to the website
 let currentSelectionMode: UserSelectionMode;
 let notificationPingMode: NotificationPingMode;
 let notificationDisplayMode: NotificationDisplayMode;
 
-export async function setSelectionModeAsync(value: UserSelectionMode)
+export async function preferences_setUserSelectionModeAsync(value: UserSelectionMode)
 {
     // @ts-ignore
     await filesystem.writePrefAsync("userSelection", value);
     currentSelectionMode = value;
 }
 
-export function getSelectionMode(): UserSelectionMode
+export function preferences_getUserSelectionMode(): UserSelectionMode
 {
     return currentSelectionMode;
 }
 
-export async function setNotificationPingModeAsync(value: NotificationPingMode)
+export async function preferences_setNotificationPingModeAsync(value: NotificationPingMode)
 {
     // @ts-ignore
     await filesystem.writePrefAsync("notification", value);
     notificationPingMode = value;
 }
 
-export function getNotificationSettings(): NotificationPingMode
+export function preferences_getNotificationPingMode(): NotificationPingMode
 {
     return notificationPingMode;
 }
 
-export async function setNotificationPrivacySettingsAsync(value: NotificationDisplayMode)
+export async function preferences_setNotificationDisplayModeAsync(value: NotificationDisplayMode)
 {
     // @ts-ignore
     await filesystem.writePrefAsync("notifPrivacy", value);
     notificationDisplayMode = value;
 }
 
-export function getNotificationPrivacySettings(): NotificationDisplayMode
+export function preferences_getNotificationDisplayMode(): NotificationDisplayMode
 {
     return notificationDisplayMode;
 }
 
-export async function setCurrentAltUserAsync(value: number[])
+export async function preferences_setCurrentAltUserAsync(website: string, value: number[])
 {
     // @ts-ignore
-    await filesystem.writePrefArrayAsync("users", value);
-    currentUser = value;
+    await filesystem.writePrefArrayAsync(`users-${website}`, value);
+    currentUser[website] = value;
 }
 
-export function getCurrentAltUser(): number[] | null
+export function preferences_getCurrentAltUser(website: string): number[] | null
 {
-    return currentUser;
+    return website in currentUser ? currentUser[website] : null;
 }
 
 export enum UserSelectionMode {

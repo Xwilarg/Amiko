@@ -8,19 +8,22 @@ import DOMPurify from 'dompurify';
 export default class MessageInstance
 {
     element: HTMLElement;
+    message: Message;
 
     constructor(
         container: HTMLElement, // Object that will contain the final message object
         m: Message,
         r: Renderer
     ) {
+        this.message = m;
+
         const template = document.getElementById("message-template") as HTMLTemplateElement;
 
         const instance = template.content.cloneNode(true) as HTMLElement;
         let msg = instance.querySelector(".message");
 
         if (m.ackId) { // If we have an acknowledgement id, it mean we didn't get a read confirmation yet from the server
-            msg.classList.add("pending");
+            msg.classList.add("sending");
         } else if (r.wasIMentionned(m.content)) {
             msg.classList.add("mention");
         }
@@ -28,9 +31,16 @@ export default class MessageInstance
         this.updateMessageAuthor(instance, r.getInfoFromIdList(m.authors));
         instance.querySelector(".date").innerHTML = m.date.toLocaleString();
 
+        // Parse message content to show image preview, markdown, etc...
         this.parseMessage(instance, m.content, m.attachments);
 
-        this.element = container.appendChild(instance);
+        container.appendChild(instance);
+        this.element = container.lastElementChild as HTMLElement;
+    }
+
+    acknowledge(isError: boolean) {
+        this.element.classList.remove("sending");
+        if (isError) this.element.classList.add("error");
     }
 
     // Update the author of a message

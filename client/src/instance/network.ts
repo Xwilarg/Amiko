@@ -1,3 +1,4 @@
+import { renderer_getMessageByAckId, renderer_isCurrentChannel, renderer_seeChannel } from "../display/rendererManager";
 import Renderer from "./renderer";
 
 // Represent the network connection of an instance
@@ -127,26 +128,27 @@ export default class Network
                             
                         }
                     }
-                    //await finishSetupAsync(); // TODO: Doesn't call it from here
+                    if (json.data[0].type == 5) self.renderer.finalizeInit();
                     break;
 
                 case 2: // Message received
-                    //updateReceivedMessage(json);
-                    /*if (isCurrentChannel(json.serverId, json.channelId))
+                    self.renderer.receiveMessage(json);
+                    if (renderer_isCurrentChannel(self.renderer, json.serverId, json.channelId))
                     {
-                        sendSeenUpdate(json.serverId, json.channelId);
+                        renderer_seeChannel()
+                        // @ts-ignore
                         if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
-                            sendNotification(json);
+                            self.renderer.sendNotification(json);
                         }
                     }
                     else { // Whenever we are currently looking at the window or not, the message have lend in another channel so we send a notification
-                        addPendingNotification(json.serverId, json.channelId);
-                        sendNotification(json);
-                    }*/
+                        self.renderer.servers[json.serverId].notification.addNotification(json.channelId);
+                        self.renderer.sendNotification(json);
+                    }
                     break;
 
                 case 3: // Acknowledgement of a message sent
-                    //acknowledgeMessage(json);
+                    self.renderer.acknowledgeMessage(json, renderer_getMessageByAckId(json.ackId));
                     break;
 
                 case 7: // A message was modified
