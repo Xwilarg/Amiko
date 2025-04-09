@@ -1,3 +1,26 @@
+/*
+ * Manage everything related to users
+ *
+ * Alt users work the following ways
+ * User is able to switch given 2 modes:
+ *
+ * "Single" (account mode):
+ * When the user select an account, it switch to this account
+ *
+ * "Multiple" (co-front mode):
+ * When the user select an account, it add it to the list of currently active account
+ * This allow to send a message with multiple account attached to it
+ * If the user click again on an account, it unselect it
+ *
+ * Overall it should never be possible to have no account selected!
+ *
+ * Along with that, the default value stored in preferences is an empty array
+ * When user first connect, this associate to his "default" account
+ * For most users, they will never switch account so this is the settings they will have
+ * For someone that switched to another account, this value of an empty array shouldn't happen again!
+ */
+
+
 import { renderer_getCurrentRenderer } from "../display/rendererManager";
 import User from "../models/user";
 import { preferences_getCurrentAltUser, preferences_getUserSelectionMode, preferences_setCurrentAltUserAsync, preferences_setUserSelectionModeAsync, UserSelectionMode } from "../persistancy/preferences";
