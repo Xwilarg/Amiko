@@ -2,7 +2,7 @@ import Notification from "../instance/notification";
 import Renderer from "../instance/renderer";
 import Message from "../models/message";
 import { preferences_getCurrentAltUser } from "../persistancy/preferences";
-import MessageInstance from "./messageInstance";
+import MessageInstance, { MessageFlag } from "./messageInstance";
 
 // Current message ID
 let currId = 1;
@@ -17,6 +17,9 @@ interface TargettedChannel {
 
 export function renderer_getMessageByAckId(ackId: number): MessageInstance {
     return displayedMessages.find(x => x.message.ackId === ackId);
+}
+export function renderer_getMessageById(id: number): MessageInstance {
+    return displayedMessages.find(x => x.message.id === id);
 }
 
 /// Scroll at the bottom of the current container
@@ -38,7 +41,7 @@ export function renderer_refreshMessageDisplay() {
     const container = document.getElementById("messages");
     container.innerHTML = "";
     for (const msg of targetChannel.messages) {
-        renderer_sendMessageInternal(msg);
+        renderer_sendMessageInternal(msg, MessageFlag.None);
     }
 
     // Whole message list are updated when we display a new channel or so
@@ -47,10 +50,10 @@ export function renderer_refreshMessageDisplay() {
 }
 
 /// Add a message on screen
-export function renderer_sendMessageInternal(msg: Message) {
+export function renderer_sendMessageInternal(msg: Message, flag: MessageFlag) {
     const container = document.getElementById("messages");
 
-    let msgInst = new MessageInstance(container, msg, currentChannel.renderer);
+    let msgInst = new MessageInstance(container, msg, currentChannel?.renderer, flag);
     displayedMessages.push(msgInst);
     scrollToBottom();
 }
@@ -79,6 +82,7 @@ export function renderer_switchChannel(r: Renderer, servId: number, chanId: numb
     };
 
     renderer_refreshMessageDisplay();
+    currentChannel.renderer.attachment.refreshDisplay();
 }
 
 export function renderer_seeChannel() {
@@ -138,7 +142,7 @@ export async function renderer_initAsync() {
         e.preventDefault();
         const content = document.getElementById("message-field") as HTMLInputElement;
         const fileInput = document.getElementById("attach-file");
-        if (content.value) {
+        if (content.value || currentChannel.renderer.attachment.hasAttachment()) {
             var newMsg = {
                 type: 2,
                 content: content.value,
@@ -148,11 +152,16 @@ export async function renderer_initAsync() {
                 authors: preferences_getCurrentAltUser(currentChannel.renderer.network.website)
             };
             const msgInst = currentChannel.renderer.addMyMessage(currentChannel.serverId, currentChannel.channelId, newMsg)
-            renderer_sendMessageInternal(msgInst);
+            renderer_sendMessageInternal(msgInst, MessageFlag.None);
             currentChannel.renderer.network.sendMessage(newMsg);
+
+            if (currentChannel.renderer.attachment.hasAttachment()) {
+                currentChannel.renderer.attachment.addAttachmentToMessage(currId, currentChannel.serverId, currentChannel.channelId);
+            }
 
             // Unset send field
             content.value = "";
+            currentChannel.renderer.attachment.setAttachment([]);
             currId++;
         }
     });
@@ -162,4 +171,46 @@ export async function renderer_initAsync() {
             e.preventDefault();
         }
     });
+    
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            currentChannel.renderer.attachment.setAttachment([]);
+        }
+    });
+    document.addEventListener("paste", e => {
+        for (var item of e.clipboardData.items) {
+            if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file.size > 2000000) {
+                    currentChannel.renderer.attachment.setAttachment([]);
+                    alert("File must be smaller than 2MB");
+                } else {
+                    currentChannel.renderer.attachment.setAttachment([ file ]);
+                }
+                break;
+            }
+        }
+    });
+    document.getElementById("attach-file").addEventListener("change", e => {
+        const target = e.target as HTMLInputElement;
+        if (target.value) {
+            if (target.files[0].size > 2000000) {
+                currentChannel.renderer.attachment.setAttachment([]);
+                alert("File must be smaller than 2MB");
+            } else {
+                // @ts-ignore
+                currentChannel.renderer.attachment.setAttachment(target.files);
+            }
+        } else {
+            currentChannel.renderer.attachment.setAttachment([]);
+        }
+        target.value = "";
+    });
+
+    // Channel settings
+    document.getElementById("export-button").onclick = () => {
+        if (currentChannel === null) return;
+
+        currentChannel.renderer.network.downloadChanExport(currentChannel.renderer.servers[currentChannel.serverId].channels[currentChannel.channelId].name, currentChannel.serverId, currentChannel.channelId);
+    };
 }

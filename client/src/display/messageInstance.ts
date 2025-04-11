@@ -4,18 +4,30 @@ import UserInfo from "../models/user";
 import { parsingHelper_parseEmojis, parsingHelper_parseMarkdown } from "./parsingHelper";
 // @ts-ignore
 import DOMPurify from 'dompurify';
+import { renderer_getCurrentChannel, renderer_getCurrentServer } from "./rendererManager";
+import { preview_createRichPreviewImage } from "../components/preview";
+
+export enum MessageFlag
+{
+    None,
+    IsError,
+    IsSystem
+}
 
 export default class MessageInstance
 {
     element: HTMLElement;
     message: Message;
+    renderer: Renderer;
 
     constructor(
         container: HTMLElement, // Object that will contain the final message object
         m: Message,
-        r: Renderer
+        r: Renderer,
+        flag: MessageFlag
     ) {
         this.message = m;
+        this.renderer = r;
 
         const template = document.getElementById("message-template") as HTMLTemplateElement;
 
@@ -24,23 +36,47 @@ export default class MessageInstance
 
         if (m.ackId) { // If we have an acknowledgement id, it mean we didn't get a read confirmation yet from the server
             msg.classList.add("sending");
-        } else if (r.wasIMentionned(m.content)) {
+        } else if (flag === MessageFlag.IsError) {
+            msg.classList.add("error");
+        } else if (flag === MessageFlag.IsSystem) {
+            msg.classList.add("system");
+        } else if (r !== null && r.wasIMentionned(m.content)) {
             msg.classList.add("mention");
         }
 
-        this.updateMessageAuthor(instance, r.getInfoFromIdList(m.authors));
+        if (m.authors.length > 0) {
+            this.updateMessageAuthor(instance, r.getInfoFromIdList(m.authors));
+        }
         instance.querySelector(".date").innerHTML = m.date.toLocaleString();
 
         // Parse message content to show image preview, markdown, etc...
-        this.parseMessage(instance, m.content, m.attachments);
+        this.parseMessage(instance, m.content);
+
+        if (m.attachments.length > 0) {
+            this.parseAttachments(instance, m.id);
+        }
 
         container.appendChild(instance);
         this.element = container.lastElementChild as HTMLElement;
     }
 
-    acknowledge(isError: boolean) {
+    acknowledge(isError: boolean, ackId: number, newId: number | null) {
         this.element.classList.remove("sending");
-        if (isError) this.element.classList.add("error");
+        if (isError) {
+            this.element.classList.add("error");
+
+            // Message wasn't sent so we don't send the attachments
+            this.renderer.attachment.discardAttachment(ackId);
+        } else {
+            const servId = renderer_getCurrentServer();
+            const chanId = renderer_getCurrentChannel();
+
+            const files = this.renderer.attachment.getAttachment(ackId);
+            if (files.length > 0) {
+                this.renderer.network.sendAttachmentOverNetwork(servId, chanId, newId, files)
+            }
+            this.renderer.attachment.discardAttachment(ackId);
+        }
     }
 
     // Update the author of a message
@@ -80,7 +116,18 @@ export default class MessageInstance
         }
     }
 
-    parseMessage(msg: HTMLElement, text: string, attachments: string[]) {
+    parseAttachments(msg: HTMLElement, msgId: number) {
+        const servId = renderer_getCurrentServer();
+        const chanId = renderer_getCurrentChannel();
+        this.renderer.network.getAttachmentOverNetwork(servId, chanId, msgId, (b: Blob) => {
+            preview_createRichPreviewImage(window.URL.createObjectURL(b), this.element.querySelector(".rich-preview"), null)
+        });
+        const attachmentInfo = msg.querySelector(".attachment-info");
+        attachmentInfo.classList.remove("is-hidden");
+        attachmentInfo.innerHTML = "1 file attached";
+    }
+
+    parseMessage(msg: HTMLElement, text: string) {
         msg.querySelector(".rich-preview").innerHTML = "";
         let finalHtml = text;
 
@@ -95,7 +142,7 @@ export default class MessageInstance
         // Then we look for the URL, it matches until it find one of the following strings: '^', ' ', '\n', ')', ',', ';', '>', '[end of line]'
         // We check if we have a ">" at the end (optional)
         const regex = /((<)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|>|$)(>)?/gm
-        const prev = msg.querySelector(".rich-preview");
+        const prev = msg.querySelector(".rich-preview") as HTMLElement;
         let behavior = "";
         finalHtml = finalHtml.replace(regex, function(match, _) {
             let l = [...match.matchAll(regex)][0];
@@ -117,6 +164,7 @@ export default class MessageInstance
     
             let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
             if (m) { // Ensure we can't inject code by closing the string
+                preview_createRichPreviewImage(l[5], prev, behavior);
                 // createRichPreviewImage(l[5], prev, behavior); // TODO: preview.js
                 return `${indicatorLeft}<span class="link link-image">${l[5]}</span>${indicatorRight}`;
             }

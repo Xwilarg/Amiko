@@ -30,7 +30,8 @@ function initBrowser() {
     });
     
     compatibility = {
-        notification: () => canUseNotification
+        notification: () => canUseNotification,
+        crossorigin: () => false
     };
     versions = {
         node: () => null,

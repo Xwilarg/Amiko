@@ -18,7 +18,8 @@ async function writePrefAsync(key, value) {
 }
 
 contextBridge.exposeInMainWorld('compatibility', {
-    notification: () => true
+    notification: () => true,
+    crossorigin: () => true
 });
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,

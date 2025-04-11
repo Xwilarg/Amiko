@@ -4,13 +4,16 @@ import { renderer_getCurrentChannel, renderer_getCurrentServer, renderer_initDis
 import Channel from "../models/channel";
 import User from "../models/user";
 import Message from "../models/message";
-import MessageInstance from "../display/messageInstance";
+import MessageInstance, { MessageFlag } from "../display/messageInstance";
 import Notification from "./notification";
 import { NotificationDisplayMode, NotificationPingMode, preferences_getNotificationDisplayMode, preferences_getNotificationPingMode } from "../persistancy/preferences";
 import { session_getLastNotificationReceived, session_setLastNotificationReceived } from "../network/sessionManager";
+import Attachment from "./attachment";
 
 export default class Renderer {
     network: Network;
+
+    messages: Message[]; // Faster way to iterate on all messages sent
     servers: { [id: number] : Server; };
     pendingAcknowledgement: { [id: number] : Message; };
 
@@ -18,22 +21,43 @@ export default class Renderer {
     mainUser: number;
     possibleUsers: number[];
 
+    attachment: Attachment
+
     constructor(network: Network) {
         this.network = network;
+        this.messages = [];
         this.servers = {};
         this.pendingAcknowledgement = {};
         this.users = {};
 
         this.mainUser = -1;
         this.possibleUsers = [];
+
+        this.attachment = new Attachment();
     }
 
-    sendSystemMessage(text) {
-        // TODO
+    sendSystemMessage(text: string) {
+        renderer_sendMessageInternal({
+            id: -1,
+            date: new Date(),
+            authors: [],
+            content: text,
+            attachments: [],
+
+            ackId: null
+        }, MessageFlag.IsSystem);
     }
 
-    sendErrorMessage(text) {
-        // TODO
+    sendErrorMessage(text: string) {
+        renderer_sendMessageInternal({
+            id: -1,
+            date: new Date(),
+            authors: [],
+            content: text,
+            attachments: [],
+
+            ackId: null
+        }, MessageFlag.IsError);
     }
 
     // Connection to the current server was closed
@@ -70,6 +94,18 @@ export default class Renderer {
         return infos.some(x => text.toLowerCase().includes(`@${x.username.toLowerCase()}`));
     }
 
+    editMessage(msg, msgInst: MessageInstance) {
+        let message = this.messages.find(x => x.id === msg.id);
+        if (message === null) {
+            console.error("Impossible to find message that was edited");
+            return;
+        }
+        if (msg.attachments.length > 0) {
+            message.attachments = msg.attachments;
+            msgInst?.parseAttachments(msgInst.element, msg.id);
+        }
+    }
+
     acknowledgeMessage(msg, msgInst: MessageInstance | null) {
         if (!(msg.ackId in this.pendingAcknowledgement))
         {
@@ -78,7 +114,7 @@ export default class Renderer {
         }
 
         let message = this.pendingAcknowledgement[msg.ackId];
-        msgInst?.acknowledge(msg.isError);
+        msgInst?.acknowledge(msg.isError, msg.ackId, msg.isError ? null : msg.newId);
 
         if (msg.isError) {
             const sId = renderer_getCurrentServer();
@@ -101,7 +137,7 @@ export default class Renderer {
 
         if (msg.content) {
             message.content = msg.content;
-            msgInst?.parseMessage(msgInst.element, message.content, message.attachments)
+            msgInst?.parseMessage(msgInst.element, message.content)
         }
 
         delete this.pendingAcknowledgement[msg.ackId];
@@ -118,6 +154,7 @@ export default class Renderer {
             ackId: msg.ackId
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
+        this.messages.push(msgInst);
         this.pendingAcknowledgement[msg.ackId] = msgInst;
         return msgInst;
     }
@@ -133,13 +170,14 @@ export default class Renderer {
             ackId: null
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
+        this.messages.push(msgInst);
         return msgInst;
     }
 
     receiveMessage(msg) {
         const msgInst = this.addMessageInternal(msg.serverId, msg.channelId, msg);
         if (renderer_isCurrentChannel(this, msg.serverId, msg.channelId)) {
-            renderer_sendMessageInternal(msgInst);
+            renderer_sendMessageInternal(msgInst, MessageFlag.None);
         }
     }
 

@@ -1,4 +1,5 @@
 import { login_initAsync } from "./components/login";
+import { preview_initAsync } from "./components/preview";
 import { sidebar_initAsync } from "./components/sidebar";
 import { userSelection_initAsync } from "./components/userSelection";
 import { renderer_initAsync } from "./display/rendererManager";
@@ -10,7 +11,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         sidebar_initAsync,
         login_initAsync,
         renderer_initAsync,
-        userSelection_initAsync
+        userSelection_initAsync,
+        preview_initAsync
     ];
 
     for (let i of inits) {

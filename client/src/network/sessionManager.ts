@@ -13,6 +13,10 @@ export function session_addNetworkSession(n: Network) {
     sessions.push(n);
 }
 
+export function session_hasNetworkSession(name: string) {
+    return sessions.some(x => x.website === name);
+}
+
 export function session_resetAllConnections() {
     for (let s of sessions) {
         s.resetConnection();
