@@ -1,6 +1,6 @@
 import Network from "./network";
 import Server from "../models/server";
-import { renderer_getCurrentChannel, renderer_getCurrentServer, renderer_initDisplay, renderer_isCurrentChannel, renderer_isCurrentServer, renderer_refreshMessageDisplay, renderer_sendMessageInternal, renderer_showCurrentChannels, renderer_switchChannel } from "../display/rendererManager";
+import { renderer_getCurrentChannel, renderer_getCurrentServer, renderer_initDisplay, renderer_isCurrentChannel, renderer_isCurrentRenderer, renderer_isCurrentServer, renderer_refreshMessageDisplay, renderer_sendMessageInternal, renderer_showCurrentChannels, renderer_switchChannel } from "../display/rendererManager";
 import Channel from "../models/channel";
 import User from "../models/user";
 import Message from "../models/message";
@@ -37,27 +37,31 @@ export default class Renderer {
     }
 
     sendSystemMessage(text: string) {
-        renderer_sendMessageInternal({
-            id: -1,
-            date: new Date(),
-            authors: [],
-            content: text,
-            attachments: [],
-
-            ackId: null
-        }, MessageFlag.IsSystem);
+        if (renderer_isCurrentRenderer(this)) {
+            renderer_sendMessageInternal({
+                id: -1,
+                date: new Date(),
+                authors: [],
+                content: text,
+                attachments: [],
+    
+                ackId: null
+            }, MessageFlag.IsSystem);
+        }
     }
 
     sendErrorMessage(text: string) {
-        renderer_sendMessageInternal({
-            id: -1,
-            date: new Date(),
-            authors: [],
-            content: text,
-            attachments: [],
-
-            ackId: null
-        }, MessageFlag.IsError);
+        if (renderer_isCurrentRenderer(this)) {
+            renderer_sendMessageInternal({
+                id: -1,
+                date: new Date(),
+                authors: [],
+                content: text,
+                attachments: [],
+    
+                ackId: null
+            }, MessageFlag.IsError);
+        }
     }
 
     // Connection to the current server was closed
@@ -296,7 +300,7 @@ export default class Renderer {
         });
 
         container.appendChild(instance);
-        serverInst.element = container.lastElementChild as HTMLElement;
+        serverInst.element = container.lastElementChild as HTMLButtonElement;
         serverInst.notification = new Notification(serverInst.element, false);
 
         // Check if we have any unread message

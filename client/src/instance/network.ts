@@ -139,6 +139,10 @@ export default class Network
         // Connection opened
         this.socket.addEventListener("open", (_) => {
             self.renderer.sendSystemMessage("Connected to server");
+            for (const s of Object.values(this.renderer.servers)) {
+                s.element.classList.remove("inactive");
+                s.element.disabled = false;
+            }
 
             clearInterval(self.keepAliveInterval);
             self.keepAliveInterval = setInterval(() => {
@@ -149,6 +153,10 @@ export default class Network
         this.socket.addEventListener("close", async (_) => {
             self.renderer.clearAll();
             self.renderer.sendErrorMessage("Connection closed");
+            for (const s of Object.values(this.renderer.servers)) {
+                s.element.classList.add("inactive");
+                s.element.disabled = true;
+            }
             await new Promise(resolve => setTimeout(resolve, 1000));
             self.openMessageConnection();
         });

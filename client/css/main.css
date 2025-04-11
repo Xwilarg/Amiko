@@ -89,6 +89,10 @@ html {
     height: 75px;
 }
 
+.profile.inactive {
+    background-color: rgb(75, 47, 47);
+}
+
 .pfp {
     width: 30px;
     height: 30px;

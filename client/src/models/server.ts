@@ -5,6 +5,6 @@ export default interface Server {
     channels: { [id: number] : Channel; };
     name: string;
 
-    element: HTMLElement;
+    element: HTMLButtonElement;
     notification: Notification;
 }

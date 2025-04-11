@@ -58,13 +58,6 @@ jobs:
           client/node_modules/
           client/index.html
         if-no-files-found: error
-
-    - name: Print Folder Tree
-      uses: jaywcjlove/github-action-folder-tree@main
-      with:
-        exclude: "node_modules|.git"
-        path: .
-        depth: 5
     - uses: actions/upload-artifact@v4
       with:
         name: software

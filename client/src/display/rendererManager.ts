@@ -122,10 +122,14 @@ export function renderer_showCurrentChannels() {
     }
 }
 
-export function renderer_isCurrentServer(r: Renderer, servId: number): boolean {
+export function renderer_isCurrentRenderer(r: Renderer) {
     if (currentChannel === null) return false;
 
-    return currentChannel.renderer.network.website === r.network.website && currentChannel.serverId === servId;
+    return currentChannel.renderer.network.website === r.network.website;
+}
+
+export function renderer_isCurrentServer(r: Renderer, servId: number): boolean {
+    return renderer_isCurrentRenderer(r) && currentChannel.serverId === servId;
 }
 
 export function renderer_isCurrentChannel(r: Renderer, servId: number, chanId: number): boolean {
