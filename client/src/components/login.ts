@@ -3,7 +3,13 @@ import { session_addNetworkSession, session_hasNetworkSession } from "../network
 
 export async function login_initAsync() {
     const websiteElem = (document.getElementById("website")! as HTMLInputElement);
-    websiteElem.value = location.host;
+
+    // @ts-ignore
+    const defaultUrl: string = configuration.baseUrl();
+    if (defaultUrl !== null) {
+        websiteElem.value = defaultUrl;
+        websiteElem.readOnly = true;
+    }
 
     document.getElementById("password-submit")!.addEventListener("click", e => {
         e.preventDefault();
@@ -48,11 +54,16 @@ export async function login_initAsync() {
         document.getElementById("login-popup")!.classList.remove("is-active");
     });
 
-    document.getElementById("add-instance")!.addEventListener("click", _ => {
-        document.getElementById("close-login")!.classList.remove("is-hidden");
-        (document.getElementById("website") as HTMLInputElement).readOnly = false;
-        websiteElem.value = "";
+    const addInstance = document.getElementById("add-instance") as HTMLButtonElement;
+    // @ts-ignore
+    if (compatibility.crossorigin()) {
+        addInstance.addEventListener("click", _ => {
+            document.getElementById("close-login")!.classList.remove("is-hidden");
+            websiteElem.value = "";
 
-        document.getElementById("login-popup")!.classList.add("is-active");
-    });
+            document.getElementById("login-popup")!.classList.add("is-active");
+        });
+    } else {
+        addInstance.disabled = true;
+    }
 }

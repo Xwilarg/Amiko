@@ -29,6 +29,9 @@ contextBridge.exposeInMainWorld('versions', {
 contextBridge.exposeInMainWorld('interaction', {
     open: (url) => shell.openExternal(url)
 });
+contextBridge.exposeInMainWorld('configuration', {
+    baseUrl: () => null
+});
 contextBridge.exposeInMainWorld('filesystem', {
     readTokenAsync: async () => {
         const path = (await ipcRenderer.invoke('path')) + "/token.dat";

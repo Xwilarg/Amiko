@@ -41,6 +41,9 @@ function initBrowser() {
     interaction = {
         open: (url) => window.open(url, '_blank').focus()
     };
+    configuration = {
+        baseUrl: () => location.host
+    };
     filesystem = {
         readTokenAsync: async () => {
             const pref = await readPrefAsync("websites", "");
