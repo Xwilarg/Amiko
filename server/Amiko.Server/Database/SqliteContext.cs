@@ -50,9 +50,15 @@ public class ContextInterpreter
             foreach (var c in s.Channels)
             {
                 var server = _ctx.Servers.Include(s => s.Channels).First(x => x.Name == s.Name);
-                if (!server.Channels.Any(x => x.Name == c.Name))
+                var channel = server.Channels.FirstOrDefault(x => x.Name == c.Name);
+                if (channel == null)
                 {
-                    AddChannel(server.Id, c.Name);
+                    AddChannel(server.Id, c.Name, c.Description);
+                }
+                else
+                {
+                    channel.Description = c.Description;
+                    _ctx.SaveChanges();
                 }
             }
         }
@@ -190,12 +196,12 @@ public class ContextInterpreter
         return serv.Id;
     }
 
-    private int AddChannel(int servId, string name)
+    private int AddChannel(int servId, string name, string? description)
     {
         var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
         if (serv == null) throw new InvalidOperationException("Server not found");
 
-        var chan = new ChannelContext() { Name = name };
+        var chan = new ChannelContext() { Name = name, Description = description };
         serv.Channels.Add(chan);
         _ctx.SaveChanges();
 
@@ -373,6 +379,7 @@ public class ChannelContext
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     public string Name { set; get; }
+    public string? Description { set; get; }
     public List<MessageContext> Messages { set; get; } = [];
 }
 

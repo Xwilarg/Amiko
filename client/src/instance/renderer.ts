@@ -239,7 +239,9 @@ export default class Renderer {
         }
 
         if (msg.isMyGroup) {
-            this.possibleUsers.push(msg.id);
+            if (!this.possibleUsers.includes(msg.id)) {
+                this.possibleUsers.push(msg.id);
+            }
         }
     }
 

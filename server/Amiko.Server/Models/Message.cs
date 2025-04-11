@@ -28,6 +28,7 @@ public class ChannelInfo
 {
     public int Id { set; get; }
     public string Name { set; get; }
+    public string? Description { set; get; }
     public Message[] Messages { set; get; }
     public long LastSeen { set; get; }
 }
