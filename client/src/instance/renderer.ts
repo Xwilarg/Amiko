@@ -215,7 +215,7 @@ export default class Renderer {
             const notifPrivacy = preferences_getNotificationDisplayMode();
     
             if (notifPrivacy == NotificationDisplayMode.ShowAll) {
-                new window.Notification(`Message from  ${this.getInfoFromIdList(json.authors).map(x => x.username)}`, {
+                new window.Notification(`Message from ${this.getInfoFromIdList(json.authors).map(x => x.username)}`, {
                     body: json.content
                 });
             }

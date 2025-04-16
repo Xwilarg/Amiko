@@ -1,3 +1,4 @@
+import { renderer_getCurrentRenderer } from "../display/rendererManager";
 import { session_resetAllConnections } from "../network/sessionManager";
 
 let areSettingsOpen = false;
@@ -43,5 +44,11 @@ export async function sidebar_initAsync() {
     document.getElementById("version-browser")!.innerHTML = versions.chrome();
     document.getElementById("reset-conn")!.addEventListener("click", _ => {
         session_resetAllConnections();
-    })
+    });
+    document.getElementById("send-notification")!.addEventListener("click", _ => {
+        renderer_getCurrentRenderer().sendNotification({
+            authors: [],
+            content: "Test notification"
+        });
+    });
 }
