@@ -37,7 +37,7 @@ public class ContextInterpreter
         {
             if (!_ctx.Servers.Any(x => x.Name == s.Name))
             {
-                AddServer(s.Name, s.AllowedUsers, s.Color, s.Character);
+                AddServer(s.Name, s.AllowedUsers, s.Color, s.Character, s.IsEphemeral ?? false, s.AllowsGuest ?? false);
             }
             else
             {
@@ -45,6 +45,8 @@ public class ContextInterpreter
                 currServ.AllowedUsers = s.AllowedUsers?.ToList();
                 if (s.Color != null) currServ.Color = (s.Color.R << 16) | (s.Color.G << 8) | s.Color.B;
                 if (s.Character != null) currServ.Character = s.Character;
+                currServ.IsEphemeral = s.IsEphemeral ?? false;
+                currServ.AllowsGuest = s.AllowsGuest ?? false;
                 _ctx.SaveChanges();
             }
             foreach (var c in s.Channels)
@@ -180,7 +182,7 @@ public class ContextInterpreter
     }
 
 
-    private int AddServer(string name, int[]? allowedUsers, Color? color, string? character)
+    private int AddServer(string name, int[]? allowedUsers, Color? color, string? character, bool isEphemeral, bool allowsGuest)
     {
         color ??= new Color() { R = 54, G = 54, B = 54 };
         var serv = new ServerContext()
@@ -188,7 +190,9 @@ public class ContextInterpreter
             Name = name,
             AllowedUsers = allowedUsers?.ToList(),
             Color = (color.R << 16) | (color.G << 8) | color.B,
-            Character = character ?? name[0].ToString()
+            Character = character ?? name[0].ToString(),
+            IsEphemeral = isEphemeral,
+            AllowsGuest = allowsGuest
         };
         _ctx.Servers.Add(serv);
         _ctx.SaveChanges();
@@ -201,7 +205,11 @@ public class ContextInterpreter
         var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
         if (serv == null) throw new InvalidOperationException("Server not found");
 
-        var chan = new ChannelContext() { Name = name, Description = description };
+        var chan = new ChannelContext()
+        {
+            Name = name,
+            Description = description
+        };
         serv.Channels.Add(chan);
         _ctx.SaveChanges();
 
@@ -217,6 +225,9 @@ public class ContextInterpreter
         if (chan == null) throw new InvalidOperationException("Channel not found");
 
         chan.Messages.Add(msg);
+        if (serv.IsEphemeral) {
+            chan.Messages = chan.Messages.TakeLast(100).ToList(); // Ephemeral channels always keep 100 messages at most
+        }
         _ctx.SaveChanges();
 
         return msg.Id;
@@ -293,6 +304,7 @@ public class ContextInterpreter
             {
                 Id = c.Id,
                 Name = c.Name,
+                Description = c.Description,
                 Messages = GetMessages(s.Id, c.Id, maxMsgCount), // We will feel msgs right after (because OrderBy make a runtime exception)
                 LastSeen = user.LastSeens.FirstOrDefault(x => x.ServId == s.Id && x.ChanId == c.Id)?.LastSeen ?? 0
             }).ToArray()
@@ -334,26 +346,73 @@ public class SqliteContext : DbContext
 public class AttachmentContext
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
+    /// <summary>
+    /// Raw data contains in the attachment
+    /// </summary>
     public byte[] Data { set; get; }
+    /// <summary>
+    /// Name of the file of the attachment
+    /// </summary>
     public string Filename { set; get; }
+    /// <summary>
+    /// <see href="https://developer.mozilla.org/fr/docs/Web/HTTP/Guides/MIME_types"></see>
+    /// </summary>
     public string Mimetype { set; get; }
 }
 
+/// <summary>
+/// Represent a user account
+/// A user can be one of the following:
+/// - User: Login with a password
+/// - AltUser: Attached to an user, need to login with the main user
+/// - Webhook: Listen to a server, use a webhook URL
+/// </summary>
 public class UserContext
 {
     [Key] public int Id { set; get; }
+    /// <summary>
+    /// Display name of the user
+    /// </summary>
     public string Username { set; get; }
+    /// <summary>
+    /// User only
+    /// Hashed password of the user
+    /// </summary>
     public string? Password { set; get; }
+    /// <summary>
+    /// AltUser only
+    /// Which user is the current account dependent of
+    /// </summary>
     public int? DependsOf { set; get; }
-    public int Color { set; get; }
-    public string Character { set; get; }
+    /// <summary>
+    /// AltUser only
+    /// Prefix that can be used to identify a message as the current altuser
+    /// </summary>
     public string? Prefix { set; get; }
-
+    /// <summary>
+    /// Webhook only
+    /// Target webhook to which a message need to be dispatched to
+    /// </summary>
     public string? Webhook { set; get; }
 
+    /// <summary>
+    /// Color of the account pfp
+    /// </summary>
+    public int Color { set; get; }
+    /// <summary>
+    /// Character in the account pfp
+    /// </summary>
+    public string Character { set; get; }
+
+    /// <summary>
+    /// For each channel, when were messages last seen
+    /// </summary>
     public List<ChannelSeen> LastSeens { set; get; } = [];
 }
 
+/// <summary>
+/// Represent information of when was a channel seen by a specific user
+/// </summary>
 public class ChannelSeen
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
@@ -363,33 +422,94 @@ public class ChannelSeen
     public long LastSeen { set; get; }
 }
 
+/// <summary>
+/// Represent a server
+/// </summary>
 public class ServerContext
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
+    /// <summary>
+    /// Display name of the server
+    /// </summary>
     public string Name { set; get; }
+    /// <summary>
+    /// Color of the server icon
+    /// </summary>
     public int Color { set; get; }
+    /// <summary>
+    /// Character inside the server icon
+    /// </summary>
     public string Character { set; get; }
+    /// <summary>
+    /// List of channels available on this server
+    /// </summary>
     public List<ChannelContext> Channels { set; get; } = [];
+    /// <summary>
+    /// Users that are allowed to access this channels, if null anyone with an account can access it
+    /// </summary>
     public List<int>? AllowedUsers { set; get; } = null;
+
+    /// <summary>
+    /// Ephemerals servers only keep X messages in their channels
+    /// When a channel get more than the allowed amount of messages, the old ones are deleted
+    /// </summary>
+    public bool IsEphemeral { set; get; } = false;
+    /// <summary>
+    /// Guests are users that don't need to login
+    /// They aren't allowed to send attachments
+    /// </summary>
+    public bool AllowsGuest { set; get; } = false;
 }
 
+/// <summary>
+/// Represent a channel of conversation within a server
+/// </summary>
 public class ChannelContext
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
+    /// <summary>
+    /// Display name of the channel
+    /// </summary>
     public string Name { set; get; }
+    /// <summary>
+    /// Short description of the channel
+    /// </summary>
     public string? Description { set; get; }
+    /// <summary>
+    /// All messages sent on this channel
+    /// </summary>
     public List<MessageContext> Messages { set; get; } = [];
 }
 
+/// <summary>
+/// Represent a message sent in a channel
+/// </summary>
 public class MessageContext
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
+    /// <summary>
+    /// Date at which the message was created
+    /// </summary>
     public DateTime CreationTime { set; get; }
 
+    /// <summary>
+    /// Content of the message
+    /// </summary>
     public string Message { set; get; }
+    /// <summary>
+    /// Authors of the messages
+    /// Usually have only one, can have more if co-fronting feature was enabled
+    /// </summary>
     public int[] Authors { set; get; }
+    /// <summary>
+    /// Files attached to the message
+    /// </summary>
     public List<AttachmentContext> Attachments { set; get; } = [];
+    /// <summary>
+    /// List of users that added a heart as reaction to the message
+    /// </summary>
+    public List<int> Reactions { set; get; } = [];
 }

@@ -1,13 +1,10 @@
-interface NotificationTarget
-{
-    serverId: number;
-    channelId: number;
-}
+import { session_updateNotificationCount } from "../network/sessionManager";
 
 export default class Notification
 {
     element: HTMLElement;
-    channels: number[];
+    // Associate channel id and amount of new messages
+    channels: { [id: number] : number; };
 
     constructor(container: HTMLElement, showNotificationByDefault: boolean) {
         this.element = this.addNotificationDiv(container, showNotificationByDefault);
@@ -27,16 +24,26 @@ export default class Notification
     }
 
     addNotification(chanId: number) {
-        if (!this.channels.includes(chanId)) {
-            this.channels.push(chanId);
+        if (!(chanId in this.channels)) {
+            this.channels[chanId] = 1;
+        } else {
+            this.channels[chanId]++;
         }
         this.element.classList.remove("is-hidden");
+
+        session_updateNotificationCount();
     }
 
     removeNotification(chanId: number) {
-        this.channels = this.channels.filter(x => x != chanId);
-        if (this.channels.length == 0) {
+        delete this.channels[chanId];
+        if (Object.keys(this.channels).length == 0) {
             this.element.classList.add("is-hidden");
         }
+
+        session_updateNotificationCount();
+    }
+
+    getNotificationCount(): number {
+        return Object.values(this.channels).reduce((a, b) => a + b, 0);
     }
 }

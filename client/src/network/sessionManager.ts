@@ -22,3 +22,13 @@ export function session_resetAllConnections() {
         s.resetConnection();
     }
 }
+
+export function session_updateNotificationCount() {//.reduce((a, b) => a + b, 0)
+    const notifCount = sessions.map(x =>
+        Object.values(x.renderer.servers)
+            .map(y => y.notification.getNotificationCount()).reduce((a, b) => a + b, 0)
+        ).reduce((a, b) => a + b, 0);
+
+    if (notifCount === 0) document.title = "Amiko";
+    else document.title = `Amiko (${notifCount})`;
+}

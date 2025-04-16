@@ -263,6 +263,7 @@ export default class Renderer {
         {
             const chanInst: Channel = {
                 name: chan.name,
+                description: chan.description,
                 messages: []
             }
             this.servers[msg.id].channels[chan.id] = chanInst;

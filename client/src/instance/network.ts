@@ -194,10 +194,12 @@ export default class Network
                     self.renderer.receiveMessage(json);
                     if (renderer_isCurrentChannel(self.renderer, json.serverId, json.channelId))
                     {
-                        renderer_seeChannel()
                         // @ts-ignore
                         if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
+                            self.renderer.servers[json.serverId].notification.addNotification(json.channelId);
                             self.renderer.sendNotification(json);
+                        } else {
+                            renderer_seeChannel()
                         }
                     }
                     else { // Whenever we are currently looking at the window or not, the message have lend in another channel so we send a notification

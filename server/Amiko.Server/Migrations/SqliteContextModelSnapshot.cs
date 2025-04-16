@@ -113,6 +113,10 @@ namespace Amiko.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Reactions")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChannelContextId");
@@ -129,11 +133,17 @@ namespace Amiko.Server.Migrations
                     b.Property<string>("AllowedUsers")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("AllowsGuest")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Character")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Color")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsEphemeral")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

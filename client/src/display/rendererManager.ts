@@ -33,9 +33,9 @@ export function renderer_refreshMessageDisplay() {
     displayedMessages = [];
 
     const targetChannel = currentChannel.renderer.servers[currentChannel.serverId].channels[currentChannel.channelId];
-    const chanName = targetChannel.name;
 
-    document.getElementById("channel-title").innerHTML = chanName;
+    document.getElementById("channel-title").innerHTML = targetChannel.name;
+    document.getElementById("channel-description").innerHTML = targetChannel.description ?? "";
 
     // Update all messages
     const container = document.getElementById("messages");
@@ -105,7 +105,7 @@ export function renderer_showCurrentChannels() {
         chanBtn.classList.add("button");
         if (currentChannel.channelId == parseInt(key)) chanBtn.classList.add("is-primary");
 
-        if (currServ.notification.channels.includes(parseInt(key))) {
+        if (parseInt(key) in currServ.notification.channels) {
             new Notification(chanBtn, true);
         }
 
@@ -141,11 +141,16 @@ export function renderer_getCurrentServer(): number { return currentChannel.serv
 export function renderer_getCurrentChannel(): number { return currentChannel.channelId; }
 
 export async function renderer_initAsync() {
+    document.addEventListener("focus", _ => {
+        if (currentChannel) {
+            renderer_seeChannel();
+        }
+    });
+
     // Sending messages
     document.getElementById("send-message").addEventListener("click", e => {
         e.preventDefault();
         const content = document.getElementById("message-field") as HTMLInputElement;
-        const fileInput = document.getElementById("attach-file");
         if (content.value || currentChannel.renderer.attachment.hasAttachment()) {
             var newMsg = {
                 type: 2,

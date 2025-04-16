@@ -20,7 +20,9 @@ namespace Amiko.Server.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Color = table.Column<int>(type: "INTEGER", nullable: false),
                     Character = table.Column<string>(type: "TEXT", nullable: false),
-                    AllowedUsers = table.Column<string>(type: "TEXT", nullable: true)
+                    AllowedUsers = table.Column<string>(type: "TEXT", nullable: true),
+                    IsEphemeral = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AllowsGuest = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,10 +38,10 @@ namespace Amiko.Server.Migrations
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: true),
                     DependsOf = table.Column<int>(type: "INTEGER", nullable: true),
-                    Color = table.Column<int>(type: "INTEGER", nullable: false),
-                    Character = table.Column<string>(type: "TEXT", nullable: false),
                     Prefix = table.Column<string>(type: "TEXT", nullable: true),
-                    Webhook = table.Column<string>(type: "TEXT", nullable: true)
+                    Webhook = table.Column<string>(type: "TEXT", nullable: true),
+                    Color = table.Column<int>(type: "INTEGER", nullable: false),
+                    Character = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -96,6 +98,7 @@ namespace Amiko.Server.Migrations
                     CreationTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Message = table.Column<string>(type: "TEXT", nullable: false),
                     Authors = table.Column<string>(type: "TEXT", nullable: false),
+                    Reactions = table.Column<string>(type: "TEXT", nullable: false),
                     ChannelContextId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>

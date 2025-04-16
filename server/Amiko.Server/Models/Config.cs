@@ -36,6 +36,9 @@
         public ChannelConfig[] Channels { set; get; }
         public int[]? AllowedUsers { set; get; }
 
+        public bool? IsEphemeral { set; get; }
+        public bool? AllowsGuest { set; get; }
+
         public Color? Color { set; get; }
         public string? Character { set; get; }
     }
