@@ -141,7 +141,7 @@ export function renderer_getCurrentServer(): number { return currentChannel.serv
 export function renderer_getCurrentChannel(): number { return currentChannel.channelId; }
 
 export async function renderer_initAsync() {
-    document.addEventListener("focus", _ => {
+    window.addEventListener("focus", _ => {
         if (currentChannel) {
             renderer_seeChannel();
         }
