@@ -15,6 +15,8 @@ export default class Network
     renderer: Renderer;
     keepAliveInterval: NodeJS.Timeout | null;
 
+    isGuest: boolean;
+
     constructor(website: string, isSecure: boolean) {
         this.website = website;
 
@@ -38,7 +40,7 @@ export default class Network
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
         .then(async _ => {
             this.token = token;
-            this.openMessageConnection();
+            this.openMessageConnection(false);
 
             onSuccess();
         })
@@ -60,7 +62,7 @@ export default class Network
             this.token = text;
             // @ts-ignore
             await filesystem.writeTokenAsync(this.token, this.website);
-            this.openMessageConnection();
+            this.openMessageConnection(false);
 
             onSuccess();
         })
@@ -69,8 +71,12 @@ export default class Network
         });
     }
 
-    getAttachmentOverNetwork(servId: number, chanId: number, msgId: number, onDone: (blob: Blob) => void) {
-        fetch(`${this.httpEndpoint}/attachment/get/${servId}/${chanId}/${msgId}`, {
+    loginAsGuest() {
+        this.openMessageConnection(true);
+    }
+
+    getAttachmentOverNetwork(servId: number, chanId: number, msgId: number, isGuest: boolean, onDone: (blob: Blob) => void) {
+        fetch(`${this.httpEndpoint}/attachment/${(isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.token}`
@@ -128,12 +134,13 @@ export default class Network
         this.socket.send(JSON.stringify(msg));
     }
 
-    openMessageConnection() {
+    openMessageConnection(isGuest: boolean) {
+        this.isGuest = isGuest;
         document.getElementById("messages").innerHTML = "";
 
         this.renderer.sendSystemMessage(`Connecting...`);
 
-        this.socket = new WebSocket(this.websocketEndpoint, ["client", this.token]);
+        this.socket = new WebSocket(this.websocketEndpoint + (isGuest ? "guest" : ""), ["client", this.token]);
 
         const self = this;
         // Connection opened
@@ -158,7 +165,7 @@ export default class Network
                 s.element.disabled = true;
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
-            self.openMessageConnection();
+            self.openMessageConnection(isGuest);
         });
 
         this.socket.addEventListener("error", (e) => {

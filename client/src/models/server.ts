@@ -5,6 +5,9 @@ export default interface Server {
     channels: { [id: number] : Channel; };
     name: string;
 
+    isEphemeral: boolean;
+    allowGuest: boolean;
+
     element: HTMLButtonElement;
     notification: Notification;
 }

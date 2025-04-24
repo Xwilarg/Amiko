@@ -61,6 +61,10 @@ html {
     }
 }
 
+.channel-hint {
+    font-size: 1em;
+}
+
 /* Settings */
 .dropdown {
     position: absolute;

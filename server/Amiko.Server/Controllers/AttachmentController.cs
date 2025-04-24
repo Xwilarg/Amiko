@@ -48,6 +48,29 @@ public class AttachmentController : ControllerBase
         return File(file.Data, file.Mimetype);
     }
 
+    [HttpGet("getGuest/{servId}/{chanId}/{msgId}")]
+    public async Task<IActionResult> GetAttachmentGuest([Required] int servId, [Required] int chanId, [Required] int msgId)
+    {
+        var ctx = ContextInterpreter.Get(_dbContext);
+
+        var att = ctx.TryGetAttachment(servId, chanId, msgId, null);
+        if (att.Count == 0)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        var file = att[0];
+        var cd = new System.Net.Mime.ContentDisposition
+        {
+            FileName = file.Filename,
+            Inline = true,
+        };
+
+        Response.Headers.Append("Content-Disposition", cd.ToString());
+
+        return File(file.Data, file.Mimetype);
+    }
+
     [Authorize]
     [HttpPost("attach/{servId}/{chanId}/{msgId}")]
     [RequestSizeLimit(2_000_000)]

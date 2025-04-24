@@ -31,9 +31,14 @@
                             <input id="password" class="input" type="password" placeholder="Password">
                         </div>
                     </div>
-                    <p class="control">
-                        <input class="button is-link" type="submit" id="password-submit">
-                    </p>
+                    <div class="field is-grouped">
+                        <p class="control">
+                            <input class="button is-link" type="submit" id="password-submit">
+                        </p>
+                        <p class="control">
+                            <button class="button" id="login-guest">Login as guest</button>
+                        </p>
+                    </div>
                 </form>
             </div>
             <button class="modal-close is-large is-hidden" aria-label="close" id="close-login"></button>
@@ -83,6 +88,8 @@
                 </button>
                 <div class="level is-mobile">
                     <h3 class="subtitle" id="channel-title"></h3>
+                    <span id="is-ephemeral"><span class="material-symbols-outlined channel-hint" title="Older messages are automatically deleted">hourglass_empty</span></span>
+                    <span id="allow-guest"><span class="material-symbols-outlined channel-hint" title="Guests users are allowed">groups</span></span>
                 </div>
             </div>
             <div class="navbar-menu">

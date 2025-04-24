@@ -32,7 +32,8 @@ function scrollToBottom() {
 export function renderer_refreshMessageDisplay() {
     displayedMessages = [];
 
-    const targetChannel = currentChannel.renderer.servers[currentChannel.serverId].channels[currentChannel.channelId];
+    const currServ = currentChannel.renderer.servers[currentChannel.serverId];
+    const targetChannel = currServ.channels[currentChannel.channelId];
 
     document.getElementById("channel-title").innerHTML = targetChannel.name;
     document.getElementById("channel-description").innerHTML = targetChannel.description ?? "";
@@ -47,6 +48,13 @@ export function renderer_refreshMessageDisplay() {
     // Whole message list are updated when we display a new channel or so
     // Hense we send a "seen" notification
     renderer_seeChannel();
+
+    // Update display depending of the channel settings
+    (document.getElementById("export-button") as HTMLButtonElement).disabled = currServ.isEphemeral;
+    (document.getElementById("is-ephemeral") as HTMLButtonElement).disabled = currServ.isEphemeral;
+    (document.getElementById("allow-guest") as HTMLButtonElement).disabled = currServ.allowGuest;
+    if (currentChannel.renderer.network.isGuest) document.getElementById("attach-file-container")!.classList.add("is-static");
+    else document.getElementById("attach-file-container")!.classList.remove("is-static");
 }
 
 /// Add a message on screen

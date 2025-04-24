@@ -23,6 +23,9 @@ public class ServerInfo : BaseMessage
     public ChannelInfo[] Channels { set; get; }
     public Color Color { set; get; }
     public string Character { set; get; }
+
+    public bool IsEphemeral { set; get; }
+    public bool AllowsGuest { set; get; }
 }
 public class ChannelInfo
 {

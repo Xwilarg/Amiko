@@ -113,11 +113,16 @@ public class ContextInterpreter
     /// <summary>
     /// Does the user given on parameter have access to a server
     /// </summary>
-    public bool CanAccessServer(int servId, int userId)
+    public bool CanAccessServer(int servId, int? userId)
     {
         var serv = _ctx.Servers.First(x => x.Id == servId);
 
-        return serv.AllowedUsers == null || serv.AllowedUsers.Contains(userId);
+        if (userId != null) { // Authentificated user
+            return serv.AllowedUsers == null || serv.AllowedUsers.Contains(userId.Value); // There is no whitelist or user is allowed
+        }
+
+        // Guest user
+        return serv.AllowedUsers == null || serv.AllowsGuest;
     }
 
     /// <summary>
@@ -156,7 +161,7 @@ public class ContextInterpreter
         return serv.Channels.First(x => x.Id == chanId);
     }
 
-    public MessageContext? GetMessage(int servId, int chanId, int msgId, int claimId)
+    public MessageContext? GetMessage(int servId, int chanId, int msgId, int? claimId)
     {
         var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments).First(x => x.Id == servId);
         if (!CanAccessServer(serv.Id, claimId)) return null;
@@ -253,7 +258,7 @@ public class ContextInterpreter
         return msg.Id;
     }
 
-    public List<AttachmentContext> TryGetAttachment(int servId, int chanId, int msgId, int claimId)
+    public List<AttachmentContext> TryGetAttachment(int servId, int chanId, int msgId, int? claimId)
     {
         var msg = GetMessage(servId, chanId, msgId, claimId);
         if (msg == null) return [];
@@ -285,9 +290,9 @@ public class ContextInterpreter
         return msgs.OrderBy(x => x.Id).ToArray();
     }
 
-    public ServerInfo[] GetStartingServerInfo(int maxMsgCount, int claimId)
+    public ServerInfo[] GetStartingServerInfo(int maxMsgCount, int? claimId)
     {
-        var user = _ctx.Users.Include(u => u.LastSeens).First(x => x.Id == claimId);
+        var user = _ctx.Users.Include(u => u.LastSeens).FirstOrDefault(x => x.Id == claimId);
         var data = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).AsEnumerable().Where(x => CanAccessServer(x.Id, claimId)).Select(s => new ServerInfo()
         {
             Type = MessageType.ServerInfo,
@@ -300,19 +305,21 @@ public class ContextInterpreter
                 B = (byte)((s.Color >> 0) & 0xff)
             },
             Character = s.Character,
+            IsEphemeral = s.IsEphemeral,
+            AllowsGuest = s.AllowsGuest,
             Channels = s.Channels.Select(c => new ChannelInfo()
             {
                 Id = c.Id,
                 Name = c.Name,
                 Description = c.Description,
                 Messages = GetMessages(s.Id, c.Id, maxMsgCount), // We will feel msgs right after (because OrderBy make a runtime exception)
-                LastSeen = user.LastSeens.FirstOrDefault(x => x.ServId == s.Id && x.ChanId == c.Id)?.LastSeen ?? 0
+                LastSeen = user == null ? 0 : (user.LastSeens.FirstOrDefault(x => x.ServId == s.Id && x.ChanId == c.Id)?.LastSeen ?? 0) // We send 0 for guest users by default
             }).ToArray()
         }).ToArray();
         return data;
     }
 
-    public UserInfo[] GetStartingUserInfo(int rawId)
+    public UserInfo[] GetStartingUserInfo(int? rawId)
     {
         var data = _ctx.Users.Select(u => new UserInfo()
         {

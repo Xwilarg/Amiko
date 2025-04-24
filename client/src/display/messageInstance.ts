@@ -44,16 +44,16 @@ export default class MessageInstance
             msg.classList.add("mention");
         }
 
-        if (m.authors.length > 0) {
+        if (m.authors !== null) {
             this.updateMessageAuthor(instance, r.getInfoFromIdList(m.authors));
         }
         instance.querySelector(".date").innerHTML = m.date.toLocaleString();
 
         // Parse message content to show image preview, markdown, etc...
-        this.parseMessage(instance, m.content);
+        this.parseMessage(instance, m.content, m.authors.length === 0);
 
         if (m.attachments.length > 0) {
-            this.parseAttachments(instance, m.id);
+            this.parseAttachments(instance, m.id, r.network.isGuest);
         }
 
         container.appendChild(instance);
@@ -82,18 +82,19 @@ export default class MessageInstance
     // Update the author of a message
     // When there are many authors, we need to merge them all into one
     updateMessageAuthor(message: HTMLElement, infos: UserInfo[]) {
-        message.querySelector(".subtitle").innerHTML = infos.map(x => x.username).join(" / ");
+        message.querySelector(".subtitle").innerHTML = infos.length === 0 ? "Guest" : infos.map(x => x.username).join(" / ");
         var pfp = message.querySelector(".pfp") as HTMLElement;
 
-        // Merge all users colors by doing their average
-        const r = infos.map(x => x.color.r).reduce((a, b) => a + b, 0) / infos.length;
-        const g = infos.map(x => x.color.g).reduce((a, b) => a + b, 0) / infos.length;
-        const b = infos.map(x => x.color.b).reduce((a, b) => a + b, 0) / infos.length;
-        pfp.style = `background: rgb(${r}, ${g}, ${b});`;
 
         // Update character inside the PFP
-        if (infos.length === 1) { // Only one user, just need to take the current one!
-            pfp.innerHTML = infos[0].character;
+        if (infos.length === 0) { // Guest mode
+            pfp.innerHTML = "G";
+            pfp.style = "background: rgb(53, 53, 53);"
+        }
+        else if (infos.length === 1) { // Only one user, just need to take the current one!
+            const a = infos[0];
+            pfp.innerHTML = a.character;
+            pfp.style = `background: rgb(${a.color.r}, ${a.color.g}, ${a.color.b});`;
         } else { // There are many users, we do the average of the symbol on their PFP
             let arr = [];
             const characters = infos.map(x => x.character).sort((a, b) => b.length - a.length);
@@ -113,13 +114,19 @@ export default class MessageInstance
                 arr[i] = Math.floor(arr[i] / infos.length);
             }
             pfp.innerHTML = String.fromCodePoint(...arr);
+
+            // Merge all users colors by doing their average
+            const r = infos.map(x => x.color.r).reduce((a, b) => a + b, 0) / infos.length;
+            const g = infos.map(x => x.color.g).reduce((a, b) => a + b, 0) / infos.length;
+            const b = infos.map(x => x.color.b).reduce((a, b) => a + b, 0) / infos.length;
+            pfp.style = `background: rgb(${r}, ${g}, ${b});`;
         }
     }
 
-    parseAttachments(msg: HTMLElement, msgId: number) {
+    parseAttachments(msg: HTMLElement, msgId: number, isGuest: boolean) {
         const servId = renderer_getCurrentServer();
         const chanId = renderer_getCurrentChannel();
-        this.renderer.network.getAttachmentOverNetwork(servId, chanId, msgId, (b: Blob) => {
+        this.renderer.network.getAttachmentOverNetwork(servId, chanId, msgId, isGuest, (b: Blob) => {
             preview_createRichPreviewImage(window.URL.createObjectURL(b), this.element.querySelector(".rich-preview"), null)
         });
         const attachmentInfo = msg.querySelector(".attachment-info");
@@ -127,7 +134,7 @@ export default class MessageInstance
         attachmentInfo.innerHTML = "1 file attached";
     }
 
-    parseMessage(msg: HTMLElement, text: string) {
+    parseMessage(msg: HTMLElement, text: string, safeMode: boolean) {
         msg.querySelector(".rich-preview").innerHTML = "";
         let finalHtml = text;
 
@@ -161,6 +168,10 @@ export default class MessageInstance
     
             const indicatorLeft = behavior === "" ? "" : `<span class="link-indicator">${l[2]}</span>`;
             const indicatorRight = behavior === "" ? "" : `<span class="link-indicator">${l[6]}</span>`;
+
+            if (safeMode) { // Safe mode: don't preview any link
+                return `${indicatorLeft}<span class="link">${l[5]}</span>${indicatorRight}`;
+            }
     
             let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
             if (m) { // Ensure we can't inject code by closing the string

@@ -62,7 +62,7 @@ public class UserSocket
     /// <summary>
     /// Claim associated with the socket, used to verify permissions
     /// </summary>
-    public int ClaimId { set; get; }
+    public int? ClaimId { set; get; }
 
     /// <summary>
     /// Actual web socket

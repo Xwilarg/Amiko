@@ -11,6 +11,15 @@ export async function login_initAsync() {
         websiteElem.readOnly = true;
     }
 
+    document.getElementById("login-guest")!.addEventListener("click", e => {
+        e.preventDefault();
+
+        const instance = new Network(websiteElem.value, true);
+        instance.loginAsGuest();
+        document.getElementById("login-popup")!.classList.remove("is-active");
+        session_addNetworkSession(instance);
+    });
+
     document.getElementById("password-submit")!.addEventListener("click", e => {
         e.preventDefault();
 

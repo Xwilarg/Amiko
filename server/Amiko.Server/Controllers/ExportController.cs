@@ -27,9 +27,10 @@ public class ExportController : ControllerBase
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
         var ctx = ContextInterpreter.Get(_dbContext);
         var serv = ctx.GetServer(servId, claimId);
+
         var chan = ctx.GetChannel(servId, chanId, claimId);
 
-        if (serv == null || chan == null)
+        if (serv == null || chan == null || serv.IsEphemeral)
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }

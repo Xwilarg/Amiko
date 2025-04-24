@@ -18,7 +18,7 @@ export default class Renderer {
     pendingAcknowledgement: { [id: number] : Message; };
 
     users: { [id: number]: User; };
-    mainUser: number;
+    mainUser: number | null;
     possibleUsers: number[];
 
     attachment: Attachment
@@ -30,7 +30,7 @@ export default class Renderer {
         this.pendingAcknowledgement = {};
         this.users = {};
 
-        this.mainUser = -1;
+        this.mainUser = null;
         this.possibleUsers = [];
 
         this.attachment = new Attachment();
@@ -41,7 +41,7 @@ export default class Renderer {
             renderer_sendMessageInternal({
                 id: -1,
                 date: new Date(),
-                authors: [],
+                authors: null,
                 content: text,
                 attachments: [],
     
@@ -55,7 +55,7 @@ export default class Renderer {
             renderer_sendMessageInternal({
                 id: -1,
                 date: new Date(),
-                authors: [],
+                authors: null,
                 content: text,
                 attachments: [],
     
@@ -106,7 +106,7 @@ export default class Renderer {
         }
         if (msg.attachments.length > 0) {
             message.attachments = msg.attachments;
-            msgInst?.parseAttachments(msgInst.element, msg.id);
+            msgInst?.parseAttachments(msgInst.element, msg.id, this.network.isGuest);
         }
     }
 
@@ -141,7 +141,7 @@ export default class Renderer {
 
         if (msg.content) {
             message.content = msg.content;
-            msgInst?.parseMessage(msgInst.element, message.content)
+            msgInst?.parseMessage(msgInst.element, message.content, message.authors.length === 0)
         }
 
         delete this.pendingAcknowledgement[msg.ackId];
@@ -151,7 +151,7 @@ export default class Renderer {
         const msgInst: Message = {
             id: -1,
             date: new Date(),
-            authors: msg.authors.length === 0 ? [ this.mainUser ] : msg.authors,
+            authors: this.mainUser === null ? [] : (msg.authors.length === 0 ? [ this.mainUser ] : msg.authors),
             content: msg.content,
             attachments: [],
 
@@ -253,6 +253,9 @@ export default class Renderer {
         let serverInst: Server = {
             name: msg.name,
             channels: {},
+
+            isEphemeral: msg.isEphemeral,
+            allowGuest: msg.allowGuest,
 
             element: null,
             notification: null
