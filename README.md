@@ -5,6 +5,9 @@ Chat software aiming to put the user first
 - Easily backup your data by exporting a whole channel content to markdown format
 - (More to come...)
 
+## How to try it
+Development is still in progress! Meanwhile you can still go to https://amiko.zirk.eu to try the pre-released version
+
 ## Installing from sources
 
 ### Backend
