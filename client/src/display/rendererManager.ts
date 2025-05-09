@@ -51,6 +51,11 @@ export function renderer_refreshMessageDisplay() {
 
     // Update display depending of the channel settings
     (document.getElementById("export-button") as HTMLButtonElement).disabled = currServ.isEphemeral;
+    if (currServ.isEphemeral) {
+        document.getElementById("export-button")!.title = "Export is disabled on ephemeral servers";
+    } else {
+        document.getElementById("export-button")!.removeAttribute("title");
+    }
     (document.getElementById("is-ephemeral") as HTMLButtonElement).disabled = currServ.isEphemeral;
     (document.getElementById("allow-guest") as HTMLButtonElement).disabled = currServ.allowGuest;
     if (currentChannel.renderer.network.isGuest) document.getElementById("attach-file-container")!.classList.add("is-static");

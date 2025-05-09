@@ -74,5 +74,6 @@ export async function login_initAsync() {
         });
     } else {
         addInstance.disabled = true;
+        addInstance.title = "New instances can only be added in the desktop version of the application";
     }
 }
