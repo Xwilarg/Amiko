@@ -73,7 +73,8 @@ public class Program
 
         var app = builder.Build();
 
-        ContextInterpreter.Get(app.Services.GetRequiredService<SqliteContext>()).Init();
+        using var scope = app.Services.CreateScope();
+        ContextInterpreter.Get(scope.ServiceProvider.GetRequiredService<SqliteContext>()).Init();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
