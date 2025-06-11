@@ -1,3 +1,5 @@
+import { renderer_refreshMessageDisplay } from "../display/rendererManager";
+
 function updateStyle(newVal: string) {
     document.getElementById("user-style")!.setAttribute("href", `./css/options/${newVal}.css`);
 }
@@ -44,6 +46,13 @@ export async function preferences_initAsync() {
     notificationDisplayMode = parseInt(await filesystem.readPrefAsync("notifPrivacy", NotificationDisplayMode.ShowAll));
     (document.getElementById("notification-privacy-selection-select") as HTMLInputElement).value = notificationDisplayMode.toString();
 
+    document.getElementById("accessibility-reading-select")!.addEventListener("change", async e => {
+        await preferences_setAccessibilityReadingModeAsync(parseInt((e.target as HTMLInputElement).value));
+    });
+    // @ts-ignore
+    accessibilityReadingMode = parseInt(await filesystem.readPrefAsync("readingMode", ReadingMode.None));
+    (document.getElementById("accessibility-reading-select") as HTMLInputElement).value = accessibilityReadingMode.toString();
+
 }
 
 // Users for each website
@@ -53,6 +62,21 @@ let currentUser: { [website: string]: number[] | null; } = {};
 let currentSelectionMode: UserSelectionMode;
 let notificationPingMode: NotificationPingMode;
 let notificationDisplayMode: NotificationDisplayMode;
+
+let accessibilityReadingMode: ReadingMode;
+
+export async function preferences_setAccessibilityReadingModeAsync(value: ReadingMode)
+{
+    // @ts-ignore
+    await filesystem.writePrefAsync("readingMode", value);
+    accessibilityReadingMode = value;
+    renderer_refreshMessageDisplay();
+}
+
+export function preferences_getAccessibilityReadingMode(): ReadingMode
+{
+    return accessibilityReadingMode;
+}
 
 export async function preferences_setUserSelectionModeAsync(value: UserSelectionMode)
 {
@@ -100,6 +124,11 @@ export async function preferences_setCurrentAltUserAsync(website: string, value:
 export function preferences_getCurrentAltUser(website: string): number[] | null
 {
     return website in currentUser ? currentUser[website] : [];
+}
+
+export enum ReadingMode {
+    None,
+    BoldReading
 }
 
 export enum UserSelectionMode {
