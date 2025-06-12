@@ -5,7 +5,7 @@ import { parsingHelper_parseEmojis, parsingHelper_parseMarkdown } from "./parsin
 // @ts-ignore
 import DOMPurify from 'dompurify';
 import { renderer_getCurrentChannel, renderer_getCurrentServer } from "./rendererManager";
-import { preview_createRichPreviewImage } from "../components/preview";
+import { preview_createRichPreview } from "../components/preview";
 
 export enum MessageFlag
 {
@@ -127,7 +127,7 @@ export default class MessageInstance
         const servId = renderer_getCurrentServer();
         const chanId = renderer_getCurrentChannel();
         this.renderer.network.getAttachmentOverNetwork(servId, chanId, msgId, isGuest, (b: Blob) => {
-            preview_createRichPreviewImage(window.URL.createObjectURL(b), this.element.querySelector(".rich-preview"), null)
+            preview_createRichPreview(window.URL.createObjectURL(b), this.element.querySelector(".rich-preview"), null, b.type)
         });
         const attachmentInfo = msg.querySelector(".attachment-info");
         attachmentInfo.classList.remove("is-hidden");
@@ -175,7 +175,7 @@ export default class MessageInstance
     
             let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
             if (m) { // Ensure we can't inject code by closing the string
-                preview_createRichPreviewImage(l[5], prev, behavior);
+                preview_createRichPreview(l[5], prev, behavior, `image/${m[1]}`);
                 // createRichPreviewImage(l[5], prev, behavior); // TODO: preview.js
                 return `${indicatorLeft}<span class="link link-image">${l[5]}</span>${indicatorRight}`;
             }
