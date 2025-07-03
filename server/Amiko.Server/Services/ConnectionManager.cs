@@ -25,6 +25,37 @@ public class ConnectionManager
         }
     }
 
+    public async Task PropagateMessageChange(int msgId, string newContent)
+    {
+        List<Task> tasks = [];
+        lock (Sockets)
+        {
+            foreach (var s in Sockets)
+            {
+                var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Message()
+                {
+                    Type = MessageType.MessageUpdate,
+                    Id = msgId,
+                    Content = newContent
+                }, Option));
+                tasks.Add(s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None));
+            }
+        }
+        foreach (var t in tasks)
+        {
+            try
+            {
+                await t;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return;
+                //_logger.LogError(e.ToString());
+            }
+        }
+    }
+
     public async Task PropagateAttachment(int msgId, AttachmentInfo[] attachments)
     {
         List<Task> tasks = [];

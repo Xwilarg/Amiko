@@ -241,6 +241,18 @@ public class ContextInterpreter
     public IEnumerable<UserContext> GetAllWebhooks()
         => _ctx.Users.Where(x => x.Webhook != null);
 
+    public bool EditMessage(int servId, int chanId, int msgId, int claimId, string content)
+    {
+        var msg = GetMessage(servId, chanId, msgId, claimId);
+        if (msg == null) return false;
+        if (!msg.Authors.Any(x => DoesUserFillClaim(claimId, x))) return false;
+
+        msg.Message = content;
+
+        _ctx.SaveChanges();
+        return true;
+    }
+
     public int? TryAddAttachment(int servId, int chanId, int msgId, int claimId, string filename, string contentType, byte[] data)
     {
         var msg = GetMessage(servId, chanId, msgId, claimId);
@@ -501,6 +513,7 @@ public class MessageContext
     /// Date at which the message was created
     /// </summary>
     public DateTime CreationTime { set; get; }
+    public DateTime LastModificationTime { set; get; }
 
     /// <summary>
     /// Content of the message
