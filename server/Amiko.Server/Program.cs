@@ -1,4 +1,4 @@
-using Amiko.Server.Database;
+using Amiko.Server.Database.Context;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;

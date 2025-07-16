@@ -1,4 +1,4 @@
-﻿namespace Amiko.Models;
+﻿namespace Amiko.Server.Models.Response;
 
 public enum MessageType
 {

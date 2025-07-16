@@ -2,6 +2,7 @@
 using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text;
+using Amiko.Server.Models.Response;
 
 namespace Amiko.Server.Services;
 

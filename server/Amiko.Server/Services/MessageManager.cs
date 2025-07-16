@@ -1,4 +1,4 @@
-﻿using Amiko.Server.Database;
+﻿using Amiko.Server.Database.Context;
 
 namespace Amiko.Server.Services;
 

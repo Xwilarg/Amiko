@@ -1,4 +1,4 @@
-using Amiko.Server.Database;
+using Amiko.Server.Database.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;

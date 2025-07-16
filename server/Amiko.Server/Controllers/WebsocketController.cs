@@ -1,6 +1,8 @@
 using Amiko.Models;
-using Amiko.Server.Database;
+using Amiko.Server.Database.Context;
+using Amiko.Server.Database.Dao;
 using Amiko.Server.Models;
+using Amiko.Server.Models.Response;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +52,7 @@ namespace Amiko.Server.Controllers
             var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
             {
                 Type = MessageType.Array,
-                Data = ContextInterpreter.Get(_dbContext).GetStartingServerInfo(50, claimId)
+                Data = ServerQuery.GetAccessibleServersWithChannelsAndMessages(_dbContext, claimId, 50).Select(x => ServerInfo.From(x, claimId == null ? null : UserQuery.GetUserWithLastSeen(_dbContext, claimId.Value))).ToArray()
             }, _connManager.Option));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -58,7 +60,7 @@ namespace Amiko.Server.Controllers
             bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
             {
                 Type = MessageType.Array,
-                Data = ContextInterpreter.Get(_dbContext).GetStartingUserInfo(claimId)
+                Data =  UserQuery.GetUsers(_dbContext).Select(x => UserInfo.From(x, claimId)).ToArray()
             }, _connManager.Option));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
