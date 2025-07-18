@@ -19,7 +19,7 @@ public class ChannelContext
     /// </summary>
     public string? Description { set; get; }
     /// <summary>
-    /// All messages sent on this channel
+    /// All messages sent in this channel
     /// </summary>
     public List<MessageContext> Messages { set; get; } = [];
 }

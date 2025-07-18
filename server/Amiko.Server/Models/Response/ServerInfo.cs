@@ -1,5 +1,4 @@
 ﻿using Amiko.Server.Database.Context;
-using Amiko.Server.Database.Dao;
 
 namespace Amiko.Server.Models.Response;
 
@@ -31,6 +30,6 @@ public class ServerInfo : BaseMessage
             IsEphemeral = s.IsEphemeral,
             AllowsGuest = s.AllowsGuest,
             Channels = s.Channels.Select(c => ChannelInfo.From(s.Id, c, requester)).ToArray()
-        }
+        };
     }
 }

@@ -27,7 +27,8 @@ public class ServerContext
     /// </summary>
     public List<ChannelContext> Channels { set; get; } = [];
     /// <summary>
-    /// Users that are allowed to access this channels, if null anyone with an account can access it
+    /// Users that are allowed to access this channels
+    /// If null anyone with an account can access it
     /// </summary>
     public List<int>? AllowedUsers { set; get; } = null;
 
@@ -38,7 +39,8 @@ public class ServerContext
     public bool IsEphemeral { set; get; } = false;
     /// <summary>
     /// Guests are users that don't need to login
-    /// They aren't allowed to send attachments
+    /// It is a system so people can use Amiko without the need to creating an account
+    /// When true, the current server allow guests account to read/send messages there
     /// </summary>
     public bool AllowsGuest { set; get; } = false;
 }

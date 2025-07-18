@@ -47,58 +47,6 @@ public class ContextInterpreter
         return true;
     }
 
-
-    private int AddServer(string name, int[]? allowedUsers, Color? color, string? character, bool isEphemeral, bool allowsGuest)
-    {
-        color ??= new Color() { R = 54, G = 54, B = 54 };
-        var serv = new ServerContext()
-        {
-            Name = name,
-            AllowedUsers = allowedUsers?.ToList(),
-            Color = color.R << 16 | color.G << 8 | color.B,
-            Character = character ?? name[0].ToString(),
-            IsEphemeral = isEphemeral,
-            AllowsGuest = allowsGuest
-        };
-        _ctx.Servers.Add(serv);
-        _ctx.SaveChanges();
-
-        return serv.Id;
-    }
-
-    private int AddChannel(int servId, string name, string? description)
-    {
-        var serv = _ctx.Servers.FirstOrDefault(x => x.Id == servId);
-        if (serv == null) throw new InvalidOperationException("Server not found");
-
-        var chan = new ChannelContext()
-        {
-            Name = name,
-            Description = description
-        };
-        serv.Channels.Add(chan);
-        _ctx.SaveChanges();
-
-        return chan.Id;
-    }
-
-    public int AddMessage(int servId, int chanId, MessageContext msg) // TODO: Check writing perms
-    {
-        var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).FirstOrDefault(x => x.Id == servId);
-        if (serv == null) throw new InvalidOperationException("Server not found");
-
-        var chan = serv.Channels.FirstOrDefault(x => x.Id == chanId);
-        if (chan == null) throw new InvalidOperationException("Channel not found");
-
-        chan.Messages.Add(msg);
-        if (serv.IsEphemeral) {
-            chan.Messages = chan.Messages.TakeLast(100).ToList(); // Ephemeral channels always keep 100 messages at most
-        }
-        _ctx.SaveChanges();
-
-        return msg.Id;
-    }
-
     public IEnumerable<UserContext> GetAllWebhooks()
         => _ctx.Users.Where(x => x.Webhook != null);
 

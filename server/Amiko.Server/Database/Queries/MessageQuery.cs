@@ -5,21 +5,37 @@ namespace Amiko.Server.Database.Dao;
 
 public static class MessageQuery
 {
-    /*public static IEnumerable<MessageContext> GetMessage(SqliteContext ctx, int servId, int chanId, int msgCount)
+    public static MessageContext? GetMessage(
+        SqliteContext ctx,
+        int servId,
+        int chanId,
+        int msgId,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
     {
-        return ctx.Servers
-            .Include(s => s.Channels)
-            .ThenInclude(c => c.Messages)
-            .ThenInclude(m => m.Attachments)
-            .First(x => x.Id == servId).Channels
-            .First(x => x.Id == chanId).Messages
-            .TakeLast(msgCount);
-    }*/
+        var c = ChannelQuery.GetChannel(ctx, servId, chanId, claimId, msgCount, includes);
+        return c?.Messages?.FirstOrDefault(x => x.Id == msgId);
+    }
 
-    public static MessageContext? GetMessage(SqliteContext ctx, int servId, int chanId, int msgId, int? claimId)
+    
+
+    public static void AddChannel(SqliteContext ctx, int servId, int chanId, MessageContext msg)
     {
-        var c = ChannelQuery.GetChannelWithMessages(ctx, servId, chanId, claimId);
-        if (c == null) return null;
-        return c.Messages.First(x => x.Id == msgId);
+        /*
+        var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).FirstOrDefault(x => x.Id == servId);
+        if (serv == null) throw new InvalidOperationException("Server not found");
+
+        var chan = serv.Channels.FirstOrDefault(x => x.Id == chanId);
+        if (chan == null) throw new InvalidOperationException("Channel not found");
+
+        chan.Messages.Add(msg);
+        if (serv.IsEphemeral) {
+            chan.Messages = chan.Messages.TakeLast(100).ToList(); // Ephemeral channels always keep 100 messages at most
+        }
+        _ctx.SaveChanges();
+
+        return msg.Id;
+        */
     }
 }

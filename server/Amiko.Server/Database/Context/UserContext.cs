@@ -22,6 +22,9 @@ public class UserContext
     /// </summary>
     public string? Password { set; get; }
 
+    /// <summary>
+    /// Salt of the stored password
+    /// </summary>
     public string? Salt { set; get; }
 
     /// <summary>
@@ -51,6 +54,7 @@ public class UserContext
 
     /// <summary>
     /// For each channel, when were messages last seen
+    /// If a channel isn't in the list, it mean the user never saw it
     /// </summary>
     public List<ChannelSeen> LastSeens { set; get; } = [];
 }

@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amiko.Server.Database.Context;
+
 /// <summary>
 /// Represent a message sent in a channel
 /// </summary>
@@ -20,7 +21,7 @@ public class MessageContext
     public string Message { set; get; }
     /// <summary>
     /// Authors of the messages
-    /// Usually have only one, can have more if co-fronting feature was enabled
+    /// Usually have only one, can have more if co-fronting feature is enabled
     /// </summary>
     public int[] Authors { set; get; }
     /// <summary>

@@ -1,36 +1,97 @@
 ﻿using Amiko.Server.Database.Context;
+using Amiko.Server.Models;
+using Amiko.Server.Models.Response;
 using Microsoft.EntityFrameworkCore;
 
 namespace Amiko.Server.Database.Dao;
 
+public enum ServerIncludes
+{
+    None,
+    IncludesChannels,
+    IncludesMessages,
+    IncludesAttachments
+}
+
 public static class ServerQuery
 {
-    public static IEnumerable<ServerContext> GetAccessibleServersWithMessages(SqliteContext ctx, int? claimId, int msgCount)
+    public static IEnumerable<ServerContext> GetAccessibleServers(
+        SqliteContext ctx,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
     {
-        return ctx.Servers
-            .Include(s => s.Channels).ThenInclude(c => c.Messages.Take(msgCount)).ThenInclude(m => m.Attachments)
-            .Where(s => s.CanAccessServer(claimId));
+        return GetAccessibleServersAsQueryable(ctx, claimId, msgCount, includes);
     }
 
-    public static IEnumerable<ServerContext> GetAccessibleServersWithMessages(SqliteContext ctx, int? claimId)
+    public static IQueryable<ServerContext> GetAccessibleServersAsQueryable(
+        SqliteContext ctx,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
     {
-        return ctx.Servers
-            .Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments)
-            .Where(s => s.CanAccessServer(claimId));
+        IQueryable<ServerContext> servers;
+        if (includes == ServerIncludes.IncludesAttachments)
+        {
+            if (msgCount == null)
+            {
+                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments);
+            }
+            else
+            {
+                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages.Take(msgCount.Value)).ThenInclude(m => m.Attachments);
+            }
+        }
+        else if (includes == ServerIncludes.IncludesMessages)
+        {
+            if (msgCount == null)
+            {
+                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages);
+            }
+            else
+            {
+                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages.Take(msgCount.Value));
+            }
+        }
+        else if (includes == ServerIncludes.IncludesChannels)
+        {
+            servers = ctx.Servers.Include(s => s.Channels);
+        }
+        else
+        {
+            servers = ctx.Servers;
+        }
+        return servers.Where(s => s.CanAccessServer(claimId));
     }
 
-    public static ServerContext? GetServer(SqliteContext ctx, int servId, int? claimId)
+    public static ServerContext? GetServer(
+        SqliteContext ctx,
+        int servId,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
     {
-        var s = ctx.Servers.First(x => x.Id == servId);
-        if (s.CanAccessServer(claimId)) return s;
-        return null;
+        return GetAccessibleServersAsQueryable(ctx, claimId, msgCount, includes).FirstOrDefault(x => x.Id == servId);
     }
 
-    public static ServerContext? GetServerWithChannels(SqliteContext ctx, int servId, int? claimId)
+    public static void AddServer(SqliteContext ctx, ServerInfo info)
     {
-        var s = ctx.Servers.Include(s => s.Channels).First(x => x.Id == servId);
-        if (s.CanAccessServer(claimId)) return s;
-        return null;
+        /*
+        var color = info.Color ?? new Color() { R = 54, G = 54, B = 54 };
+        var serv = new ServerContext()
+        {
+            Name = info.Name,
+            AllowedUsers = info.AllowedUsers?.ToList(),
+            Color = color.R << 16 | color.G << 8 | color.B,
+            Character = character ?? name[0].ToString(),
+            IsEphemeral = isEphemeral,
+            AllowsGuest = allowsGuest
+        };
+        _ctx.Servers.Add(serv);
+        _ctx.SaveChanges();
+
+        return serv.Id;
+        */
     }
 
     private static bool CanAccessServer(this ServerContext s, int? claimId)
