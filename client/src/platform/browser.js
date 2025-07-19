@@ -28,24 +28,24 @@ navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
     }
 });
     
-compatibility = {
+window.compatibility = {
     notification: () => canUseNotification,
     crossorigin: () => false
 };
-versions = {
+window.versions = {
     node: () => null,
     chrome: () => navigator.userAgent,
     electron: () => null
 };
-interaction = {
+window.interaction = {
     open: (url) => window.open(url, '_blank').focus()
 };
-configuration = {
+window.configuration = {
     baseUrl: () => window.location.origin.startsWith("http://localhost")
         ? `http://localhost:5129` // Used for local debugging
         : window.location.origin
 };
-filesystem = {
+window.filesystem = {
     readTokenAsync: async () => {
         const pref = await readPrefAsync("websites", "");
         if (pref === "") return {};
@@ -78,6 +78,6 @@ filesystem = {
         await writePrefAsync(key, values.join(","));
     }
 };
-notification = {
+window.notification = {
     isFocusedAsync: async () => document.hasFocus()
 };

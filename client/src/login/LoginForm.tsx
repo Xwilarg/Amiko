@@ -15,10 +15,18 @@ export default function LoginForm() {
             setMetadata(json);
             setError("");
         })
-        .catch((err) => {
+        .catch((_) => {
             console.error(`Failed to GET ${instance}/api/`);
-            setInstance("");
-            setError("There is no Amiko instance found at this address")
+            // @ts-ignore
+            if (configuration.baseUrl() === "")
+            {
+                setInstance("");
+                setError("There is no Amiko instance found at this address");
+            }
+            else
+            {
+                setError("Failed to connect to Amiko");
+            }
         });
     }
     useEffect(() => {
@@ -85,7 +93,7 @@ export default function LoginForm() {
             <div className="field pb-6">
                 <label className="label">Website</label>
                 <div className="control">
-                    <input className="input" name="instance" type="text" disabled={instance != null}
+                    <input className="input" name="instance" type="text" disabled={instance != ""}
                         value={instance} onChange={(e) => setInstance(e.target.value)}
                     />
                 </div>
