@@ -20,9 +20,17 @@ public class Program
         builder.Services.AddHttpClient();
         builder.Services.AddControllers();
         builder.Services.AddSingleton<ConnectionManager>();
-        builder.Services.AddSingleton<MessageManager>();
+        builder.Services.AddScoped<MessageManager>();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("debug", p =>
+            {
+                p.WithOrigins("http://localhost:5173").AllowAnyHeader();
+            });
+        });
 
         builder.Services.AddAuthentication(options =>
         {
@@ -77,13 +85,16 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseCors("debug");
+        }
+        else
+        {
+            app.UseHttpsRedirection();
         }
 
         app.UseWebSockets();
 
         app.UseAuthorization();
-
-        app.UseHttpsRedirection();
 
         app.MapControllers();
 

@@ -17,7 +17,7 @@ namespace Amiko.Server.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
-            modelBuilder.Entity("Amiko.Server.Database.AttachmentContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.AttachmentContext", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace Amiko.Server.Migrations
                     b.ToTable("AttachmentContext");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ChannelContext", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +68,7 @@ namespace Amiko.Server.Migrations
                     b.ToTable("ChannelContext");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ChannelSeen", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ChannelSeen", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,7 +93,7 @@ namespace Amiko.Server.Migrations
                     b.ToTable("ChannelSeen");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.MessageContext", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,7 +124,7 @@ namespace Amiko.Server.Migrations
                     b.ToTable("MessageContext");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ServerContext", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -155,7 +155,7 @@ namespace Amiko.Server.Migrations
                     b.ToTable("Servers");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.UserContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.UserContext", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,6 +177,9 @@ namespace Amiko.Server.Migrations
                     b.Property<string>("Prefix")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Salt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -189,50 +192,50 @@ namespace Amiko.Server.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.AttachmentContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.AttachmentContext", b =>
                 {
-                    b.HasOne("Amiko.Server.Database.MessageContext", null)
+                    b.HasOne("Amiko.Server.Database.Context.MessageContext", null)
                         .WithMany("Attachments")
                         .HasForeignKey("MessageContextId");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ChannelContext", b =>
                 {
-                    b.HasOne("Amiko.Server.Database.ServerContext", null)
+                    b.HasOne("Amiko.Server.Database.Context.ServerContext", null)
                         .WithMany("Channels")
                         .HasForeignKey("ServerContextId");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ChannelSeen", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ChannelSeen", b =>
                 {
-                    b.HasOne("Amiko.Server.Database.UserContext", null)
+                    b.HasOne("Amiko.Server.Database.Context.UserContext", null)
                         .WithMany("LastSeens")
                         .HasForeignKey("UserContextId");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.MessageContext", b =>
                 {
-                    b.HasOne("Amiko.Server.Database.ChannelContext", null)
+                    b.HasOne("Amiko.Server.Database.Context.ChannelContext", null)
                         .WithMany("Messages")
                         .HasForeignKey("ChannelContextId");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ChannelContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ChannelContext", b =>
                 {
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.MessageContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.MessageContext", b =>
                 {
                     b.Navigation("Attachments");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.ServerContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.ServerContext", b =>
                 {
                     b.Navigation("Channels");
                 });
 
-            modelBuilder.Entity("Amiko.Server.Database.UserContext", b =>
+            modelBuilder.Entity("Amiko.Server.Database.Context.UserContext", b =>
                 {
                     b.Navigation("LastSeens");
                 });

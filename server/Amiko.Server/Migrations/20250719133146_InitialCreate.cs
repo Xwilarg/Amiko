@@ -37,6 +37,7 @@ namespace Amiko.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: true),
+                    Salt = table.Column<string>(type: "TEXT", nullable: true),
                     DependsOf = table.Column<int>(type: "INTEGER", nullable: true),
                     Prefix = table.Column<string>(type: "TEXT", nullable: true),
                     Webhook = table.Column<string>(type: "TEXT", nullable: true),
