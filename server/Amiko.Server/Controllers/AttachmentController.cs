@@ -13,11 +13,11 @@ namespace Amiko.Server.Controllers;
 [Route("/api/attachment/")]
 public class AttachmentController : ControllerBase
 {
-    private readonly ILogger<WebsocketController> _logger;
+    private readonly ILogger<AttachmentController> _logger;
     private SqliteContext _dbContext;
     private ConnectionManager _connManager;
 
-    public AttachmentController(ILogger<WebsocketController> logger, SqliteContext dbContext, ConnectionManager connManager)
+    public AttachmentController(ILogger<AttachmentController> logger, SqliteContext dbContext, ConnectionManager connManager)
     {
         _logger = logger;
         _dbContext = dbContext;

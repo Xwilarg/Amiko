@@ -17,7 +17,7 @@ namespace Amiko.Server.Database.Queries
             return m?.Attachments;
         }
 
-        public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password, bool isAdmin)
+        public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password)
         {
             var invite = ctx.Invitations.FirstOrDefault(x => x.Id == invitation);
             if (invite == null) return false;
@@ -30,7 +30,7 @@ namespace Amiko.Server.Database.Queries
             }
 
             ctx.Invitations.Remove(invite);
-            UserQuery.CreateUser(ctx, name, isAdmin, password);
+            UserQuery.CreateUser(ctx, name, invite.IsAdmin, password);
 
             // CreateUser already call ctx.SaveChanges so we don't do it again
 
@@ -61,6 +61,14 @@ namespace Amiko.Server.Database.Queries
             ctx.SaveChanges();
 
             return id;
+        }
+
+        public static bool IsInvitationValid(SqliteContext ctx, string code)
+        {
+            var invitation = ctx.Invitations.FirstOrDefault(x => x.Id == code);
+            if (invitation == null) return false;
+
+            return invitation.ExpirationDate <= DateTime.UtcNow;
         }
     }
 }
