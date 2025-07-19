@@ -3,6 +3,7 @@ using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
 
 namespace Amiko.Server;
 
@@ -17,10 +18,15 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddDbContext<SqliteContext>();
+        builder.Services.AddSingleton<JsonSerializerOptions>(_ => new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
         builder.Services.AddHttpClient();
         builder.Services.AddControllers();
         builder.Services.AddSingleton<ConnectionManager>();
         builder.Services.AddScoped<MessageManager>();
+        builder.Services.AddScoped<ConfigManager>();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
@@ -80,6 +86,9 @@ public class Program
         });
 
         var app = builder.Build();
+
+        using var scope = app.Services.CreateScope();
+        scope.ServiceProvider.GetRequiredService<ConfigManager>().InitConfig();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

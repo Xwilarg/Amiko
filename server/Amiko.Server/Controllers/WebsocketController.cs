@@ -21,19 +21,22 @@ namespace Amiko.Server.Controllers
         private HttpClient _httpClient;
         private ConnectionManager _connManager;
         private MessageManager _msgManager;
+        private JsonSerializerOptions _options;
 
         public WebsocketController(
             ILogger<WebsocketController> logger,
             SqliteContext dbContext,
             HttpClient httpClient,
             ConnectionManager connManager,
-            MessageManager msgManager)
+            MessageManager msgManager,
+            JsonSerializerOptions options)
         {
             _logger = logger;
             _dbContext = dbContext;
             _httpClient = httpClient;
             _connManager = connManager;
             _msgManager = msgManager;
+            _options = options;
         }
 
         private async Task ListenInternalAsync(int? claimId)
@@ -52,7 +55,7 @@ namespace Amiko.Server.Controllers
             {
                 Type = MessageType.Array,
                 Data = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments).Select(x => ServerInfo.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
-            }, _connManager.Option));
+            }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
             // Send information about all users existing
@@ -60,7 +63,7 @@ namespace Amiko.Server.Controllers
             {
                 Type = MessageType.Array,
                 Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserInfo.From(x, claimId)).ToArray()
-            }, _connManager.Option));
+            }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
             while (true)
@@ -90,7 +93,7 @@ namespace Amiko.Server.Controllers
 
                     try
                     {
-                        var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _connManager.Option);
+                        var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _options);
 
                         if (baseMsg.Type == MessageType.Heartbeat)
                         { // Heartbeat, we just send one back
@@ -101,14 +104,14 @@ namespace Amiko.Server.Controllers
                             if (claimId != null)
                             {
                                 // Seen update, we update the db
-                                var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _connManager.Option);
+                                var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _options);
                                 UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
                         }
                         else if (baseMsg.Type == MessageType.Message)
                         {
                             // Parse actual message
-                            var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), _connManager.Option);
+                            var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), _options);
 
                             if (claimId == null)
                             {
@@ -134,7 +137,7 @@ namespace Amiko.Server.Controllers
                                     Type = MessageType.Acknowledge,
                                     AckId = prot.AckId,
                                     IsError = true
-                                }, _connManager.Option));
+                                }, _options));
                                 await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                 continue;
                             }
@@ -168,7 +171,7 @@ namespace Amiko.Server.Controllers
                                 // Connected users
                                 foreach (var s in _connManager.Sockets.Where(x => x.WebSocket != client && ServerQuery.CanAccessServer(_dbContext, prot.ServerId, x.ClaimId))) // Send the message to every users
                                 {
-                                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _connManager.Option));
+                                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _options));
                                     Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
                                     tasks.Add(t);
                                 }
@@ -181,14 +184,14 @@ namespace Amiko.Server.Controllers
                                         IsError = false,
                                         Content = wasContentUpdated ? prot.Content : null,
                                         Authors = wereAuthorsUpdated ? prot.Authors : null,
-                                    }, _connManager.Option));
+                                    }, _options));
                                     Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
                                     tasks.Add(t);
                                 }
                                 // Webhooks
                                 foreach (var hook in UserQuery.GetServerWebhooks(_dbContext, prot.ServerId, UserIncludes.None))
                                 {
-                                    Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", updatedData.Authors.Select(x => x.Username)) }, _connManager.Option);
+                                    Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", updatedData.Authors.Select(x => x.Username)) }, _options);
                                     tasks.Add(t);
                                 }
                             }

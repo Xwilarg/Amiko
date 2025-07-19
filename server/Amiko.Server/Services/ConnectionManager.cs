@@ -10,20 +10,13 @@ namespace Amiko.Server.Services;
 /// </summary>
 public class ConnectionManager
 {
-    public List<UserSocket> Sockets { get; } = [];
-
-    private JsonSerializerOptions _option;
-    public JsonSerializerOptions Option
+    public ConnectionManager(JsonSerializerOptions options)
     {
-        get
-        {
-            _option ??= new()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-            return _option;
-        }
+        _options = options;
     }
+
+    public List<UserSocket> Sockets { get; } = [];
+    private JsonSerializerOptions _options;
 
     public async Task PropagateAttachment(int msgId, AttachmentInfo[] attachments)
     {
@@ -37,7 +30,7 @@ public class ConnectionManager
                     Type = MessageType.MessageUpdate,
                     Id = msgId,
                     Attachments = attachments
-                }, Option));
+                }, _options));
                 tasks.Add(s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None));
             }
         }
