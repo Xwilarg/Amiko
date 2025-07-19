@@ -1,0 +1,88 @@
+async function readPrefAsync(key, def) {
+    var match = document.cookie.match(new RegExp(`(^| )${key}=([^;]+)`));
+    if (match) return match[2];
+    return def;
+}
+
+async function writePrefAsync(key, value) {
+    document.cookie = `${key}=${value}; max-age=34560000; path=/; SameSite=Strict`;
+}
+
+let canUseNotification = false;
+function initBrowser() {
+    try
+    {
+        window.Notification.requestPermission().then(function (permission) {
+            console.log(`Notification perm status: ${permission}`);
+        });
+        canUseNotification = true;
+    }
+    catch
+    {
+        console.warn("Notification API not available");
+    }
+
+    navigator.permissions.query({ name: "clipboard-read" }).then((result) => {
+        console.log(`Clipboard perm status: ${result.state}`);
+        if (result.state === "prompt") { // Show prompt right away so no need to ask in the future
+            navigator.clipboard.read();
+        }
+    });
+    
+    compatibility = {
+        notification: () => canUseNotification,
+        crossorigin: () => false
+    };
+    versions = {
+        node: () => null,
+        chrome: () => navigator.userAgent,
+        electron: () => null
+    };
+    interaction = {
+        open: (url) => window.open(url, '_blank').focus()
+    };
+    configuration = {
+        baseUrl: () => location.host
+    };
+    filesystem = {
+        readTokenAsync: async () => {
+            const pref = await readPrefAsync("websites", "");
+            if (pref === "") return {};
+
+            let data = {};
+            for (let website of pref.split(','))
+            {
+                data[website] = await readPrefAsync(`website-${website}`, "");
+            }
+            return data;
+        },
+        writeTokenAsync: async (token, website) => {
+            const pref = await readPrefAsync("websites", "");
+            let websites;
+            if (pref === "") websites = [];
+            else websites = pref.split(',');
+            websites.push(website);
+
+            await writePrefAsync("websites", websites.join(','));
+            await writePrefAsync(`website-${website}`, token);
+        },
+        readPrefAsync: readPrefAsync,
+        writePrefAsync: writePrefAsync,
+        readPrefArrayAsync: async (key) => {
+            const pref = await readPrefAsync(key, "");
+            if (pref === "") return [];
+            return pref.split(",");
+        },
+        writePrefArrayAsync: async (key, values) => {
+            await writePrefAsync(key, values.join(","));
+        }
+    };
+    notification = {
+        isFocusedAsync: async () => document.hasFocus()
+    };
+}
+
+if (typeof versions === 'undefined') {
+    // If versions is undefined, it means we are on the browser version
+    initBrowser();
+}

@@ -13,7 +13,7 @@ const createWindow = () => {
     }
   })
 
-  mainWindow.loadFile('index.html')
+  mainWindow.loadFile('index-electron.html')
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
