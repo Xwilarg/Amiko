@@ -78,6 +78,27 @@ public static class UserQuery
         return true;
     }
 
+    public static void CreateUser(SqliteContext ctx, string name, bool isAdmin, string password)
+    {
+        ctx.Users.Add(new()
+        {
+            Username = name,
+            IsAdmin = isAdmin,
+            Password = password,
+            Salt = Guid.NewGuid().ToString(),
+
+            Character = name[0].ToString(),
+            Color = (54 << 16) | (54 << 8) | 54,
+
+            DependsOf = null,
+            LastSeens = [],
+            Prefix = null,
+            Webhook = null,
+        });
+
+        ctx.SaveChanges();
+    }
+
     /// <summary>
     /// Does the identity given (who the user pretend to be) allowed by current claim
     /// This mean targetted account is either us or an account that depends on us

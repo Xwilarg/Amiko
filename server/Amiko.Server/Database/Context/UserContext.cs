@@ -12,6 +12,13 @@ namespace Amiko.Server.Database.Context;
 public class UserContext
 {
     [Key] public int Id { set; get; }
+
+    /// <summary>
+    /// Does the current user have administration right
+    /// Admin right allow to configure the instance, create new servers, ban users, etc...
+    /// </summary>
+    public bool IsAdmin { set; get; }
+
     /// <summary>
     /// Display name of the user
     /// </summary>

@@ -8,5 +8,15 @@ namespace Amiko.Server.Database.Context;
 /// </summary>
 public class InvitationContext
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public string Id { set; get; }
+    [Key] public string Id { set; get; }
+
+    /// <summary>
+    /// Time after the invitation is no longer valid
+    /// </summary>
+    public DateTime ExpirationDate { set; get; }
+
+    /// <summary>
+    /// Will the invite create an admin account
+    /// </summary>
+    public bool IsAdmin { set; get; }
 }

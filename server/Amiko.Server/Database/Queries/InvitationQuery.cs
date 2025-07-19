@@ -1,0 +1,66 @@
+﻿using Amiko.Server.Database.Context;
+using Amiko.Server.Database.Dao;
+
+namespace Amiko.Server.Database.Queries
+{
+    public class InvitationQuery
+    {
+        /// <returns>null mean the message was not found, else return a potentially empty array</returns>
+        public static IEnumerable<AttachmentContext>? GetAttachment(
+            SqliteContext ctx,
+            int servId,
+            int chanId,
+            int msgId,
+            int? claimId)
+        {
+            var m = MessageQuery.GetMessage(ctx, servId, chanId, msgId, claimId, null, ServerIncludes.IncludesAttachments);
+            return m?.Attachments;
+        }
+
+        public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password, bool isAdmin)
+        {
+            var invite = ctx.Invitations.FirstOrDefault(x => x.Id == invitation);
+            if (invite == null) return false;
+
+            if (invite.ExpirationDate >  DateTime.UtcNow)
+            {
+                ctx.Invitations.Remove(invite);
+                ctx.SaveChanges();
+                return false; // Invitation exists but already expired!
+            }
+
+            ctx.Invitations.Remove(invite);
+            UserQuery.CreateUser(ctx, name, isAdmin, password);
+
+            // CreateUser already call ctx.SaveChanges so we don't do it again
+
+            return true;
+        }
+
+        public static string CreateInvitation(
+            SqliteContext ctx,
+            bool isAdmin)
+        {
+            var id = Guid.NewGuid().ToString();
+
+            for (int i = ctx.Invitations.Count(); i >=  0; i--) // Remove expired invitations
+            {
+                if (ctx.Invitations.ElementAt(i).ExpirationDate > DateTime.UtcNow)
+                {
+                    ctx.Invitations.Remove(ctx.Invitations.ElementAt(i));
+                }
+            }
+
+            ctx.Invitations.Add(new()
+            {
+                Id = id,
+                IsAdmin = isAdmin,
+                ExpirationDate = DateTime.UtcNow.AddDays(14),
+            });
+
+            ctx.SaveChanges();
+
+            return id;
+        }
+    }
+}
