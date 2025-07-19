@@ -18,7 +18,7 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddDbContext<SqliteContext>();
-        builder.Services.AddSingleton<JsonSerializerOptions>(_ => new()
+        builder.Services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });

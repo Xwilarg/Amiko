@@ -19,11 +19,15 @@ namespace Amiko.Server.Database.Queries
 
         public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password)
         {
+            if (UserQuery.GetUser(ctx, name, UserIncludes.None) != null) return false;
+
             var invite = ctx.Invitations.FirstOrDefault(x => x.Id == invitation);
+            Console.WriteLine(ctx.Invitations.Count());
             if (invite == null) return false;
 
-            if (invite.ExpirationDate >  DateTime.UtcNow)
+            if (DateTime.UtcNow > invite.ExpirationDate)
             {
+                Console.WriteLine(invite.ExpirationDate);
                 ctx.Invitations.Remove(invite);
                 ctx.SaveChanges();
                 return false; // Invitation exists but already expired!
@@ -43,9 +47,9 @@ namespace Amiko.Server.Database.Queries
         {
             var id = Guid.NewGuid().ToString();
 
-            for (int i = ctx.Invitations.Count(); i >=  0; i--) // Remove expired invitations
+            for (int i = ctx.Invitations.Count() - 1; i >=  0; i--) // Remove expired invitations
             {
-                if (ctx.Invitations.ElementAt(i).ExpirationDate > DateTime.UtcNow)
+                if (DateTime.UtcNow > ctx.Invitations.ElementAt(i).ExpirationDate)
                 {
                     ctx.Invitations.Remove(ctx.Invitations.ElementAt(i));
                 }

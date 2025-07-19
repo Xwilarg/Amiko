@@ -45,6 +45,11 @@ public static class UserQuery
         return GetUsersAsQueryable(ctx, includes).FirstOrDefault(x => x.Id == id);
     }
 
+    public static UserContext? GetUser(SqliteContext ctx, string username, UserIncludes includes)
+    {
+        return GetUsersAsQueryable(ctx, includes).FirstOrDefault(x => x.Username == username);
+    }
+
     public static UserContext? GetUserFromPassword(SqliteContext ctx, string password, string salt)
     {
         foreach (var u in ctx.Users)
@@ -80,12 +85,17 @@ public static class UserQuery
 
     public static void CreateUser(SqliteContext ctx, string name, bool isAdmin, string password)
     {
+        var salt = Guid.NewGuid().ToString();
+        var saltBytes = Encoding.ASCII.GetBytes(salt);
+        var hash = KeyDerivation.Pbkdf2(password, saltBytes, KeyDerivationPrf.HMACSHA512, 210000, 256 / 8);
+        var computed = Convert.ToHexString(hash).ToLower();
+
         ctx.Users.Add(new()
         {
             Username = name,
             IsAdmin = isAdmin,
-            Password = password,
-            Salt = Guid.NewGuid().ToString(),
+            Password = computed,
+            Salt = salt,
 
             Character = name[0].ToString(),
             Color = (54 << 16) | (54 << 8) | 54,

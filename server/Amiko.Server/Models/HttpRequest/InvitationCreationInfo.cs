@@ -1,7 +1,11 @@
-﻿namespace Amiko.Server.Models.HttpRequest;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Amiko.Server.Models.HttpRequest;
 
 public class InvitationCreationInfo
 {
-    public string AdminToken { set; get; }
-    public bool IsAdmin { set; get; }
+    [Required]
+    public required string AdminToken { set; get; }
+    [Required]
+    public required bool IsAdmin { set; get; }
 }

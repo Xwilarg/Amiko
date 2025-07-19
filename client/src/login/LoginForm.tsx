@@ -5,6 +5,7 @@ export default function LoginForm() {
     // @ts-ignore
     const [instance, setInstance] = useState<string>(`${configuration.baseUrl() ?? ""}`);
     const [metadata, setMetadata] = useState<Metadata | null>(null);
+    const [adminToken, setAdminToken] = useState("");
     const [error, setError] = useState('');
 
     function checkInstance()
@@ -16,7 +17,6 @@ export default function LoginForm() {
             setError("");
         })
         .catch((_) => {
-            console.error(`Failed to GET ${instance}/api/`);
             // @ts-ignore
             if (configuration.baseUrl() === "")
             {
@@ -39,13 +39,33 @@ export default function LoginForm() {
     function onLogin(e: React.MouseEvent<HTMLInputElement>) {
         e.preventDefault();
 
+        setError(""); // Clear error message
+
         if (metadata === null) {
             checkInstance();
         } else {
             if (metadata.isInit) {
 
             } else {
-                setError("test")
+                fetch(`${instance}/api/invitation/create`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        adminToken: adminToken,
+                        isAdmin: true
+                    })
+                }
+                )
+                .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+                .then(text => {
+                    window.location.replace(`/join?token=${text}&instance=${encodeURI(instance)}`);
+                })
+                .catch((_) => {
+                    setError("Invalid admin password");
+                });
             }
         }
     }
@@ -76,9 +96,11 @@ export default function LoginForm() {
         {
             instanceLoginForm = 
                 <div className="field">
-                    <label className="label">Enter your admin password and let's begin our journey</label>
+                    <label className="label">Enter your admin password (config.json at your backend root)</label>
                     <div className="control">
-                        <input className="input" name="password" type="text" />
+                        <input className="input" name="password" type="text"
+                        value={adminToken} onChange={(e) => setAdminToken(e.target.value)}
+                        />
                     </div>
                 </div>
         }

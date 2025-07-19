@@ -26,7 +26,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> CreateInvitation([Required] InvitationCreationInfo creationInfo)
+    public async Task<IActionResult> CreateInvitation([FromBody] InvitationCreationInfo creationInfo)
     {
         if (creationInfo.AdminToken == _configManager.GetConfig().AdminKey)
         {
@@ -37,11 +37,11 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("createUser")]
-    public async Task<IActionResult> CreateUser([Required] UserCreationInfo creationInfo)
+    public async Task<IActionResult> CreateUser([FromBody] UserCreationInfo creationInfo)
     {
         var res = InvitationQuery.CreateUserFromInvitation(_dbContext, creationInfo.Invitation, creationInfo.Username, creationInfo.Password);
         if (res) return StatusCode(StatusCodes.Status204NoContent);
-        return StatusCode(StatusCodes.Status401Unauthorized);
+        return StatusCode(StatusCodes.Status400BadRequest);
     }
 
     [HttpPost("isValid")]

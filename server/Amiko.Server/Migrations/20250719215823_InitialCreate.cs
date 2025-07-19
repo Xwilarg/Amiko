@@ -12,6 +12,19 @@ namespace Amiko.Server.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Invitations",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    ExpirationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsAdmin = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Invitations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Servers",
                 columns: table => new
                 {
@@ -35,6 +48,7 @@ namespace Amiko.Server.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    IsAdmin = table.Column<bool>(type: "INTEGER", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: true),
                     Salt = table.Column<string>(type: "TEXT", nullable: true),
@@ -162,6 +176,9 @@ namespace Amiko.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "ChannelSeen");
+
+            migrationBuilder.DropTable(
+                name: "Invitations");
 
             migrationBuilder.DropTable(
                 name: "MessageContext");

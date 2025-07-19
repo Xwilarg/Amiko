@@ -1,8 +1,13 @@
-﻿namespace Amiko.Server.Models.HttpRequest;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Amiko.Server.Models.HttpRequest;
 
 public class UserCreationInfo
 {
-    public string Invitation { set; get; }
-    public string Username { set; get; }
-    public string Password { set; get; }
+    [Required]
+    public required string Invitation { set; get; }
+    [Required]
+    public required string Username { set; get; }
+    [Required]
+    public required string Password { set; get; }
 }

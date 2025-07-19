@@ -93,6 +93,22 @@ namespace Amiko.Server.Migrations
                     b.ToTable("ChannelSeen");
                 });
 
+            modelBuilder.Entity("Amiko.Server.Database.Context.InvitationContext", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invitations");
+                });
+
             modelBuilder.Entity("Amiko.Server.Database.Context.MessageContext", b =>
                 {
                     b.Property<int>("Id")
@@ -169,6 +185,9 @@ namespace Amiko.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("DependsOf")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsAdmin")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Password")

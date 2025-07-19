@@ -1,7 +1,4 @@
-﻿using System.Net.WebSockets;
-using System.Text.Json;
-using System.Text;
-using Amiko.Server.Models.Response;
+﻿using System.Text.Json;
 using Amiko.Server.Models;
 
 namespace Amiko.Server.Services;
@@ -36,6 +33,6 @@ public class ConfigManager
         }
 
         config.AdminKey ??= Guid.NewGuid().ToString();
-        File.WriteAllText("config.json", JsonSerializer.Serialize(config));
+        File.WriteAllText("config.json", JsonSerializer.Serialize(config, _options));
     }
 }
