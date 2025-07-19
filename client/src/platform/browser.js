@@ -41,7 +41,9 @@ interaction = {
     open: (url) => window.open(url, '_blank').focus()
 };
 configuration = {
-    baseUrl: () => window.location.origin.startsWith("http://localhost") ? `http://localhost:5129` : window.location.origin
+    baseUrl: () => window.location.origin.startsWith("http://localhost")
+        ? `http://localhost:5129` // Used for local debugging
+        : window.location.origin
 };
 filesystem = {
     readTokenAsync: async () => {
