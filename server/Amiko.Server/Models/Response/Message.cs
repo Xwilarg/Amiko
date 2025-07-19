@@ -1,5 +1,4 @@
-﻿using Amiko.Models;
-using Amiko.Server.Database.Context;
+﻿using Amiko.Server.Database.Context;
 
 namespace Amiko.Server.Models.Response;
 

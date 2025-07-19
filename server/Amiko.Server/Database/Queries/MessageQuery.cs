@@ -1,5 +1,4 @@
 ﻿using Amiko.Server.Database.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace Amiko.Server.Database.Dao;
 
@@ -20,22 +19,20 @@ public static class MessageQuery
 
     
 
-    public static void AddChannel(SqliteContext ctx, int servId, int chanId, MessageContext msg)
+    public static int AddMessage(SqliteContext ctx, int servId, int chanId, int? claimId, MessageContext msg)
     {
-        /*
-        var serv = _ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).FirstOrDefault(x => x.Id == servId);
-        if (serv == null) throw new InvalidOperationException("Server not found");
+        var serv = ServerQuery.GetServer(ctx, servId, claimId, null, ServerIncludes.IncludesMessages);
+        if (serv == null) return -1;
 
         var chan = serv.Channels.FirstOrDefault(x => x.Id == chanId);
-        if (chan == null) throw new InvalidOperationException("Channel not found");
+        if (chan == null) return -1;
 
         chan.Messages.Add(msg);
         if (serv.IsEphemeral) {
             chan.Messages = chan.Messages.TakeLast(100).ToList(); // Ephemeral channels always keep 100 messages at most
         }
-        _ctx.SaveChanges();
+        ctx.SaveChanges();
 
         return msg.Id;
-        */
     }
 }

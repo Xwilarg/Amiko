@@ -1,5 +1,6 @@
-using Amiko.Models;
 using Amiko.Server.Database.Context;
+using Amiko.Server.Database.Queries;
+using Amiko.Server.Models.Response;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,10 +29,9 @@ public class AttachmentController : ControllerBase
     public async Task<IActionResult> GetAttachment([Required] int servId, [Required] int chanId, [Required] int msgId)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
-        var ctx = ContextInterpreter.Get(_dbContext);
 
-        var att = ctx.TryGetAttachment(servId, chanId, msgId, claimId);
-        if (att.Count == 0)
+        var att = AttachmentQuery.GetAttachment(_dbContext, servId, chanId, msgId, claimId).ToArray();
+        if (att.Length == 0)
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }
@@ -51,10 +51,8 @@ public class AttachmentController : ControllerBase
     [HttpGet("getGuest/{servId}/{chanId}/{msgId}")]
     public async Task<IActionResult> GetAttachmentGuest([Required] int servId, [Required] int chanId, [Required] int msgId)
     {
-        var ctx = ContextInterpreter.Get(_dbContext);
-
-        var att = ctx.TryGetAttachment(servId, chanId, msgId, null);
-        if (att.Count == 0)
+        var att = AttachmentQuery.GetAttachment(_dbContext, servId, chanId, msgId, null).ToArray();
+        if (att.Length == 0)
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }
@@ -77,7 +75,6 @@ public class AttachmentController : ControllerBase
     public async Task<IActionResult> AddAttachment([Required] int servId, [Required] int chanId, [Required] int msgId, [Required, FromForm] IFormFile[] files)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
-        var ctx = ContextInterpreter.Get(_dbContext);
 
         if (files.Length == 0)
         {
@@ -90,7 +87,7 @@ public class AttachmentController : ControllerBase
 
         using var ms = new MemoryStream();
         files[0].CopyTo(ms);
-        var id = ctx.TryAddAttachment(servId, chanId, msgId, claimId, files[0].FileName, files[0].ContentType, ms.ToArray());
+        var id = AttachmentQuery.AddAttachment(_dbContext, servId, chanId, msgId, claimId, files[0].FileName, files[0].ContentType, ms.ToArray());
         if (id == null)
         {
             return StatusCode(StatusCodes.Status403Forbidden);

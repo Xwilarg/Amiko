@@ -1,4 +1,5 @@
 ﻿using Amiko.Server.Database.Context;
+using Amiko.Server.Database.Dao;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -22,7 +23,7 @@ public class AuthController : ControllerBase
     [HttpPost("token")]
     public IActionResult GetToken([FromBody] string password)
     {
-        var user = ContextInterpreter.Get(_dbContext).TryGetUserFromPassword(password, "Effy");
+        var user = UserQuery.GetUserFromPassword(_dbContext, password, "Effy");
 
         if (user == null)
         {

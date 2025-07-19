@@ -1,4 +1,5 @@
 using Amiko.Server.Database.Context;
+using Amiko.Server.Database.Dao;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -25,10 +26,9 @@ public class ExportController : ControllerBase
     public IActionResult ValidateToken([Required] int servId, [Required] int chanId)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
-        var ctx = ContextInterpreter.Get(_dbContext);
-        var serv = ctx.GetServer(servId, claimId);
 
-        var chan = ctx.GetChannel(servId, chanId, claimId);
+        var serv = ServerQuery.GetServer(_dbContext, servId, claimId, null, ServerIncludes.None);
+        var chan = ChannelQuery.GetChannel(_dbContext, servId, chanId, claimId, null, ServerIncludes.IncludesAttachments);
 
         if (serv == null || chan == null || serv.IsEphemeral)
         {
@@ -39,13 +39,10 @@ public class ExportController : ControllerBase
         str.AppendLine($"# {serv.Name}");
         str.AppendLine($"## {chan.Name}");
 
-        var msgs = ctx.GetMessages(servId, chanId, int.MaxValue);
-        foreach (var msg in msgs)
+        foreach (var msg in chan.Messages)
         {
-            var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            dateTime = dateTime.AddSeconds(msg.SentAt);
-            str.AppendLine($"### [{dateTime:yyyy/MM/dd HH:mm:ss}] {string.Join(" / ", msg.Authors.Select(x => ctx.TryGetUserFromId(x)?.Username ?? "deleted"))}");
-            str.AppendLine(msg.Content);
+            str.AppendLine($"### [{msg.CreationTime:yyyy/MM/dd HH:mm:ss}] {string.Join(" / ", msg.Authors.Select(x => UserQuery.GetUser(_dbContext, x, UserIncludes.None)?.Username ?? "deleted"))}");
+            str.AppendLine(msg.Message);
             str.AppendLine();
         }
 

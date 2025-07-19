@@ -1,5 +1,4 @@
 ﻿using Amiko.Server.Database.Context;
-using Amiko.Server.Models;
 using Amiko.Server.Models.Response;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,16 +14,16 @@ public enum ServerIncludes
 
 public static class ServerQuery
 {
-    public static IEnumerable<ServerContext> GetAccessibleServers(
+    public static IEnumerable<ServerContext> GetServers(
         SqliteContext ctx,
         int? claimId,
         int? msgCount,
         ServerIncludes includes)
     {
-        return GetAccessibleServersAsQueryable(ctx, claimId, msgCount, includes);
+        return GetServersAsQueryable(ctx, claimId, msgCount, includes);
     }
 
-    public static IQueryable<ServerContext> GetAccessibleServersAsQueryable(
+    public static IQueryable<ServerContext> GetServersAsQueryable(
         SqliteContext ctx,
         int? claimId,
         int? msgCount,
@@ -71,7 +70,7 @@ public static class ServerQuery
         int? msgCount,
         ServerIncludes includes)
     {
-        return GetAccessibleServersAsQueryable(ctx, claimId, msgCount, includes).FirstOrDefault(x => x.Id == servId);
+        return GetServersAsQueryable(ctx, claimId, msgCount, includes).FirstOrDefault(x => x.Id == servId);
     }
 
     public static void AddServer(SqliteContext ctx, ServerInfo info)
@@ -92,6 +91,11 @@ public static class ServerQuery
 
         return serv.Id;
         */
+    }
+
+    public static bool CanAccessServer(SqliteContext ctx, int servId, int? claimId)
+    {
+        return GetServer(ctx, servId, claimId, null, ServerIncludes.None)?.CanAccessServer(claimId) ?? false;
     }
 
     private static bool CanAccessServer(this ServerContext s, int? claimId)

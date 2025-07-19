@@ -1,4 +1,3 @@
-using Amiko.Models;
 using Amiko.Server.Database.Context;
 using Amiko.Server.Database.Dao;
 using Amiko.Server.Models;
@@ -52,7 +51,7 @@ namespace Amiko.Server.Controllers
             var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
             {
                 Type = MessageType.Array,
-                Data = ServerQuery.GetAccessibleServersWithChannelsAndMessages(_dbContext, claimId, 50).Select(x => ServerInfo.From(x, claimId == null ? null : UserQuery.GetUserWithLastSeen(_dbContext, claimId.Value))).ToArray()
+                Data = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments).Select(x => ServerInfo.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
             }, _connManager.Option));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -60,7 +59,7 @@ namespace Amiko.Server.Controllers
             bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
             {
                 Type = MessageType.Array,
-                Data =  UserQuery.GetUsers(_dbContext).Select(x => UserInfo.From(x, claimId)).ToArray()
+                Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserInfo.From(x, claimId)).ToArray()
             }, _connManager.Option));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -103,8 +102,7 @@ namespace Amiko.Server.Controllers
                             {
                                 // Seen update, we update the db
                                 var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _connManager.Option);
-                                var ctx = ContextInterpreter.Get(_dbContext);
-                                ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                                UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
                         }
                         else if (baseMsg.Type == MessageType.Message)
@@ -112,16 +110,14 @@ namespace Amiko.Server.Controllers
                             // Parse actual message
                             var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), _connManager.Option);
 
-                            var ctx = ContextInterpreter.Get(_dbContext);
-
                             if (claimId == null)
                             {
-                                if (!ctx.CanAccessServer(prot.ServerId, claimId)) // Can we access the server as a guest?
+                                if (!ServerQuery.CanAccessServer(_dbContext, prot.ServerId, claimId)) // Can we access the server as a guest?
                                 {
                                     continue;
                                 }
                             }
-                            else if (!ctx.UpdateLastSeen(prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
+                            else if (!UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds()))
                             {
                                 // If this fail, it means we don't have the permissions to view this channel
                                 continue;
@@ -146,7 +142,7 @@ namespace Amiko.Server.Controllers
                             _logger.Log(LogLevel.Information, $"Received message of size {updatedData.Content.Length} by {string.Join(", ", updatedData.Authors.Select(x => x.Username))}");
 
                             // Save to db
-                            var finalId = ContextInterpreter.Get(_dbContext).AddMessage(prot.ServerId, prot.ChannelId, new()
+                            var finalId = MessageQuery.AddMessage(_dbContext, prot.ServerId, prot.ChannelId, claimId, new()
                             {
                                 CreationTime = now,
                                 Authors = updatedData.Authors.Select(x => x.Id).ToArray(),
@@ -170,7 +166,7 @@ namespace Amiko.Server.Controllers
                             lock (_connManager.Sockets)
                             {
                                 // Connected users
-                                foreach (var s in _connManager.Sockets.Where(x => x.WebSocket != client && ctx.CanAccessServer(prot.ServerId, x.ClaimId))) // Send the message to every users
+                                foreach (var s in _connManager.Sockets.Where(x => x.WebSocket != client && ServerQuery.CanAccessServer(_dbContext, prot.ServerId, x.ClaimId))) // Send the message to every users
                                 {
                                     var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _connManager.Option));
                                     Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -190,7 +186,7 @@ namespace Amiko.Server.Controllers
                                     tasks.Add(t);
                                 }
                                 // Webhooks
-                                foreach (var hook in ctx.GetAllWebhooks().Where(x => ctx.CanAccessServer(prot.ServerId, x.Id)))
+                                foreach (var hook in UserQuery.GetServerWebhooks(_dbContext, prot.ServerId, UserIncludes.None))
                                 {
                                     Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", updatedData.Authors.Select(x => x.Username)) }, _connManager.Option);
                                     tasks.Add(t);
