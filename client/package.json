@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --minify --outfile=js/index.js && esbuild src/platform/browser.js --minify --sourcemap --outfile=js/platform/browser.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
-    "start": "electron-forge start",
-    "make": "electron-forge make"
+    "webdev": "vite",
+    "webbuild": "vite build",
+    "appstart": "electron-forge start",
+    "appmake": "electron-forge make"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.6.0",
@@ -13,16 +14,22 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
     "@electron-forge/plugin-fuses": "^7.6.0",
     "@electron/fuses": "^1.8.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.7.0",
     "electron": "^33.3.1",
-    "esbuild": "^0.25.1"
+    "esbuild": "^0.25.1",
+    "vite": "^7.0.5"
   },
   "main": "main.js",
   "dependencies": {
-    "bulma": "^1.0.3",
+    "bulma": "^1.0.4",
     "dompurify": "^3.2.4",
     "electron-squirrel-startup": "^1.0.1",
     "emoji-js": "^3.8.1",
-    "marked": "^15.0.7"
+    "marked": "^15.0.7",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "version": "1.0.0-beta",
   "author": "Xwilarg",
