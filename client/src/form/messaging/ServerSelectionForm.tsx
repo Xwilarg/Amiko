@@ -1,23 +1,8 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import NetworkSession from '../../instance/NetworkSession';
-import ServerSelectionForm from './ServerSelectionForm';
 
-export default function AppForm() {
-    const [sessions, _] = useState<Array<NetworkSession>>([]);
+export default function ServerSelectionForm({sessions, refreshPage}: any) {
     const [r, forceRefresh] = useState(0);
-
-    function refreshPage() {
-        forceRefresh(r + 1);
-    }
-
-    useEffect(() => {
-        // @ts-ignore
-        filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
-            for (let [key, value] of Object.entries(storedSessions)) {
-                sessions.push(new NetworkSession(key, value, refreshPage));
-            }
-        });
-    }, [])
 
 
     let serverListDisplay: Array<ReactElement> = []
@@ -37,8 +22,9 @@ export default function AppForm() {
 
     return (
     <div className="is-flex">
-        <ServerSelectionForm sessions={sessions}/>
-        Welcome inside Amiko!
+        <div className="server-list">
+            {serverListDisplay}
+        </div>
     </div>
     )
 }
