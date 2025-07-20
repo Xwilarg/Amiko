@@ -33,6 +33,7 @@ public class ConfigManager
         }
 
         config.AdminKey ??= Guid.NewGuid().ToString();
+        config.SecurityKey ??= Guid.NewGuid().ToString();
         File.WriteAllText("config.json", JsonSerializer.Serialize(config, _options));
     }
 }

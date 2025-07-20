@@ -6,6 +6,8 @@ export default function LoginForm() {
     const [instance, setInstance] = useState<string>(`${configuration.baseUrl() ?? ""}`);
     const [metadata, setMetadata] = useState<Metadata | null>(null);
     const [adminToken, setAdminToken] = useState("");
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState('');
 
     function checkInstance()
@@ -41,12 +43,52 @@ export default function LoginForm() {
 
         setError(""); // Clear error message
 
-        if (metadata === null) {
+        if (metadata === null) { // Metadata not set, we need to connect to a backend
+            if (!instance) {
+                setError("Please enter your Amiko server");
+                return;
+            }
+
             checkInstance();
         } else {
-            if (metadata.isInit) {
+            if (metadata.isInit) { // Metadata are set and the instance already have an admin user
+                if (!username) {
+                    setError("Please enter an username");
+                    return;
+                }
 
-            } else {
+                if (!password) {
+                    setError("Please enter a password");
+                    return;
+                }
+
+                fetch(`${instance}/api/auth/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+                .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+                .then(async text => {
+                    // We are connected!
+                    // @ts-ignore
+                    await filesystem.writeTokenAsync(text, instance);
+                    window.location.reload();
+                })
+                .catch((_) => {
+                    setError("Invalid username/password combination");
+                });
+
+            } else { // No admin user, we need to create one
+                if (!adminToken) {
+                    setError("Please enter your admin token");
+                    return;
+                }
+
                 fetch(`${instance}/api/invitation/create`,
                 {
                     method: "POST",
@@ -61,6 +103,7 @@ export default function LoginForm() {
                 )
                 .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
                 .then(text => {
+                    // We generated an invitation token, we redirect to the join page so the admon can create his account
                     window.location.replace(`/join?token=${text}&instance=${encodeURI(instance)}`);
                 })
                 .catch((_) => {
@@ -78,18 +121,22 @@ export default function LoginForm() {
         if (metadata.isInit) {
             instanceLoginForm =
             <>
-                <div className="field">
-                    <label className="label">Username</label>
-                    <div className="control">
-                        <input className="input" name="username" type="text" />
-                    </div>
+            <div className="field">
+                <label className="label">Username</label>
+                <div className="control">
+                    <input className="input" name="username" type="text"
+                        value={username} onChange={(e) => setUsername(e.target.value)}
+                    />
                 </div>
-                <div className="field">
-                    <label className="label">Password</label>
-                    <div className="control">
-                        <input className="input" name="password" type="password" />
-                    </div>
+            </div>
+            <div className="field">
+                <label className="label">Password</label>
+                <div className="control">
+                    <input className="input" name="password" type="password" 
+                    value={password} onChange={(e) => setPassword(e.target.value)}
+                />
                 </div>
+            </div>
             </>
         }
         else

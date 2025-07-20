@@ -22,12 +22,10 @@ namespace Amiko.Server.Database.Queries
             if (UserQuery.GetUser(ctx, name, UserIncludes.None) != null) return false;
 
             var invite = ctx.Invitations.FirstOrDefault(x => x.Id == invitation);
-            Console.WriteLine(ctx.Invitations.Count());
             if (invite == null) return false;
 
             if (DateTime.UtcNow > invite.ExpirationDate)
             {
-                Console.WriteLine(invite.ExpirationDate);
                 ctx.Invitations.Remove(invite);
                 ctx.SaveChanges();
                 return false; // Invitation exists but already expired!

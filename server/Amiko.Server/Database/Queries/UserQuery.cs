@@ -50,16 +50,16 @@ public static class UserQuery
         return GetUsersAsQueryable(ctx, includes).FirstOrDefault(x => x.Username == username);
     }
 
-    public static UserContext? GetUserFromPassword(SqliteContext ctx, string password, string salt)
+    public static UserContext? GetUserFromPassword(SqliteContext ctx, string username, string password)
     {
-        foreach (var u in ctx.Users)
-        {
-            var saltBytes = Encoding.ASCII.GetBytes(u.Salt);
-            var hash = KeyDerivation.Pbkdf2(password, saltBytes, KeyDerivationPrf.HMACSHA512, 210000, 256 / 8);
+        var u = GetUser(ctx, username, UserIncludes.None);
+        if (u == null) return null;
 
-            var computed = Convert.ToHexString(hash).ToLower();
-            if (u.Password == computed) return u;
-        }
+        var saltBytes = Encoding.ASCII.GetBytes(u.Salt);
+        var hash = KeyDerivation.Pbkdf2(password, saltBytes, KeyDerivationPrf.HMACSHA512, 210000, 256 / 8);
+
+        var computed = Convert.ToHexString(hash).ToLower();
+        if (u.Password == computed) return u;
 
         return null;
     }

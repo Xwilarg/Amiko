@@ -38,6 +38,8 @@ public class Program
             });
         });
 
+        WebApplication app = null;
+
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -46,8 +48,8 @@ public class Program
         {
             options.IncludeErrorDetails = true;
 
-
-            var data = Encoding.UTF8.GetBytes("EffyILoveYouButPleaseINeedABetterPassword");
+            using var scope = app.Services.CreateScope();
+            var data = Encoding.UTF8.GetBytes(scope.ServiceProvider.GetRequiredService<ConfigManager>().GetConfig().SecurityKey);
             var securityKey = new SymmetricSecurityKey(data);
 
             options.SaveToken = true;
@@ -85,7 +87,7 @@ public class Program
             };
         });
 
-        var app = builder.Build();
+        app = builder.Build();
 
         using var scope = app.Services.CreateScope();
         scope.ServiceProvider.GetRequiredService<ConfigManager>().InitConfig();

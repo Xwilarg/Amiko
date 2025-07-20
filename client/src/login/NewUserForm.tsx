@@ -48,7 +48,7 @@ export default function NewUserForm() {
     <div className="modal is-active">
         <div className="modal-background"></div>
         <div className="modal-content">
-            <h2 className="title">Welcome in Amiko!</h2>
+            <h2 className="title">Welcome to Amiko!</h2>
             <h3 className="subtitle">Let's create your account!</h3>
             <div className="field pb-6 mt-6">
                 <label className="label">Website</label>

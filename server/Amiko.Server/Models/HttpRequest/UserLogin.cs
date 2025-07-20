@@ -1,0 +1,11 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Amiko.Server.Models.HttpRequest;
+
+public class UserLogin
+{
+    [Required]
+    public required string Username { set; get; }
+    [Required]
+    public required string Password { set; get; }
+}
