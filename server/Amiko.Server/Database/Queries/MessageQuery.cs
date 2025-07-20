@@ -1,4 +1,5 @@
 ﻿using Amiko.Server.Database.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace Amiko.Server.Database.Dao;
 
@@ -17,7 +18,22 @@ public static class MessageQuery
         return c?.Messages?.FirstOrDefault(x => x.Id == msgId);
     }
 
-    
+    public static IEnumerable<MessageContext> GetMessages(
+        SqliteContext ctx,
+        int servId,
+        int chanId,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
+    {
+        var c = ServerQuery.GetServersAsQueryableInternal(ctx, claimId, includes)?.FirstOrDefault(x => x.Id == servId)?.Channels?.FirstOrDefault(x => x.Id ==  chanId);
+        if (c == null) return [];
+        if (msgCount == null)
+        {
+            return c.Messages;
+        }
+        return c.Messages.Take(msgCount.Value);
+    }
 
     public static int AddMessage(SqliteContext ctx, int servId, int chanId, int? claimId, MessageContext msg)
     {

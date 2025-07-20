@@ -20,47 +20,47 @@ public static class ServerQuery
         int? msgCount,
         ServerIncludes includes)
     {
-        return GetServersAsQueryable(ctx, claimId, msgCount, includes);
+        var servers = GetServersAsQueryable(ctx, claimId, includes >= ServerIncludes.IncludesMessages ? ServerIncludes.IncludesChannels : includes);
+        if (includes >= ServerIncludes.IncludesMessages)
+        {
+            foreach (var s in servers)
+            {
+                foreach (var c in s.Channels)
+                {
+                    c.Messages = MessageQuery.GetMessages(ctx, s.Id, c.Id, claimId, msgCount, includes).ToList();
+                }
+            }
+        }
+        return servers;
     }
 
-    public static IQueryable<ServerContext> GetServersAsQueryable(
+    public static IQueryable<ServerContext> GetServersAsQueryableInternal(
         SqliteContext ctx,
         int? claimId,
-        int? msgCount,
         ServerIncludes includes)
     {
         IQueryable<ServerContext> servers;
         if (includes == ServerIncludes.IncludesAttachments)
         {
-            if (msgCount == null)
-            {
-                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments);
-            }
-            else
-            {
-                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages.Take(msgCount.Value)).ThenInclude(m => m.Attachments);
-            }
+            return ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments);
         }
-        else if (includes == ServerIncludes.IncludesMessages)
+        if (includes == ServerIncludes.IncludesMessages)
         {
-            if (msgCount == null)
-            {
-                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages);
-            }
-            else
-            {
-                servers = ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages.Take(msgCount.Value));
-            }
+            return ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages);
         }
-        else if (includes == ServerIncludes.IncludesChannels)
+        if (includes == ServerIncludes.IncludesChannels)
         {
-            servers = ctx.Servers.Include(s => s.Channels);
+            return ctx.Servers.Include(s => s.Channels);
         }
-        else
-        {
-            servers = ctx.Servers;
-        }
+        return ctx.Servers;
+    }
 
+    public static IQueryable<ServerContext> GetServersAsQueryable(
+        SqliteContext ctx,
+        int? claimId,
+        ServerIncludes includes)
+    {
+        var servers = GetServersAsQueryableInternal(ctx, claimId, includes);
         if (claimId == null)
         {
             return servers.Where(s => s.AllowsGuest && s.IsPublic);
@@ -77,7 +77,20 @@ public static class ServerQuery
         int? msgCount,
         ServerIncludes includes)
     {
-        return GetServersAsQueryable(ctx, claimId, msgCount, includes).FirstOrDefault(x => x.Id == servId);
+        var s = GetServersAsQueryableInternal(ctx, claimId, includes >= ServerIncludes.IncludesMessages ? ServerIncludes.IncludesChannels : includes).FirstOrDefault(x => x.Id == servId);
+        if (s == null || !CanAccessServer(ctx, s, servId, claimId))
+        {
+            return null;
+        }
+
+        if (includes >= ServerIncludes.IncludesMessages)
+        {
+            foreach (var c in s.Channels)
+            {
+                c.Messages = MessageQuery.GetMessages(ctx, servId, c.Id, claimId, msgCount, includes).ToList();
+            }
+        }
+        return s;
     }
 
     public static ServerContext? GetServerRaw(SqliteContext ctx, int servId)
@@ -103,16 +116,21 @@ public static class ServerQuery
         return serv.Id;
     }
 
+    public static bool CanAccessServer(SqliteContext ctx, ServerContext s, int servId, int? claimId)
+    {
+        if (claimId == null)
+        { // Authentificated user
+            return s.AllowsGuest && s.IsPublic;
+        }
+        return s.IsPublic || ctx.AllowUsers.Any(x => x.UserId == claimId.Value && x.ServerId == s.Id); // There is no whitelist or user is allowed
+    }
+
     public static bool CanAccessServer(SqliteContext ctx, int servId, int? claimId)
     {
         var s = GetServer(ctx, servId, claimId, null, ServerIncludes.None);
 
         if (s == null) return false;
 
-        if (claimId == null)
-        { // Authentificated user
-            return s.AllowsGuest && s.IsPublic;
-        }
-        return s.IsPublic || ctx.AllowUsers.Any(x => x.UserId == claimId.Value && x.ServerId == s.Id); // There is no whitelist or user is allowed
+        return CanAccessServer(ctx, s, servId, claimId);
     }
 }
