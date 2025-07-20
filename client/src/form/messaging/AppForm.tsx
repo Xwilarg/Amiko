@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
 import NetworkSession from '../../instance/NetworkSession';
 import ServerSelectionForm from './ServerSelectionForm';
 
@@ -6,8 +6,12 @@ export default function AppForm() {
     const [sessions, _] = useState<Array<NetworkSession>>([]);
     const [r, forceRefresh] = useState(0);
 
+    // @ts-ignore
+    const ref = useRef();
+
     function refreshPage() {
-        forceRefresh(r + 1);
+        // @ts-ignore
+        ref.current.refresh();
     }
 
     useEffect(() => {
@@ -37,7 +41,7 @@ export default function AppForm() {
 
     return (
     <div className="is-flex">
-        <ServerSelectionForm sessions={sessions}/>
+        <ServerSelectionForm sessions={sessions} ref={ref}/>
         Welcome inside Amiko!
     </div>
     )

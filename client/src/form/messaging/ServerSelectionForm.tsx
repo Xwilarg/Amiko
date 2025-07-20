@@ -1,13 +1,23 @@
-import { useState, type ReactElement } from 'react'
+import { forwardRef, useImperativeHandle, useState, type ReactElement } from 'react'
 import NetworkSession from '../../instance/NetworkSession';
 
-export default function ServerSelectionForm({sessions, refreshPage}: any) {
+interface ServerSelectionFormProps {
+    sessions: Array<NetworkSession>;
+}
+
+const ServerSelectionForm = forwardRef((
+    { sessions }: ServerSelectionFormProps,
+    ref
+) => {
     const [r, forceRefresh] = useState(0);
+
+    useImperativeHandle(ref, () => ({
+        refresh: () => { forceRefresh(r + 1); }
+    }));
 
 
     let serverListDisplay: Array<ReactElement> = []
-    let tmpS: Array<NetworkSession> = sessions;
-    for (let ns of tmpS) {
+    for (let ns of sessions) {
         for (let [key, value] of Object.entries(ns.messaging.servers))
         serverListDisplay.push(
             <div key={value.name} className="button profile is-flex is-flex-wrap-wrap is-primary notif-container">
@@ -27,4 +37,6 @@ export default function ServerSelectionForm({sessions, refreshPage}: any) {
         </div>
     </div>
     )
-}
+});
+
+export default ServerSelectionForm;
