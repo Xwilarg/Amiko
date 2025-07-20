@@ -60,11 +60,14 @@ public static class ServerQuery
         {
             servers = ctx.Servers;
         }
+
         if (claimId == null)
         {
-            return servers.Where(s => s.AllowsGuest);
+            return servers.Where(s => s.AllowsGuest && s.IsPublic);
         }
-        return servers.Where(s => s.AllowedUsers == null || s.AllowedUsers.Contains(claimId.Value));
+
+        var allowedServers = ctx.AllowUsers.Where(x => x.UserId == claimId).Select(x => x.ServerId);
+        return servers.Where(s => s.IsPublic || allowedServers.Contains(s.Id));
     }
 
     public static ServerContext? GetServer(
@@ -87,7 +90,8 @@ public static class ServerQuery
         var serv = new ServerContext()
         {
             Name = name,
-            AllowedUsers = null,
+            Channels = [],
+            IsPublic = true,
             Color = 54 << 16 | 54 << 8 | 54,
             Character = name[0].ToString(),
             IsEphemeral = false,
@@ -101,17 +105,14 @@ public static class ServerQuery
 
     public static bool CanAccessServer(SqliteContext ctx, int servId, int? claimId)
     {
-        return GetServer(ctx, servId, claimId, null, ServerIncludes.None)?.CanAccessServer(claimId) ?? false;
-    }
+        var s = GetServer(ctx, servId, claimId, null, ServerIncludes.None);
 
-    private static bool CanAccessServer(this ServerContext s, int? claimId)
-    {
-        if (claimId != null)
+        if (s == null) return false;
+
+        if (claimId == null)
         { // Authentificated user
-            return s.AllowedUsers == null || s.AllowedUsers.Contains(claimId.Value); // There is no whitelist or user is allowed
+            return s.AllowsGuest && s.IsPublic;
         }
-
-        // Guest user
-        return s.AllowsGuest;
+        return s.IsPublic || ctx.AllowUsers.Any(x => x.UserId == claimId.Value && x.ServerId == s.Id); // There is no whitelist or user is allowed
     }
 }

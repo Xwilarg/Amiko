@@ -12,6 +12,18 @@ namespace Amiko.Server.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AllowUsers",
+                columns: table => new
+                {
+                    ServerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AllowUsers", x => new { x.ServerId, x.UserId });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Invitations",
                 columns: table => new
                 {
@@ -33,7 +45,7 @@ namespace Amiko.Server.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Color = table.Column<int>(type: "INTEGER", nullable: false),
                     Character = table.Column<string>(type: "TEXT", nullable: false),
-                    AllowedUsers = table.Column<string>(type: "TEXT", nullable: true),
+                    IsPublic = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsEphemeral = table.Column<bool>(type: "INTEGER", nullable: false),
                     AllowsGuest = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
@@ -171,6 +183,9 @@ namespace Amiko.Server.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AllowUsers");
+
             migrationBuilder.DropTable(
                 name: "AttachmentContext");
 

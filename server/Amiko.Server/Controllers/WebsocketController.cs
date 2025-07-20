@@ -49,7 +49,6 @@ namespace Amiko.Server.Controllers
 
             // First connection from user!
             _logger.Log(LogLevel.Information, $"New client connected ({claimId})");
-
             // Send information about all servers existing
             var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
             {

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Amiko.Server.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    [Migration("20250719215823_InitialCreate")]
+    [Migration("20250720155552_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,6 +19,19 @@ namespace Amiko.Server.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
+
+            modelBuilder.Entity("Amiko.Server.Database.Context.AllowedUsersContext", b =>
+                {
+                    b.Property<int>("ServerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ServerId", "UserId");
+
+                    b.ToTable("AllowUsers");
+                });
 
             modelBuilder.Entity("Amiko.Server.Database.Context.AttachmentContext", b =>
                 {
@@ -149,9 +162,6 @@ namespace Amiko.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AllowedUsers")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("AllowsGuest")
                         .HasColumnType("INTEGER");
 
@@ -163,6 +173,9 @@ namespace Amiko.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsEphemeral")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsPublic")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

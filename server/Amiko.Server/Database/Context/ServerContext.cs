@@ -27,10 +27,9 @@ public class ServerContext
     /// </summary>
     public List<ChannelContext> Channels { set; get; } = [];
     /// <summary>
-    /// Users that are allowed to access this channels
-    /// If null anyone with an account can access it
+    /// Can any user access this channel or is there an allow list
     /// </summary>
-    public List<int>? AllowedUsers { set; get; } = null;
+    public bool IsPublic { set; get; } = true;
 
     /// <summary>
     /// Ephemerals servers only keep X messages in their channels
