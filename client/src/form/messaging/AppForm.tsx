@@ -26,7 +26,7 @@ export default function AppForm() {
     for (let ns of tmpS) {
         for (let [key, value] of Object.entries(ns.messaging.servers))
         serverListDisplay.push(
-            <div className="button profile is-flex is-flex-wrap-wrap is-primary notif-container">
+            <div key={value.name} className="button profile is-flex is-flex-wrap-wrap is-primary notif-container">
                 <div className="pfp" style={{
                     background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                 }}>{value.character}
