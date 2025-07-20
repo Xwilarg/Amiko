@@ -72,7 +72,6 @@ export default class NetworkSession
             }, 10_000);*/
 
             this.isConnected = true;
-            this.refreshState();
         });
 
         this.socket.addEventListener("close", async (_) => {
@@ -113,8 +112,9 @@ export default class NetworkSession
                             
                         }
                     }
-                    self.refreshState();
-                    //if (json.data[0].type == 5) self.renderer.finalizeInit();
+                    if (json.data[0].type == 5) {
+                        self.refreshState();
+                    }
                     break;
 
                 case 2: // Message received

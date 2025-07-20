@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactElement } from 'react'
 import NetworkSession from '../../instance/NetworkSession';
 
 export default function AppForm() {
-    const [sessions, setSessions] = useState<Array<NetworkSession>>([]);
+    const [sessions, _] = useState<Array<NetworkSession>>([]);
     const [r, forceRefresh] = useState(0);
 
     function refreshPage() {
@@ -12,11 +12,9 @@ export default function AppForm() {
     useEffect(() => {
         // @ts-ignore
         filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
-            let tmpSessions = [];
             for (let [key, value] of Object.entries(storedSessions)) {
-                tmpSessions.push(new NetworkSession(key, value, refreshPage));
+                sessions.push(new NetworkSession(key, value, refreshPage));
             }
-            setSessions(tmpSessions);
         });
     }, [])
 
