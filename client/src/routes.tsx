@@ -6,7 +6,6 @@ import { createRoot } from 'react-dom/client';
 import LoginForm from "./form/login/LoginForm.js";
 import NewUserForm from "./form/login/NewUserForm.js";
 import AppForm from "./form/messaging/AppForm.js";
-
 const root = createRoot(document.getElementById("root")!);
 root.render(
     <BrowserRouter>

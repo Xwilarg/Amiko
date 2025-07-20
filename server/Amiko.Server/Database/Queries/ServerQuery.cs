@@ -60,7 +60,11 @@ public static class ServerQuery
         {
             servers = ctx.Servers;
         }
-        return servers.Where(s => s.CanAccessServer(claimId));
+        if (claimId == null)
+        {
+            return servers.Where(s => s.AllowsGuest);
+        }
+        return servers.Where(s => s.AllowedUsers == null || s.AllowedUsers.Contains(claimId.Value));
     }
 
     public static ServerContext? GetServer(
