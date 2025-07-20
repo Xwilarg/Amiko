@@ -57,6 +57,8 @@ public class UserSocket
     /// </summary>
     public int? ClaimId { set; get; }
 
+    public bool IsAdmin { set; get; }
+
     /// <summary>
     /// Actual web socket
     /// </summary>

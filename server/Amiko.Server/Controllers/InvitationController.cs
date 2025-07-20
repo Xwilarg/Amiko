@@ -1,12 +1,9 @@
 ﻿using Amiko.Server.Database.Context;
+using Amiko.Server.Database.Dao;
 using Amiko.Server.Database.Queries;
 using Amiko.Server.Models.HttpRequest;
-using Amiko.Server.Models.Response;
 using Amiko.Server.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace Amiko.Server.Controllers;
 
@@ -39,8 +36,20 @@ public class InvitationController : ControllerBase
     [HttpPost("createUser")]
     public async Task<IActionResult> CreateUser([FromBody] UserCreationInfo creationInfo)
     {
+        var isFirstUser = InvitationQuery.GetInvitation(_dbContext, creationInfo.Invitation).IsAdmin && !UserQuery.GetUsers(_dbContext, UserIncludes.None).Any();
+
         var res = InvitationQuery.CreateUserFromInvitation(_dbContext, creationInfo.Invitation, creationInfo.Username, creationInfo.Password);
-        if (res) return StatusCode(StatusCodes.Status204NoContent);
+        if (res)
+        {
+            if (isFirstUser) // We automatically create a server and channel along the first user
+            {
+                var id = ServerQuery.AddServer(_dbContext, $"{creationInfo.Username}'s server");
+                ChannelQuery.AddChannel(_dbContext, id, "General");
+
+                // Since this is the first user and he isn't connected yet, there is no use to propagate the creation because he'll get the info when login-in
+            }
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
         return StatusCode(StatusCodes.Status400BadRequest);
     }
 

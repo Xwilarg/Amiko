@@ -39,7 +39,8 @@ public class AuthController : ControllerBase
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.UserData, user.Id.ToString())
+            new(ClaimTypes.UserData, user.Id.ToString()),
+            new(ClaimTypes.Role, user.IsAdmin ? "Admin" : string.Empty)
         };
 
         var algorithms = Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature;

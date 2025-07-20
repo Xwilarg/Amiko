@@ -6,15 +6,11 @@ namespace Amiko.Server.Database.Queries
     public class InvitationQuery
     {
         /// <returns>null mean the message was not found, else return a potentially empty array</returns>
-        public static IEnumerable<AttachmentContext>? GetAttachment(
+        public static InvitationContext? GetInvitation(
             SqliteContext ctx,
-            int servId,
-            int chanId,
-            int msgId,
-            int? claimId)
+            string id)
         {
-            var m = MessageQuery.GetMessage(ctx, servId, chanId, msgId, claimId, null, ServerIncludes.IncludesAttachments);
-            return m?.Attachments;
+            return ctx.Invitations.FirstOrDefault(x =>  x.Id == id);
         }
 
         public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password)

@@ -39,12 +39,12 @@ namespace Amiko.Server.Controllers
             _options = options;
         }
 
-        private async Task ListenInternalAsync(int? claimId)
+        private async Task ListenInternalAsync(int? claimId, bool isAdmin)
         {
             var client = await HttpContext.WebSockets.AcceptWebSocketAsync("client");
             lock (_connManager.Sockets)
             {
-                _connManager.Sockets.Add(new() { WebSocket = client, ClaimId = claimId });
+                _connManager.Sockets.Add(new() { WebSocket = client, ClaimId = claimId, IsAdmin = isAdmin });
             }
 
             // First connection from user!
@@ -231,7 +231,7 @@ namespace Amiko.Server.Controllers
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                await ListenInternalAsync(null);
+                await ListenInternalAsync(null, false);
             }
             else
             {
@@ -246,8 +246,9 @@ namespace Amiko.Server.Controllers
             {
                 // Info of who sent the msg
                 var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+                var isAdmin = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.Role).Value.Split(",").Contains("Admin");
 
-                await ListenInternalAsync(claimId);
+                await ListenInternalAsync(claimId, isAdmin);
             }
             else
             {

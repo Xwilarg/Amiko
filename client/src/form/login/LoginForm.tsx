@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import type Metadata from '../model/Metadata';
+import type Metadata from '../../model/Metadata';
 
 export default function LoginForm() {
     // @ts-ignore

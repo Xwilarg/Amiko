@@ -17,23 +17,20 @@ public static class ChannelQuery
         return s?.Channels?.FirstOrDefault(x => x.Id == chanId);
     }
 
-    public static void AddChannel(SqliteContext ctx, ChannelInfo info)
+    public static int AddChannel(SqliteContext ctx, int servId, string name)
     {
-        /*
-        var color = info.Color ?? new Color() { R = 54, G = 54, B = 54 };
-        var serv = new ServerContext()
-        {
-            Name = info.Name,
-            AllowedUsers = info.AllowedUsers?.ToList(),
-            Color = color.R << 16 | color.G << 8 | color.B,
-            Character = character ?? name[0].ToString(),
-            IsEphemeral = isEphemeral,
-            AllowsGuest = allowsGuest
-        };
-        _ctx.Servers.Add(serv);
-        _ctx.SaveChanges();
+        var s = ServerQuery.GetServerRaw(ctx, servId);
+        if (s == null) return -1;
 
-        return serv.Id;
-        */
+        var chan = new ChannelContext()
+        {
+            Name = name,
+            Description = string.Empty,
+            Messages = []
+        };
+        s.Channels.Add(chan);
+        ctx.SaveChanges();
+
+        return chan.Id;
     }
 }

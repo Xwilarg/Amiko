@@ -73,24 +73,26 @@ public static class ServerQuery
         return GetServersAsQueryable(ctx, claimId, msgCount, includes).FirstOrDefault(x => x.Id == servId);
     }
 
-    public static void AddServer(SqliteContext ctx, ServerInfo info)
+    public static ServerContext? GetServerRaw(SqliteContext ctx, int servId)
     {
-        /*
-        var color = info.Color ?? new Color() { R = 54, G = 54, B = 54 };
+        return ctx.Servers.FirstOrDefault(x => x.Id == servId);
+    }
+
+    public static int AddServer(SqliteContext ctx, string name)
+    {
         var serv = new ServerContext()
         {
-            Name = info.Name,
-            AllowedUsers = info.AllowedUsers?.ToList(),
-            Color = color.R << 16 | color.G << 8 | color.B,
-            Character = character ?? name[0].ToString(),
-            IsEphemeral = isEphemeral,
-            AllowsGuest = allowsGuest
+            Name = name,
+            AllowedUsers = null,
+            Color = 54 << 16 | 54 << 8 | 54,
+            Character = name[0].ToString(),
+            IsEphemeral = false,
+            AllowsGuest = false
         };
-        _ctx.Servers.Add(serv);
-        _ctx.SaveChanges();
+        ctx.Servers.Add(serv);
+        ctx.SaveChanges();
 
         return serv.Id;
-        */
     }
 
     public static bool CanAccessServer(SqliteContext ctx, int servId, int? claimId)
