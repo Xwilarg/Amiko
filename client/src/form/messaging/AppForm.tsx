@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 import NetworkSession from '../../instance/NetworkSession';
 import ServerSelectionForm from './ServerSelectionForm';
+import MessageContainerForm from './MessageContainerForm';
 
 export default function AppForm() {
     const [sessions, _] = useState<Array<NetworkSession>>([]);
@@ -41,8 +42,8 @@ export default function AppForm() {
 
     return (
     <div className="is-flex">
-        <ServerSelectionForm sessions={sessions} ref={ref}/>
-        Welcome inside Amiko!
+        <ServerSelectionForm sessions={sessions} activeIndex={0} ref={ref}/>
+        <MessageContainerForm session={sessions[0]} />
     </div>
     )
 }

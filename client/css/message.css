@@ -1,0 +1,59 @@
+/* Message */
+.message {
+    margin-bottom: 0 !important;
+    padding: .5em;
+}
+
+.message:hover {
+    background-color: rgb(52, 53, 66);
+}
+
+.message.error {
+    color: hsl(0, 100%, 87%);
+}
+
+.message.system {
+    color: hsl(240, 100%, 87%)
+}
+
+.message.sending {
+    color: rgb(80, 80, 80);
+}
+
+.message.mention {
+    background-color: rgb(102, 74, 53);
+}
+
+.message.mention:hover {
+    background-color: rgb(138, 104, 78);
+}
+
+.message .pfp {
+    flex-shrink: 0;
+}
+
+/* Messages components */
+.subtitle {
+    margin-bottom: 0 !important;
+}
+
+.content {
+    margin-bottom: 0 !important;
+    word-break: break-word;
+}
+
+/* Links within messages */
+.link {
+    text-decoration: underline;
+    color: lightcoral;
+    cursor: pointer;
+}
+
+.link:hover {
+    color: white;
+}
+
+/* Markdown */
+pre, code {
+    text-wrap-mode: wrap !important;
+}

@@ -3,10 +3,11 @@ import NetworkSession from '../../instance/NetworkSession';
 
 interface ServerSelectionFormProps {
     sessions: Array<NetworkSession>;
+    activeIndex: number;
 }
 
 const ServerSelectionForm = forwardRef((
-    { sessions }: ServerSelectionFormProps,
+    { sessions, activeIndex }: ServerSelectionFormProps,
     ref
 ) => {
     const [r, forceRefresh] = useState(0);
@@ -17,10 +18,11 @@ const ServerSelectionForm = forwardRef((
 
 
     let serverListDisplay: Array<ReactElement> = []
+    let index = 0;
     for (let ns of sessions) {
         for (let [key, value] of Object.entries(ns.messaging.servers))
         serverListDisplay.push(
-            <div key={value.name} className="button profile is-flex is-flex-wrap-wrap is-primary notif-container">
+            <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (activeIndex === index ? "is-primary" : "")}>
                 <div className="pfp" style={{
                     background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                 }}>{value.character}
@@ -28,6 +30,7 @@ const ServerSelectionForm = forwardRef((
                 <p>{value.name}</p>
             </div>
         )
+        index++;
     }
 
     return (

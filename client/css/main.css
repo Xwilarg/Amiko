@@ -10,7 +10,6 @@
 }
 
 /* Profile are small icons that show icons like servers or user selection */
-
 .profile {
     width: 75px;
     height: 75px;
@@ -20,6 +19,7 @@
     background-color: rgb(75, 47, 47);
 }
 
+/* Picture profile, used in profiles but also in messages */
 .pfp {
     width: 30px;
     height: 30px;
@@ -30,4 +30,49 @@
     color: white;
     text-align: center;
     white-space: nowrap;
+}
+
+/* Main part that contains messages and input bar */
+#main-screen {
+    width: calc(100% - 75px);
+}
+
+/* Messages container */
+#messages {
+    padding: .5em;
+    height: calc(100dvh - 127px);
+    overflow-y: scroll;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    scrollbar-color: rgb(52, 53, 66) transparent;
+}
+
+/* Bottom bar to send messages */
+#message-form {
+    height: 65px;
+    margin-bottom: 10px;
+}
+
+/* File attachment */
+#attach-file-container {
+    height: calc(75px - 10px);
+}
+
+#attach-file {
+    display: none;
+}
+
+/* Text input */
+#message-field {
+    min-height: 100%;
+    resize: none;
+}
+
+/* Button to send message */
+#send-message {
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    margin: 5px 5px 5px 10px;
 }
