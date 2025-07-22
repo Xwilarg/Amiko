@@ -126,6 +126,11 @@ export default class NetworkSession
                         }
                     }
                     if (json.data[0].type == 5) {
+                        let servId = parseInt(Object.keys(self.messaging.servers)[0]);
+                        let chanId = parseInt(Object.keys(self.messaging.servers[servId].channels)[0]);
+
+                        self.renderingContext.currServ = servId;
+                        self.renderingContext.currChannel = chanId;
                         self.refreshState();
                     }
                     break;

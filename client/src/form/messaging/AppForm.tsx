@@ -16,6 +16,8 @@ export default function AppForm() {
 
     const ref = React.createRef();
     function refreshPage() { // Need to clean this
+        
+        
         // @ts-ignore
         ref.current.refresh();
         forceRefresh(r + 1);

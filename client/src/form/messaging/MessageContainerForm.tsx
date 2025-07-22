@@ -20,11 +20,10 @@ const MessageContainerForm = forwardRef((
             setRendererMessages(msgs);
         }
     }));
-
     return (
         <div id="main-screen">
             <div className="is-flex is-flex-direction-column" id="messages">
-                {renderedMessages.map(msg => <MessageForm msg={msg} type="None" key={msg.id} />)}
+                {renderedMessages.map(msg => <MessageForm msg={msg} type="None"  key={msg.id ?? `ack-${msg.ackId}`} />)}
             </div>
             <MessageInputForm />
         </div>

@@ -1,5 +1,5 @@
 export default interface Message {
-    id: number;
+    id: number | null;
     date: Date;
     authors: number[] | null;
     content: string;

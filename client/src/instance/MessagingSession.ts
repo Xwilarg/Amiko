@@ -56,6 +56,22 @@ export default class MessagingSession
         return msgInst;
     }
 
+    addPendingMessage(servId: number, chanId: number, msg: any): Message {
+        const msgInst: Message = {
+            id: null,
+            date: new Date(),
+            authors: msg.authors.length > 0 ? msg.authors : [ this.mainUser! ],
+            content: msg.content,
+            attachments: [],
+
+            ackId: msg.ackId
+        };
+        this.servers[servId].channels[chanId].messages.push(msgInst);
+        this.messages.push(msgInst);
+
+        return msgInst;
+    }
+
     sendSystemMessage(text: string) {
         this.session.renderingContext.sendMessage({
             id: this.systemId--,
