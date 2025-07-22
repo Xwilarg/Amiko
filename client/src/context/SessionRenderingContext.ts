@@ -40,6 +40,10 @@ export default class SessionRenderingContext
         // @ts-ignore
         this.refMsg.current.sendMessage(msg);
     }
+
+    sendUserMessage() {
+
+    }
     
     clearAllMessages() {
     

@@ -1,6 +1,4 @@
 import type SessionRenderingContext from "../context/SessionRenderingContext";
-import type Message from "../model/Message";
-import type { MessageFlag } from "../model/MessageFlag";
 import MessagingSession from "./MessagingSession";
 
 export default class NetworkSession
@@ -35,13 +33,13 @@ export default class NetworkSession
         this.refreshState = refreshState;
 
         if (this.token === null) {
-            this.openNetworkConnection(false);
+            this.#openNetworkConnection(false);
         } else {
-            this.checkToken();
+            this.#checkToken();
         }
     }
 
-    checkToken() { // As a connected user, we verify that our token is still valid
+    #checkToken() { // As a connected user, we verify that our token is still valid
         fetch(`${this.instance}/api/auth/validate`, {
             method: 'POST',
             headers: {
@@ -50,14 +48,14 @@ export default class NetworkSession
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
         .then(_ => {
-            this.openNetworkConnection(false);
+            this.#openNetworkConnection(false);
         })
         .catch(async (e) => {
             console.error(`Session for ${this.instance} expired`);
         });
     }
 
-    openNetworkConnection(isGuest: boolean) {
+    #openNetworkConnection(isGuest: boolean) {
         this.renderingContext.clearAllMessages();
 
         let endpoint = `${this.instance}/ws/${(isGuest ? "guest" : "")}`;
@@ -94,7 +92,7 @@ export default class NetworkSession
             }
             */
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s to not spam reconnections
-            self.openNetworkConnection(isGuest);
+            self.#openNetworkConnection(isGuest);
         });
 
         this.socket.addEventListener("error", (e) => {
@@ -125,7 +123,6 @@ export default class NetworkSession
                     }
                     if (json.data[0].type == 5) {
                         self.refreshState();
-                        //self.renderingContext.setMessages()
                     }
                     break;
 
