@@ -17,6 +17,7 @@ root.render(
                 : <AppForm />
             } />
             <Route path="/join" element={<NewUserForm />} />
+            <Route path="/login" element={<LoginForm />} />
         </Routes>
   </BrowserRouter>
 );

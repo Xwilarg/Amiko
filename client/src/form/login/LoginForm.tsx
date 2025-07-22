@@ -77,7 +77,7 @@ export default function LoginForm() {
                     // We are connected!
                     // @ts-ignore
                     await filesystem.writeTokenAsync(text, instance);
-                    window.location.reload();
+                    window.location.replace(`/`);
                 })
                 .catch((_) => {
                     setError("Invalid username/password combination");

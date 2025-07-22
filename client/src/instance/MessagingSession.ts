@@ -57,7 +57,7 @@ export default class MessagingSession
     }
 
     sendSystemMessage(text: string) {
-        this.session.sendMessage({
+        this.session.renderingContext.sendMessage({
             id: this.systemId--,
             date: new Date(),
             authors: null,
@@ -69,7 +69,7 @@ export default class MessagingSession
     }
 
     sendErrorMessage(text: string) {
-        this.session.sendMessage({
+        this.session.renderingContext.sendMessage({
             id: this.systemId--,
             date: new Date(),
             authors: null,

@@ -1,3 +1,4 @@
+import type SessionRenderingContext from "../context/SessionRenderingContext";
 import type Message from "../model/Message";
 import type { MessageFlag } from "../model/MessageFlag";
 import MessagingSession from "./MessagingSession";
@@ -17,27 +18,21 @@ export default class NetworkSession
 
     // Allow to refresh the React state
     refreshState: () => void;
-    sendMessage: (msg: Message, type: MessageFlag) => void;
-    isCurrentChannel: (s: NetworkSession, servId: number, chanId: number) => boolean;
+    renderingContext: SessionRenderingContext;
 
-    constructor(instance: string, token: string | null,
-        refreshState: () => void,
-        sendMessage: (msg: Message, type: MessageFlag) => void,
-        isCurrentChannel: (s: NetworkSession, servId: number, chanId: number) => boolean
-    )
+    constructor(instance: string, token: string | null, renderingContext: SessionRenderingContext, refreshState: () => void)
     {
         this.instance = instance;
         this.token = token;
         this.socket = null;
         this.keepAliveInterval = null;
 
-        this.refreshState = refreshState;
-        this.sendMessage = sendMessage;
-        this.isCurrentChannel = isCurrentChannel;
+        this.renderingContext = renderingContext;
 
         this.isConnected = false;
 
         this.messaging = new MessagingSession(this);
+        this.refreshState = refreshState;
 
         if (this.token === null) {
             this.openNetworkConnection(false);
@@ -57,12 +52,14 @@ export default class NetworkSession
         .then(_ => {
             this.openNetworkConnection(false);
         })
-        .catch(async (_) => {
+        .catch(async (e) => {
             console.error(`Session for ${this.instance} expired`);
         });
     }
 
     openNetworkConnection(isGuest: boolean) {
+        this.renderingContext.clearAllMessages();
+
         let endpoint = `${this.instance}/ws/${(isGuest ? "guest" : "")}`;
 
         if (isGuest) this.socket = new WebSocket(endpoint);
@@ -104,7 +101,7 @@ export default class NetworkSession
             self.messaging.sendErrorMessage("Websocket error");
         });
 
-                // Listen for messages
+        // Listen for messages
         this.socket.addEventListener("message", async function(event) {
             const json = JSON.parse(event.data);
 
@@ -128,6 +125,7 @@ export default class NetworkSession
                     }
                     if (json.data[0].type == 5) {
                         self.refreshState();
+                        //self.renderingContext.setMessages()
                     }
                     break;
 

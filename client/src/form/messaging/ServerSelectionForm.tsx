@@ -1,13 +1,13 @@
 import { forwardRef, useImperativeHandle, useState, type ReactElement } from 'react'
 import NetworkSession from '../../instance/NetworkSession';
+import type SessionRenderingContext from '../../context/SessionRenderingContext';
 
 interface ServerSelectionFormProps {
-    sessions: Array<NetworkSession>;
-    activeIndex: number;
+    context: SessionRenderingContext;
 }
 
 const ServerSelectionForm = forwardRef((
-    { sessions, activeIndex }: ServerSelectionFormProps,
+    { context }: ServerSelectionFormProps,
     ref
 ) => {
     const [r, forceRefresh] = useState(0);
@@ -18,19 +18,23 @@ const ServerSelectionForm = forwardRef((
 
 
     let serverListDisplay: Array<ReactElement> = []
-    let index = 0;
-    for (let ns of sessions) {
-        for (let [key, value] of Object.entries(ns.messaging.servers))
-        serverListDisplay.push(
-            <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (activeIndex === index ? "is-primary" : "")}>
-                <div className="pfp" style={{
-                    background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
-                }}>{value.character}
-                </div>
-                <p>{value.name}</p>
-            </div>
-        )
-        index++;
+    if (context) {
+        for (let ns of context.sessions) {
+            let entries = Object.entries(ns.messaging.servers);
+            for (let i = 0; i < entries.length; i++)
+            {
+                const [key, value] = entries[i];
+                serverListDisplay.push(
+                    <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (context.isCurrentServer(ns, i) ? "is-primary" : "")}>
+                        <div className="pfp" style={{
+                            background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
+                        }}>{value.character}
+                        </div>
+                        <p>{value.name}</p>
+                    </div>
+                )
+            }
+        }
     }
 
     return (
