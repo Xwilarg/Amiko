@@ -1,5 +1,5 @@
-import { forwardRef, useImperativeHandle, useState } from 'react'
-import type NetworkSession from '../../instance/NetworkSession';
+import { forwardRef, useContext, useImperativeHandle, useState } from 'react'
+import { SessionRenderingContextProvider } from './AppForm';
 
 
 const MessageInputForm = forwardRef((
@@ -7,12 +7,18 @@ const MessageInputForm = forwardRef((
     ref
 ) => {
     const [message, setMessage] = useState('');
+    const ctx = useContext(SessionRenderingContextProvider);
 
     useImperativeHandle(ref, () => ({
     }));
 
     function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+
+        if (message) {
+            ctx.sendUserMessage(message);
+            setMessage("");
+        }
     }
 
     return (

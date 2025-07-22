@@ -10,7 +10,15 @@ const MessageContainerForm = forwardRef((
     const [renderedMessages, setRendererMessages] = useState<Array<Message>>([]);
     
     useImperativeHandle(ref, () => ({
-        sendMessage: (msg: Message) => { setRendererMessages([...renderedMessages, msg]); }
+        sendMessage: (msg: Message) => {
+            setRendererMessages([...renderedMessages, msg]);
+        },
+        clearAllMessages: () => {
+            setRendererMessages([]);
+        },
+        setMessages: (msgs: Array<Message>) => {
+            setRendererMessages(msgs);
+        }
     }));
 
     return (

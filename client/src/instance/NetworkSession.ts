@@ -55,6 +55,10 @@ export default class NetworkSession
         });
     }
 
+    sendMessage(msg: any) {
+        this.socket?.send(JSON.stringify(msg));
+    }
+
     #openNetworkConnection(isGuest: boolean) {
         this.renderingContext.clearAllMessages();
 

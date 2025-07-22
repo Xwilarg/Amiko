@@ -40,7 +40,7 @@ export default class MessagingSession
     }
 
     // Add a message to the list of messages
-    #addMessageInternal(servId: number, chanId: number, msg: any): Message {
+    addMessageInternal(servId: number, chanId: number, msg: any): Message {
         const msgInst: Message = {
             id: msg.id,
             date: new Date((msg.sentAt - (new Date().getTimezoneOffset() * 60)) * 1000),
@@ -126,7 +126,7 @@ export default class MessagingSession
             }
             this.servers[msg.id].channels[chan.id] = chanInst;
             for (const m of chan.messages) {
-                this.#addMessageInternal(msg.id, chan.id, m);
+                this.addMessageInternal(msg.id, chan.id, m);
             }
 
             if (this.session.renderingContext.isCurrentChannel(this.session, msg.id, chan.id)) {

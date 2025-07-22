@@ -12,12 +12,16 @@ export default class SessionRenderingContext
 
     refMsg: React.RefObject<unknown> | null
 
+    ackId: number;
+
     constructor() {
         this.sessions = [];
 
         this.currInstance = 0;
         this.currServ = 0;
         this.currChannel = 0;
+
+        this.ackId = 0;
 
         this.refMsg = null;
     }
@@ -41,15 +45,27 @@ export default class SessionRenderingContext
         this.refMsg.current.sendMessage(msg);
     }
 
-    sendUserMessage() {
+    sendUserMessage(text: string) {
+        const newMsg = {
+            type: 2,
+            content: text,
+            ackId: this.ackId++,
+            serverId: this.currServ,
+            channelId: this.currChannel,
+            authors: [] // TODO
+        }
 
+        const msg = this.sessions[this.currInstance].messaging.addMessageInternal(this.currServ, this.currChannel, newMsg)
+        this.sendMessage(msg, "None")
     }
     
     clearAllMessages() {
-    
+        // @ts-ignore
+        this.refMsg.current.clearAllMessages();
     }
     
     setMessages(msgs: Message[]) {
-    
+        // @ts-ignore
+        this.refMsg.current.setMessages(msgs);
     }
 }
