@@ -125,12 +125,13 @@ export default class NetworkSession
                             
                         }
                     }
-                    if (json.data[0].type == 5) {
+                    if (json.data[0].type == 5 && self.renderingContext.isCurrentInstance(self)) {
                         let servId = parseInt(Object.keys(self.messaging.servers)[0]);
                         let chanId = parseInt(Object.keys(self.messaging.servers[servId].channels)[0]);
 
                         self.renderingContext.currServ = servId;
                         self.renderingContext.currChannel = chanId;
+                        self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
                         self.refreshState();
                     }
                     break;

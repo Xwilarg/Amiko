@@ -144,10 +144,6 @@ export default class MessagingSession
             for (const m of chan.messages) {
                 this.addMessageInternal(msg.id, chan.id, m);
             }
-
-            if (this.session.renderingContext.isCurrentChannel(this.session, msg.id, chan.id)) {
-                this.session.renderingContext.setMessages(this.servers[msg.id].channels[chan.id].messages);
-            }
         }
     }
 }

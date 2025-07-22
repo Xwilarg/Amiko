@@ -30,9 +30,12 @@ export default class SessionRenderingContext
         this.sessions.push(new NetworkSession(instance, token, this, refreshState));
     }
 
+    isCurrentInstance(s: NetworkSession) {
+        return s.instance == this.sessions[this.currInstance].instance;
+    }
+
     isCurrentServer(s: NetworkSession, servId: number) {
-        return s.instance == this.sessions[this.currInstance].instance &&
-            this.currServ == servId;
+        return this.isCurrentInstance(s) && this.currServ == servId;
     }
 
     isCurrentChannel(s: NetworkSession, servId: number, chanId: number) {
