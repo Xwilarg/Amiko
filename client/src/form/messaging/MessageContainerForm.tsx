@@ -17,7 +17,7 @@ const MessageContainerForm = forwardRef((
             setRendererMessages([]);
         },
         setMessages: (msgs: Array<Message>) => {
-            setRendererMessages(msgs);
+            setRendererMessages([...renderedMessages, ...msgs]);
         }
     }));
     return (

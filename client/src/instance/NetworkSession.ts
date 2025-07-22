@@ -55,7 +55,7 @@ export default class NetworkSession
         });
     }
 
-    sendMessage(msg: any) {
+    sendNetworkMessage(msg: any) {
         this.socket?.send(JSON.stringify(msg));
     }
 

@@ -58,7 +58,7 @@ export default class SessionRenderingContext
             authors: [] // TODO
         }
 
-        this.sessions[this.currInstance].sendMessage(newMsg);
+        this.sessions[this.currInstance].sendNetworkMessage(newMsg);
         const msg = this.sessions[this.currInstance].messaging.addPendingMessage(this.currServ, this.currChannel, newMsg)
         this.sendMessage(msg, "None")
     }

@@ -21,11 +21,10 @@ const ServerSelectionForm = forwardRef((
     if (context) {
         for (let ns of context.sessions) {
             let entries = Object.entries(ns.messaging.servers);
-            for (let i = 0; i < entries.length; i++)
+            for (let [key, value] of entries)
             {
-                const [key, value] = entries[i];
                 serverListDisplay.push(
-                    <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (context.isCurrentServer(ns, i) ? "is-primary" : "")}>
+                    <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (context.isCurrentServer(ns, parseInt(key)) ? "is-primary" : "")}>
                         <div className="pfp" style={{
                             background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                         }}>{value.character}
