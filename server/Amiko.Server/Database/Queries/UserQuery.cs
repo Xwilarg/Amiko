@@ -29,7 +29,7 @@ public static class UserQuery
 
     public static IEnumerable<UserContext> GetServerWebhooks(SqliteContext ctx, int servId, UserIncludes includes)
     {
-        return GetUsersAsQueryable(ctx, includes).Where(x => x.Webhook != null && ServerQuery.CanAccessServer(ctx, servId, x.Id));
+        return GetUsersAsQueryable(ctx, includes).Where(x => x.Webhook != null).AsEnumerable().Where(x => ServerQuery.CanAccessServer(ctx, servId, x.Id));
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public static class UserQuery
     /// </summary>
     public static UserContext? GetUserFromPrefix(SqliteContext ctx, string prefix, int claimId, UserIncludes includes)
     {
-        return GetUsersAsQueryable(ctx, includes).FirstOrDefault(x => x.Prefix == prefix &&  DoesUserFillClaim(ctx, x.Id, claimId));
+        return GetUsersAsQueryable(ctx, includes).AsEnumerable().FirstOrDefault(x => x.Prefix == prefix && DoesUserFillClaim(ctx, x.Id, claimId));
     }
 
     public static UserContext? GetUser(SqliteContext ctx, int id, UserIncludes includes)
