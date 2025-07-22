@@ -45,7 +45,7 @@ export default class SessionRenderingContext
     
     sendMessage(msg: Message, type: MessageFlag) {
         // @ts-ignore
-        this.refMsg.current.sendMessage(msg);
+        this.refMsg.current.sendMessage(msg, type);
     }
 
     sendUserMessage(text: string) {

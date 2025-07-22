@@ -12,8 +12,14 @@ const MessageForm = forwardRef((
     ref
 ) => {
     let _ = type; // tmp
+
+    let cssTag = "";
+    if (msg.ackId !== null) cssTag = "sending";
+    else if (type === "IsSystem") cssTag = "system";
+    else if (type == "IsError") cssTag = "error";
+
     return (
-    <div className="container message is-flex-grow-0">
+    <div className={`container message is-flex-grow-0 ${cssTag}`}>
         <div className="is-flex">
             <div className="pfp"></div>
             <div className="message-main">
