@@ -1,3 +1,5 @@
+import type Message from "../model/Message";
+import type { MessageFlag } from "../model/MessageFlag";
 import MessagingSession from "./MessagingSession";
 
 export default class NetworkSession
@@ -15,18 +17,27 @@ export default class NetworkSession
 
     // Allow to refresh the React state
     refreshState: () => void;
+    sendMessage: (msg: Message, type: MessageFlag) => void;
+    isCurrentChannel: (s: NetworkSession, servId: number, chanId: number) => boolean;
 
-    constructor(instance: string, token: string | null, refreshState: () => void)
+    constructor(instance: string, token: string | null,
+        refreshState: () => void,
+        sendMessage: (msg: Message, type: MessageFlag) => void,
+        isCurrentChannel: (s: NetworkSession, servId: number, chanId: number) => boolean
+    )
     {
         this.instance = instance;
         this.token = token;
         this.socket = null;
-        this.refreshState = refreshState;
         this.keepAliveInterval = null;
+
+        this.refreshState = refreshState;
+        this.sendMessage = sendMessage;
+        this.isCurrentChannel = isCurrentChannel;
 
         this.isConnected = false;
 
-        this.messaging = new MessagingSession();
+        this.messaging = new MessagingSession(this);
 
         if (this.token === null) {
             this.openNetworkConnection(false);
@@ -57,10 +68,13 @@ export default class NetworkSession
         if (isGuest) this.socket = new WebSocket(endpoint);
         else this.socket = new WebSocket(endpoint, ["client", this.token!]);
         const self = this;
+        
+        self.messaging.sendSystemMessage("Connecting...");
 
         // Connection opened
         this.socket.addEventListener("open", (_) => {
-            /*self.renderer.sendSystemMessage("Connected to server");
+            self.messaging.sendSystemMessage("Connected to server");
+            /*
             for (const s of Object.values(this.renderer.servers)) {
                 s.element.classList.remove("inactive");
                 s.element.disabled = false;
@@ -75,8 +89,8 @@ export default class NetworkSession
         });
 
         this.socket.addEventListener("close", async (_) => {
+            self.messaging.sendErrorMessage("Connection closed");
             /*self.renderer.clearAll();
-            self.renderer.sendErrorMessage("Connection closed");
             for (const s of Object.values(this.renderer.servers)) {
                 s.element.classList.add("inactive");
                 s.element.disabled = true;
@@ -87,7 +101,7 @@ export default class NetworkSession
         });
 
         this.socket.addEventListener("error", (e) => {
-            //self.renderer.sendErrorMessage("Websocket error");
+            self.messaging.sendErrorMessage("Websocket error");
         });
 
                 // Listen for messages

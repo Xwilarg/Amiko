@@ -1,12 +1,9 @@
 import { forwardRef, useImperativeHandle, useState } from 'react'
 import type NetworkSession from '../../instance/NetworkSession';
 
-interface MessageInputFormProps {
-    session: NetworkSession;
-}
 
 const MessageInputForm = forwardRef((
-    { session }: MessageInputFormProps,
+    {},
     ref
 ) => {
     const [message, setMessage] = useState('');

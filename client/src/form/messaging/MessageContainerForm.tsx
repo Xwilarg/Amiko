@@ -1,17 +1,26 @@
-import type NetworkSession from "../../instance/NetworkSession";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import MessageInputForm from "./MessageInputForm";
+import type Message from "../../model/Message";
+import MessageForm from "./MessageForm";
 
-interface MessageContainerFormProps {
-    session: NetworkSession;
-}
+const MessageContainerForm = forwardRef((
+    {},
+    ref
+) => {
+    const [renderedMessages, setRendererMessages] = useState<Array<Message>>([]);
+    
+    useImperativeHandle(ref, () => ({
+        sendMessage: (msg: Message) => { setRendererMessages([...renderedMessages, msg]); }
+    }));
 
-export default function MessageContainerForm({ session }: MessageContainerFormProps) {
     return (
         <div id="main-screen">
             <div className="is-flex is-flex-direction-column" id="messages">
-                Welcome to Amiko
+                {renderedMessages.map(msg => <MessageForm msg={msg} type="None" key={msg.id} />)}
             </div>
-            <MessageInputForm session={session} />
+            <MessageInputForm />
         </div>
     )
-}
+});
+
+export default MessageContainerForm;

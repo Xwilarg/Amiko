@@ -1,10 +1,13 @@
-import type Channel from "../model/channel";
-import type Message from "../model/message";
-import type Server from "../model/server";
-import type User from "../model/user";
+import type Channel from "../model/Channel";
+import type Message from "../model/Message";
+import type Server from "../model/Server";
+import type User from "../model/User";
+import type NetworkSession from "./NetworkSession";
 
 export default class MessagingSession
 {
+    session: NetworkSession;
+
     // All the users of this instance
     users: { [id: number]: User; };
     // User holding the claim for us
@@ -20,7 +23,13 @@ export default class MessagingSession
     // Messages we sent but weren't acknowledged by the server yet
     pendingAcknowledgement: { [id: number] : Message; };
 
-    constructor() {
+    systemId: number; // Keep track of IDs for system messages
+
+    constructor(s: NetworkSession) {
+        this.session = s;
+
+        this.systemId = -1;
+
         this.users = [];
         this.mainUser = null;
         this.possibleUsers = [];
@@ -43,7 +52,32 @@ export default class MessagingSession
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
         this.messages.push(msgInst);
+
         return msgInst;
+    }
+
+    sendSystemMessage(text: string) {
+        this.session.sendMessage({
+            id: this.systemId--,
+            date: new Date(),
+            authors: null,
+            content: text,
+            attachments: [],
+
+            ackId: null
+        }, "IsSystem");
+    }
+
+    sendErrorMessage(text: string) {
+        this.session.sendMessage({
+            id: this.systemId--,
+            date: new Date(),
+            authors: null,
+            content: text,
+            attachments: [],
+
+            ackId: null
+        }, "IsError");
     }
 
     updateUserInfo(msg: any) {
