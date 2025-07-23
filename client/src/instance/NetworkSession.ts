@@ -155,7 +155,9 @@ export default class NetworkSession
                     break;
 
                 case 3: // Acknowledgement of a message sent
-                    //self.renderer.acknowledgeMessage(json, renderer_getMessageByAckId(json.ackId));
+                    self.messaging.acknowledgeMessage(json.ackId, json.newId);
+                    // @ts-ignore
+                    self.renderingContext.refMsg.current.refresh();
                     break;
 
                 case 7: // A message was modified

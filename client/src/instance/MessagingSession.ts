@@ -36,7 +36,7 @@ export default class MessagingSession
 
         this.messages = [];
         this.servers = {};
-        this.pendingAcknowledgement = [];
+        this.pendingAcknowledgement = {};
     }
 
     // Add a message to the list of messages
@@ -69,7 +69,16 @@ export default class MessagingSession
         this.servers[servId].channels[chanId].messages.push(msgInst);
         this.messages.push(msgInst);
 
+        this.pendingAcknowledgement[msg.ackId] = msgInst;
+
         return msgInst;
+    }
+
+    acknowledgeMessage(ackId: number, newId: number) {
+        const msg = this.pendingAcknowledgement[ackId];
+        msg.id = newId;
+        msg.ackId = null;
+        delete this.pendingAcknowledgement[ackId];
     }
 
     sendSystemMessage(text: string) {

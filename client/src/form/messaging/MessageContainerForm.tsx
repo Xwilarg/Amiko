@@ -25,6 +25,9 @@ const MessageContainerForm = forwardRef((
         setMessages: (msgs: Array<Message>) => {
             const formatted = msgs.map<ScreenMessage>(x => { return { msg: x, flag: "None" }; })
             setRendererMessages([...renderedMessages, ...formatted]);
+        },
+        refresh:  () => {
+            setRendererMessages([...renderedMessages]);
         }
     }));
     return (
