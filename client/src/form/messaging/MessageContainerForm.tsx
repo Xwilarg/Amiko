@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import MessageInputForm from "./MessageInputForm";
 import type Message from "../../model/Message";
 import MessageForm from "./MessageForm";
@@ -14,7 +14,15 @@ const MessageContainerForm = forwardRef((
     ref
 ) => {
     const [renderedMessages, setRendererMessages] = useState<Array<ScreenMessage>>([]);
-    
+
+    // Add a div at the end of the list of message to easily scroll down
+    // https://stackoverflow.com/a/52266212
+    const messagesEndRef = useRef<null | HTMLDivElement>(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [renderedMessages]);
+
     useImperativeHandle(ref, () => ({
         sendMessage: (msg: Message, flag: MessageFlag) => {
             setRendererMessages([...renderedMessages, { msg: msg, flag: flag }]);
@@ -34,6 +42,7 @@ const MessageContainerForm = forwardRef((
         <div id="main-screen">
             <div className="is-flex is-flex-direction-column" id="messages">
                 {renderedMessages.map(msg => <MessageForm msg={msg.msg} type={msg.flag} key={msg.msg.id ?? `ack-${msg.msg.ackId}`} />)}
+                <div ref={messagesEndRef} />
             </div>
             <MessageInputForm />
         </div>
