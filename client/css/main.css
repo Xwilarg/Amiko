@@ -1,5 +1,9 @@
-/* Server list on the side */
+/* Prettify Bulma */
+.is-flex {
+    gap: 10px;
+}
 
+/* Server list on the side */
 #server-list {
     width: 75px;
     background-color: var(--bulma-scheme-main);

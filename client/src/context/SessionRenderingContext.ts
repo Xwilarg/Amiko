@@ -1,6 +1,7 @@
 import NetworkSession from "../instance/NetworkSession";
 import type Message from "../model/Message";
 import type { MessageFlag } from "../model/MessageFlag";
+import type User from "../model/User";
 
 export default class SessionRenderingContext
 {
@@ -24,6 +25,11 @@ export default class SessionRenderingContext
         this.ackId = 0;
 
         this.refMsg = null;
+    }
+
+    getUsers(ids: Array<number>) : Array<User> {
+        const users = this.sessions[this.currInstance].messaging.users
+        return ids.map(x => users[x]);
     }
 
     addInstance(instance: string, token: string, refreshState: () => void) {
