@@ -12,12 +12,22 @@ const MessageInputForm = forwardRef((
     useImperativeHandle(ref, () => ({
     }));
 
-    function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-
+    function sendMessage() {
         if (message) {
             ctx.sendUserMessage(message);
             setMessage("");
+        }
+    }
+
+    function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        sendMessage();
+    }
+
+    function onKeyPressed(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
         }
     }
 
@@ -33,6 +43,7 @@ const MessageInputForm = forwardRef((
             <p className="control is-expanded">
                 <textarea maxLength={3000} className="textarea" placeholder="Your message" id="message-field" 
                     value={message} onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={onKeyPressed}
                 ></textarea>
             </p>
             <p className="control">
