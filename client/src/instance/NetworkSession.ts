@@ -131,7 +131,19 @@ export default class NetworkSession
 
                         self.renderingContext.currServ = servId;
                         self.renderingContext.currChannel = chanId;
+
                         self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
+
+                        if (Object.keys(self.messaging.users).length === 1) {
+                            let intro = "";
+                            intro += "# Welcome in Amiko!\n";
+                            intro += "What is next?\n";
+                            intro += `- Use the invite button to invite people <span class="material-symbols-outlined">person_add</span>\n`;
+                            intro += `- Configure your server how you like it <span class="material-symbols-outlined">admin_panel_settings</span>\n\n`;
+                            intro += "*This message is automatically shown because you are the only user in this server*"
+                            self.messaging.sendSystemMessage(intro);
+                        }
+
                         self.refreshState();
                     }
                     break;

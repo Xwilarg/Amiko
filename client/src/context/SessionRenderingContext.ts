@@ -96,15 +96,18 @@ export default class SessionRenderingContext
         this.refMsg = null;
     }
 
+    // Parse emojis such as :eyes:
     parseEmojis(str: string): string {
         return this.emojiParser.replace_colons(str);
     }
 
+    // Parse markdown like *this* or # that
     parseMarkdown(str: string): string {
         // @ts-ignore
         return marked.parse(str);
     }
 
+    // Does current user have admin perms
     amIAdmin() : boolean {
         if (this.sessions.length === 0) return false;
         const m = this.sessions[this.currInstance].messaging;
