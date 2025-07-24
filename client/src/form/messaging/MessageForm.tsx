@@ -3,6 +3,7 @@ import type Message from "../../model/Message";
 import type { MessageFlag } from "../../model/MessageFlag";
 import { SessionRenderingContextProvider } from "./AppForm";
 import type Color from "../../model/Color";
+import DOMPurify from 'dompurify';
 
 interface MessageFormProps {
     msg: Message;
@@ -73,6 +74,10 @@ const MessageForm = forwardRef((
         pfpNode = <div className="pfp"></div>
     }
 
+    let content = msg.content;
+    content = ctx.parseEmojis(content);
+    content = ctx.parseMarkdown(content);
+
     return (
     <div className={`container message is-flex-grow-0 ${cssTag}`}>
         <div className="is-flex">
@@ -80,7 +85,7 @@ const MessageForm = forwardRef((
             <div className="message-main">
                 <small className="date">{msg.date.toDateString()}</small>
                 <h2 className="subtitle">{users.map(x => x.username).join(", ")}</h2>
-                <p className="content">{msg.content}</p>
+                <p className="content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}></p>
                 <div className="rich-preview is-flex is-hidden"></div>
                 <div className="attachment-info is-hidden"></div>
             </div>

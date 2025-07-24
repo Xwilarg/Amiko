@@ -1,3 +1,5 @@
+import EmojiConvertor from 'emoji-js';
+import { marked } from "marked";
 import NetworkSession from "../instance/NetworkSession";
 import type Message from "../model/Message";
 import type { MessageFlag } from "../model/MessageFlag";
@@ -16,7 +18,73 @@ export default class SessionRenderingContext
 
     ackId: number;
 
+    // Message parsing
+    emojiParser: any;
+
     constructor() {
+        this.emojiParser = new EmojiConvertor();
+        this.emojiParser.replace_mode = "unified";
+
+        // Override function
+        const walkTokens = (token: any) => {/* TODO: bold reading
+            // Bold reading check, emphasis the start of each word by putting it in bold
+            if ((token.type === "text" || token.type === "paragraph")
+                && preferences_getAccessibilityReadingMode() === ReadingMode.BoldReading
+                && token.tokens
+                && !token.raw.includes('<span class="link">') // Placeholder, TODO: redo link parsing in marked itself
+            )
+            {
+                const finalTokens: Array<any> = [];
+
+                token.tokens.forEach((subToken: any) => { // Paragraphs may contains lot to tokens
+                    if (subToken.type === 'text') // We don't emphasis something that is already in italic or other
+                    {
+                        const words = subToken.text.split(' ');
+                        for (let i = 0; i < words.length; i++) // We split by space so we can iterate on each word
+                        {
+                            const word = words[i] + ' ';
+                            if (word.length < 3)
+                            {
+                                finalTokens.push({
+                                    type: 'strong',
+                                    tokens: [{ type: 'text', text: word }]
+                                });
+                            }
+                            else
+                            {
+                                const first = word.substring(0, 3);
+                                const rest = word.substring(3);
+
+                                if (first) {
+                                    finalTokens.push({
+                                        type: 'strong',
+                                        tokens: [{ type: 'text', text: first }]
+                                    });
+                                }
+                                if (rest) {
+                                    finalTokens.push({ type: 'text', text: rest });
+                                }
+                            }
+                        }
+                    } else {
+                        finalTokens.push(subToken);
+                    }
+                });
+
+                token.tokens = finalTokens;*/
+            }
+
+        marked.use({
+            walkTokens,
+            breaks: true,
+            tokenizer: {
+                // @ts-ignore
+                link() {},
+                // @ts-ignore
+                url() {}
+            }
+        });
+
         this.sessions = [];
 
         this.currInstance = 0;
@@ -26,6 +94,15 @@ export default class SessionRenderingContext
         this.ackId = 0;
 
         this.refMsg = null;
+    }
+
+    parseEmojis(str: string): string {
+        return this.emojiParser.replace_colons(str);
+    }
+
+    parseMarkdown(str: string): string {
+        // @ts-ignore
+        return marked.parse(str);
     }
 
     amIAdmin() : boolean {
