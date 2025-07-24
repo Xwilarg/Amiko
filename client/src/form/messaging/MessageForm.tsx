@@ -11,7 +11,7 @@ interface MessageFormProps {
 
 const MessageForm = forwardRef((
     { msg, type }: MessageFormProps,
-    ref
+    _
 ) => {
     let ctx = useContext(SessionRenderingContextProvider);
     let users = msg.authors ? ctx.getUsers(msg.authors!) : []

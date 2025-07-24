@@ -11,7 +11,7 @@ interface ScreenMessage {
 
 const MessageContainerForm = forwardRef((
     {},
-    ref
+    msgRef
 ) => {
     const [renderedMessages, setRendererMessages] = useState<Array<ScreenMessage>>([]);
 
@@ -23,7 +23,7 @@ const MessageContainerForm = forwardRef((
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [renderedMessages]);
 
-    useImperativeHandle(ref, () => ({
+    useImperativeHandle(msgRef, () => ({
         sendMessage: (msg: Message, flag: MessageFlag) => {
             setRendererMessages(prev => [...prev, { msg: msg, flag: flag }]);
         },

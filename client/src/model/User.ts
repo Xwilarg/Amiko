@@ -14,4 +14,6 @@ export default interface User
 
     // Character shown on the user profile picture
     character: string;
+
+    isAdmin: boolean;
 }

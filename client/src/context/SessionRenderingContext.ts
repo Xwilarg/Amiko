@@ -28,6 +28,12 @@ export default class SessionRenderingContext
         this.refMsg = null;
     }
 
+    amIAdmin() : boolean {
+        if (this.sessions.length === 0) return false;
+        const m = this.sessions[this.currInstance].messaging;
+        return m.users[m.mainUser!].isAdmin
+    }
+
     getUsers(ids: Array<number>) : Array<User> {
         const users = this.sessions[this.currInstance].messaging.users
         return ids.map(x => users[x]);

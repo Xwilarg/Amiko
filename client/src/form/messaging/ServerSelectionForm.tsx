@@ -1,30 +1,17 @@
-import { forwardRef, useImperativeHandle, useState, type ReactElement } from 'react'
-import NetworkSession from '../../instance/NetworkSession';
-import type SessionRenderingContext from '../../context/SessionRenderingContext';
+import { useContext, type ReactElement } from 'react'
+import { SessionRenderingContextProvider } from './AppForm';
 
-interface ServerSelectionFormProps {
-    context: SessionRenderingContext;
-}
-
-const ServerSelectionForm = forwardRef((
-    { context }: ServerSelectionFormProps,
-    ref
-) => {
-    const [r, forceRefresh] = useState(0);
-
-    useImperativeHandle(ref, () => ({
-        refresh: () => { forceRefresh(r + 1); }
-    }));
-
-
+export default function ServerSelectionForm () {
     let serverListDisplay: Array<ReactElement> = []
-    if (context) {
-        for (let ns of context.sessions) {
+    let ctx = useContext(SessionRenderingContextProvider);
+    
+    if (ctx) {
+        for (let ns of ctx.sessions) {
             let entries = Object.entries(ns.messaging.servers);
             for (let [key, value] of entries)
             {
                 serverListDisplay.push(
-                    <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (context.isCurrentServer(ns, parseInt(key)) ? "is-primary" : "")}>
+                    <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (ctx.isCurrentServer(ns, parseInt(key)) ? "is-primary" : "")}>
                         <div className="pfp" style={{
                             background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                         }}>{value.character}
@@ -43,6 +30,4 @@ const ServerSelectionForm = forwardRef((
         </div>
     </div>
     )
-});
-
-export default ServerSelectionForm;
+}

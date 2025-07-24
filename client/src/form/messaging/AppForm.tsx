@@ -3,6 +3,7 @@ import NetworkSession from '../../instance/NetworkSession';
 import ServerSelectionForm from './ServerSelectionForm';
 import MessageContainerForm from './MessageContainerForm';
 import SessionRenderingContext from '../../context/SessionRenderingContext';
+import NavbarForm from './NavbarForm';
 
 export const SessionRenderingContextProvider = createContext<SessionRenderingContext>(new SessionRenderingContext());
 
@@ -14,10 +15,7 @@ export default function AppForm() {
     const context = useContext(SessionRenderingContextProvider);
     context.refMsg = msgRef
 
-    const ref = React.createRef();
     function refreshPage() { // Need to clean this
-        // @ts-ignore
-        ref.current.refresh();
         forceRefresh(r + 1);
     }
 
@@ -47,11 +45,12 @@ export default function AppForm() {
     }
 
     return (
-    <div className="is-flex">
-        <ServerSelectionForm context={context} ref={ref}/>
         <SessionRenderingContextProvider.Provider value={context}>
-            <MessageContainerForm ref={msgRef} />
+            <NavbarForm />
+            <div className="is-flex">
+                <ServerSelectionForm />
+                <MessageContainerForm ref={msgRef} />
+            </div>
         </SessionRenderingContextProvider.Provider>
-    </div>
     )
 }

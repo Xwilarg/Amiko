@@ -110,7 +110,8 @@ export default class MessagingSession
             id: msg.id,
             username: msg.username,
             color: msg.color,
-            character: msg.character
+            character: msg.character,
+            isAdmin: msg.isAdmin
         }
 
         if (msg.isMe) {
