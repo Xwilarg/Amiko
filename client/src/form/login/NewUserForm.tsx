@@ -3,6 +3,7 @@ export default function NewUserForm() {
     const [error, setError] = useState('');
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [passwordConfirm, setPasswordConfirm] = useState("");
     const [instance, setInstance] = useState<string>(() => {
         const url = new URL(window.location.href);
         var i = url.searchParams.get("instance");
@@ -21,6 +22,11 @@ export default function NewUserForm() {
 
         if (!password) {
             setError("Please enter a password");
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            setError("Your passwords doesn't match")
             return;
         }
 
@@ -69,8 +75,16 @@ export default function NewUserForm() {
             <div className="field">
                 <label className="label">Password</label>
                 <div className="control">
-                    <input className="input" name="password" type="password" 
+                    <input className="input" name="password" type="password"
                     value={password} onChange={(e) => setPassword(e.target.value)}
+                />
+                </div>
+            </div>
+            <div className="field">
+                <label className="label">Confirm your password</label>
+                <div className="control">
+                    <input className="input" name="password-confirm" type="password"
+                    value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)}
                 />
                 </div>
             </div>
