@@ -25,17 +25,17 @@ const MessageContainerForm = forwardRef((
 
     useImperativeHandle(ref, () => ({
         sendMessage: (msg: Message, flag: MessageFlag) => {
-            setRendererMessages([...renderedMessages, { msg: msg, flag: flag }]);
+            setRendererMessages(prev => [...prev, { msg: msg, flag: flag }]);
         },
         clearAllMessages: () => {
             setRendererMessages([]);
         },
         setMessages: (msgs: Array<Message>) => {
             const formatted = msgs.map<ScreenMessage>(x => { return { msg: x, flag: "None" }; })
-            setRendererMessages([...renderedMessages, ...formatted]);
+            setRendererMessages(prev => [...prev, ...formatted]);
         },
         refresh:  () => {
-            setRendererMessages([...renderedMessages]);
+            setRendererMessages(prev => [...prev]);
         }
     }));
     return (

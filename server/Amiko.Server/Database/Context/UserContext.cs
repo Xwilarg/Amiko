@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Amiko.Server.Database.Context;
 
@@ -11,7 +12,7 @@ namespace Amiko.Server.Database.Context;
 /// </summary>
 public class UserContext
 {
-    [Key] public int Id { set; get; }
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] public int Id { set; get; }
 
     /// <summary>
     /// Does the current user have administration right

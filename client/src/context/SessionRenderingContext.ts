@@ -11,6 +11,7 @@ export default class SessionRenderingContext
     currServ: number;
     currChannel: number;
 
+    // Ref pointing to MessageContainerForm.tsx
     refMsg: React.RefObject<unknown> | null
 
     ackId: number;
