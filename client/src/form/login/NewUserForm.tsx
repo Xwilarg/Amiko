@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router';
 export default function NewUserForm() {
     const [error, setError] = useState('');
     const [username, setUsername] = useState("");
@@ -11,6 +12,8 @@ export default function NewUserForm() {
         // @ts-ignore
         return configuration.baseUrl() ?? ""
     });
+    
+    let navigate = useNavigate();
 
     function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
         setError("");
@@ -43,7 +46,7 @@ export default function NewUserForm() {
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
         .then(_ => {
-            window.location.replace(`/`);
+            navigate(`/`);
         })
         .catch((_) => {
             setError("Invalid invitation link");

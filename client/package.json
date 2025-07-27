@@ -2,7 +2,7 @@
   "scripts": {
     "webdev": "vite",
     "webbuild": "vite build",
-    "appbuild": "esbuild src/routes.tsx --bundle --minify --outfile=js/routes.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
+    "appbuild": "esbuild src/routes.tsx --jsx=automatic --bundle --minify --outfile=js/routes.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
     "appstart": "electron-forge start",
     "appmake": "electron-forge make"
   },

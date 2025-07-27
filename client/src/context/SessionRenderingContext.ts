@@ -177,4 +177,8 @@ export default class SessionRenderingContext
     getInvitationLink(onSuccess: (invite: string) => void) {
         this.sessions[this.currInstance].getInvitationLink(onSuccess);
     }
+
+    getCurrentInstance() : string {
+        return this.sessions[this.currInstance].instance;
+    }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type Metadata from '../../model/Metadata';
+import { useNavigate } from 'react-router';
 
 export default function LoginForm() {
     // @ts-ignore
@@ -9,6 +10,8 @@ export default function LoginForm() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
+
+    let navigate = useNavigate();
 
     function checkInstance()
     {
@@ -77,7 +80,7 @@ export default function LoginForm() {
                     // We are connected!
                     // @ts-ignore
                     await filesystem.writeTokenAsync(text, instance);
-                    window.location.replace(`/`);
+                    navigate(`/`);
                 })
                 .catch((_) => {
                     setError("Invalid username/password combination");
@@ -104,7 +107,7 @@ export default function LoginForm() {
                 .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
                 .then(text => {
                     // We generated an invitation token, we redirect to the join page so the admon can create his account
-                    window.location.replace(`/join?token=${text}&instance=${encodeURI(instance)}`);
+                    navigate(`/join?token=${text}&instance=${encodeURI(instance)}`);
                 })
                 .catch((_) => {
                     setError("Invalid admin password");

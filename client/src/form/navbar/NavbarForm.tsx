@@ -30,10 +30,22 @@ export default function NavbarForm() {
             <div className="modal-background"></div>
             <div className="modal-content">
                 <button className="modal-close is-large" aria-label="close" onClick={(e) => {setShownInvitation("")}}></button>
+                <div className="field has-addons">
+                    <div className="control">
+                        <button className="button is-info" disabled={true} style={{
+                            cursor:"default"
+                        }}>
+                            For Instance
+                        </button>
+                    </div>
+                    <div className="control">
+                        <input className="input"type="text" readOnly={true} value={ctx.getCurrentInstance()} />
+                    </div>
+                </div>
                 <div className="field pb-6">
                     <label className="label">Invitation link</label>
                     <div className="control">
-                        <input className="input" name="instance" type="text" readOnly={true} value={shownInvitation} />
+                        <input className="input" type="text" readOnly={true} value={shownInvitation} />
                     </div>
                 </div>
             </div>

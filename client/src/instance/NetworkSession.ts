@@ -64,8 +64,7 @@ export default class NetworkSession
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
         .then(text => {
-            console.log(window.location);
-            onSuccess(`${this.instance}/join?token=${text}&instance=${encodeURI(this.instance)}`);
+            onSuccess(text);
         })
         .catch(async (e) => {
             alert("Invitation creation failed")
