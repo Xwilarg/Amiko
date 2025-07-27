@@ -19,7 +19,7 @@ public class RootController : ControllerBase
     }
 
     [HttpGet()]
-    public IActionResult GetToken()
+    public IActionResult Get()
     {
         return StatusCode(StatusCodes.Status200OK, new InstanceInfo()
         {

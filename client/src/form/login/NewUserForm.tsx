@@ -56,7 +56,7 @@ export default function NewUserForm() {
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
         .then(_ => {
-            navigate(`/`);
+            navigate(`/login`);
         })
         .catch((_) => {
             setError("Invalid invitation link");
