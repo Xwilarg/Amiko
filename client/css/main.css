@@ -85,3 +85,12 @@
 .navbar {
     height: 50px;
 }
+
+/* Bulma style override */
+
+/* Make the close button of modal less far away */
+.modal-close {
+    position: absolute;
+    right: 0;
+    top: 0;
+}

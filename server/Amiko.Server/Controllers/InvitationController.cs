@@ -3,6 +3,7 @@ using Amiko.Server.Database.Dao;
 using Amiko.Server.Database.Queries;
 using Amiko.Server.Models.HttpRequest;
 using Amiko.Server.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amiko.Server.Controllers;
@@ -23,6 +24,14 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("create")]
+    [Authorize]
+    public async Task<IActionResult> CreateInvitation()
+    {
+        var code = InvitationQuery.CreateInvitation(_dbContext, false);
+        return StatusCode(StatusCodes.Status200OK, code);
+    }
+
+    [HttpPost("createAdmin")]
     public async Task<IActionResult> CreateInvitation([FromBody] InvitationCreationInfo creationInfo)
     {
         if (creationInfo.AdminToken == _configManager.GetConfig().AdminKey)

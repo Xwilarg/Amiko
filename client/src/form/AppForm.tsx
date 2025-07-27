@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useRef, useState, type ReactElement } from 'react'
-import NetworkSession from '../../instance/NetworkSession';
-import ServerSelectionForm from './ServerSelectionForm';
-import MessageContainerForm from './MessageContainerForm';
-import SessionRenderingContext from '../../context/SessionRenderingContext';
-import NavbarForm from './NavbarForm';
+import NetworkSession from '../instance/NetworkSession';
+import ServerSelectionForm from './messaging/ServerSelectionForm';
+import MessageContainerForm from './messaging/MessageContainerForm';
+import SessionRenderingContext from '../context/SessionRenderingContext';
+import NavbarForm from './navbar/NavbarForm';
 
 export const SessionRenderingContextProvider = createContext<SessionRenderingContext>(new SessionRenderingContext());
 

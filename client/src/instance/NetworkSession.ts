@@ -55,6 +55,23 @@ export default class NetworkSession
         });
     }
 
+    getInvitationLink(onSuccess: (invite: string) => void) {
+        fetch(`${this.instance}/api/invitation/create`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(text => {
+            console.log(window.location);
+            onSuccess(`${this.instance}/join?token=${text}&instance=${encodeURI(this.instance)}`);
+        })
+        .catch(async (e) => {
+            alert("Invitation creation failed")
+        });
+    }
+
     sendNetworkMessage(msg: any) {
         this.socket?.send(JSON.stringify(msg));
     }

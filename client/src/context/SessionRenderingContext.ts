@@ -96,6 +96,8 @@ export default class SessionRenderingContext
         this.refMsg = null;
     }
 
+    /* MESSAGE PARSING */
+
     // Parse emojis such as :eyes:
     parseEmojis(str: string): string {
         return this.emojiParser.replace_colons(str);
@@ -106,6 +108,8 @@ export default class SessionRenderingContext
         // @ts-ignore
         return marked.parse(str);
     }
+
+    /* USER MANAGEMENT */
 
     // Does current user have admin perms
     amIAdmin() : boolean {
@@ -135,6 +139,8 @@ export default class SessionRenderingContext
         return this.isCurrentServer(s, servId) &&
             this.currChannel == chanId;
     }
+
+    /* MESSAGE MANAGEMENT */
     
     sendMessage(msg: Message, type: MessageFlag) {
         // @ts-ignore
@@ -164,5 +170,11 @@ export default class SessionRenderingContext
     setMessages(msgs: Message[]) {
         // @ts-ignore
         this.refMsg.current.setMessages(msgs);
+    }
+
+    /* NAVBAR */
+
+    getInvitationLink(onSuccess: (invite: string) => void) {
+        this.sessions[this.currInstance].getInvitationLink(onSuccess);
     }
 }

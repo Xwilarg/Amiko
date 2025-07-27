@@ -1,7 +1,7 @@
 import { forwardRef, useContext, type ReactElement } from "react"
 import type Message from "../../model/Message";
 import type { MessageFlag } from "../../model/MessageFlag";
-import { SessionRenderingContextProvider } from "./AppForm";
+import { SessionRenderingContextProvider } from "../AppForm";
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
 

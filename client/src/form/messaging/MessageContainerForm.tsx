@@ -1,8 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import MessageInputForm from "./MessageInputForm";
-import type Message from "../../model/Message";
 import MessageForm from "./MessageForm";
 import type { MessageFlag } from "../../model/MessageFlag";
+import type Message from "../../model/Message";
 
 interface ScreenMessage {
     msg: Message;

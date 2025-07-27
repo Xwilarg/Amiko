@@ -1,5 +1,5 @@
 import { forwardRef, useContext, useImperativeHandle, useState } from 'react'
-import { SessionRenderingContextProvider } from './AppForm';
+import { SessionRenderingContextProvider } from '../AppForm';
 
 
 const MessageInputForm = forwardRef((

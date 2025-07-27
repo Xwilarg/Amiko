@@ -89,7 +89,7 @@ export default function LoginForm() {
                     return;
                 }
 
-                fetch(`${instance}/api/invitation/create`,
+                fetch(`${instance}/api/invitation/createAdmin`,
                 {
                     method: "POST",
                     headers: {
