@@ -157,7 +157,7 @@ export default class NetworkSession
                             intro += "What is next?\n";
                             intro += `- Use the invite button to invite people <span class="material-symbols-outlined">person_add</span>\n`;
                             intro += `- Configure your server how you like it <span class="material-symbols-outlined">admin_panel_settings</span>\n\n`;
-                            intro += "*This message is automatically shown because you are the only user in this server*"
+                            intro += "*This message is automatically shown because you are the only user in this instance*"
                             self.messaging.sendSystemMessage(intro);
                         }
 
