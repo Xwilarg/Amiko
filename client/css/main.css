@@ -94,3 +94,7 @@
     right: 0;
     top: 0;
 }
+
+input[type='submit'] {
+    cursor: pointer;
+}

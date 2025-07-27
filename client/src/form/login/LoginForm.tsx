@@ -172,8 +172,15 @@ export default function LoginForm() {
             </div>
             {instanceLoginForm}
             <p className={"help is-danger" + (error ? "" : " is-hidden")}>{error}</p>
-            <div className="field pt-3">
-                <input className="input is-primary" type="submit" onClick={onLogin} />
+            <div className="field is-grouped ">
+                <p className="control is-expanded">
+                    <input className="input is-primary is-fullwidth" type="submit" onClick={onLogin} />
+                </p>
+                <p className="control is-expanded">
+                    <button className="button is-info is-fullwidth"
+                        onClick={(e) => { navigate(`/join?instance=${encodeURI(instance)}`); }}
+                    >...or join with an invitation link</button>
+                </p>
             </div>
         </div>
     </div>

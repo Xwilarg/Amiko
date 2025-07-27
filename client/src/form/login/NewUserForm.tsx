@@ -12,6 +12,11 @@ export default function NewUserForm() {
         // @ts-ignore
         return configuration.baseUrl() ?? ""
     });
+    const [token, setToken] = useState<string>(() => {
+        const url = new URL(window.location.href);
+        var t = url.searchParams.get("token");
+        return t ?? ""
+    });
     
     let navigate = useNavigate();
 
@@ -28,6 +33,11 @@ export default function NewUserForm() {
             return;
         }
 
+        if (!token) {
+            setError("Invitation token can't be empty");
+            return;
+        }
+
         if (password !== passwordConfirm) {
             setError("Your passwords doesn't match")
             return;
@@ -39,7 +49,7 @@ export default function NewUserForm() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                invitation: new URL(window.location.href).searchParams.get("token"),
+                invitation: token,
                 username: username,
                 password: password
             })
@@ -62,15 +72,23 @@ export default function NewUserForm() {
             <div className="field pb-6 mt-6">
                 <label className="label">Website</label>
                 <div className="control">
-                    <input className="input" name="instance" type="text" disabled={instance != ""}
+                    <input className="input" type="text" disabled={instance != ""}
                         value={instance} onChange={(e) => setInstance(e.target.value)}
+                    />
+                </div>
+            </div>
+            <div className="field pb-6 mt-6">
+                <label className="label">Invitation Token</label>
+                <div className="control">
+                    <input className="input" type="text" 
+                        value={token} onChange={(e) => setToken(e.target.value)}
                     />
                 </div>
             </div>
             <div className="field">
                 <label className="label">Username</label>
                 <div className="control">
-                    <input className="input" name="username" type="text"
+                    <input className="input" type="text"
                         value={username} onChange={(e) => setUsername(e.target.value)}
                     />
                 </div>
@@ -78,7 +96,7 @@ export default function NewUserForm() {
             <div className="field">
                 <label className="label">Password</label>
                 <div className="control">
-                    <input className="input" name="password" type="password"
+                    <input className="input" type="password"
                     value={password} onChange={(e) => setPassword(e.target.value)}
                 />
                 </div>
@@ -86,7 +104,7 @@ export default function NewUserForm() {
             <div className="field">
                 <label className="label">Confirm your password</label>
                 <div className="control">
-                    <input className="input" name="password-confirm" type="password"
+                    <input className="input" type="password"
                     value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)}
                 />
                 </div>
