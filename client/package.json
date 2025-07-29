@@ -30,9 +30,11 @@
     "dompurify": "^3.2.4",
     "electron-squirrel-startup": "^1.0.1",
     "emoji-js": "^3.8.1",
+    "i18next": "^25.3.2",
     "marked": "^15.0.7",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-i18next": "^15.6.1"
   },
   "version": "1.0.0-beta",
   "author": "Xwilarg",

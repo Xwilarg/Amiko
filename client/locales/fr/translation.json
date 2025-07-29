@@ -1,0 +1,63 @@
+{
+    "name": "Français",
+    "iso3166": "fr",
+
+    "socket": {
+        "connecting": "Connection en cours...",
+        "connected": "Connecté au serveur",
+        "closed": "Connection fermée",
+        "error": "Erreur de socket"
+    },
+
+    "intro": {
+        "welcome1": "Bienvenue sur Amiko!",
+        "welcome2": "Et maintenant ?",
+        "welcome3": "Utilise le bouton d'invitation pour rammener tes amis",
+        "welcome4": "Configure ton serveur comme tu l'aimes",
+        "welcome5": "Ce message est affiché automatiquement car tu es le seul utilisateur dans cette instance"
+    },
+
+    "invitation": {
+        "forInstance": "Pour l'instance",
+        "invitationToken": "Token d'invitation",
+
+        "error": "La création d'invitation à échoué"
+    },
+
+    "login": {
+        "welcome": "Bienvenu sur Amiko !",
+        "catchphrase": "Créons ton compte !",
+
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "passwordConfirm": "Confirme ton mot de passe",
+        "adminToken": "Entre ton mot de passe admin (config.json à la racine du backend)",
+        "invitationToken": "Token d'invitation",
+        "website": "Site web",
+
+        "joinInvitation": "...ou rejoint avec un token d'invitation",
+
+        "noInstance": "Aucune instance d'Amiko trouvé à cette addresse",
+        "genericError": "Impossible de se connecter à Amiko",
+
+        "missingInstance": "L'URL d'instance ne peut pas être vide",
+        "missingUsername": "Le nom d'utilisateur ne peut pas être vide",
+        "missingPassword": "Le mot de passe ne peut pas être vide",
+        "missingInvitation": "Le token d'invitation ne peut pas être vide",
+        "missingAdminToken": "Le mot de passe admin ne peut pas être vide",
+        "passwordDontMatch": "Les mots de passe ne correspondent pas",
+
+        "badLogin": "Nom d'utilisateur ou mot de passe incorrect",
+        "badAdminToken": "Mot de passe admin incorrect",
+        "badInvitation": "Le token d'invitation n'est plus valide"
+    },
+
+    "settings": {
+        "server": {
+            "title": "Options du serveur",
+
+            "symbol": "Symbole",
+            "color": "Couleur"
+        }
+    }
+}

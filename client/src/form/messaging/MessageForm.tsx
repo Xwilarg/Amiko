@@ -4,6 +4,7 @@ import { SessionRenderingContextProvider } from "../AppForm";
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
 import type Message from "../../model/Message";
+import { useTranslation } from "react-i18next";
 
 interface MessageFormProps {
     msg: Message;
@@ -16,6 +17,8 @@ const MessageForm = forwardRef((
 ) => {
     let ctx = useContext(SessionRenderingContextProvider);
     let users = msg.authors ? ctx.getUsers(msg.authors!) : []
+    
+    let { t } = useTranslation();
 
     let cssTag = "";
     if (msg.ackId !== null) cssTag = "sending";
@@ -78,12 +81,20 @@ const MessageForm = forwardRef((
     content = ctx.parseEmojis(content);
     content = ctx.parseMarkdown(content);
 
+    let format: Intl.DateTimeFormatOptions = {
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        day: "2-digit"
+    }
+
     return (
     <div className={`container message is-flex-grow-0 ${cssTag}`}>
         <div className="is-flex">
             {pfpNode}
             <div className="message-main">
-                <small className="date">{msg.date.toDateString()}</small>
+                <small className="date">{msg.date.toLocaleDateString(t("iso3166"), format)}</small>
                 <h2 className="subtitle">{users.map(x => x.username).join(", ")}</h2>
                 <p className="content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}></p>
                 <div className="rich-preview is-flex is-hidden"></div>

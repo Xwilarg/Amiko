@@ -9,6 +9,7 @@ using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Amiko.Server.Controllers
 {
@@ -37,6 +38,30 @@ namespace Amiko.Server.Controllers
             _connManager = connManager;
             _msgManager = msgManager;
             _options = options;
+        }
+
+        private async Task BroadcastMessageAsync<T>(int serverId, T prot) where T : BaseMessage
+        {
+            List<Task> tasks = [];
+            lock (_connManager.Sockets)
+            {
+                // Connected users
+                foreach (var s in _connManager.Sockets.Where(x => ServerQuery.CanAccessServer(_dbContext, serverId, x.ClaimId))) // Send the message to every users
+                {
+                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _options));
+                    Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
+                    tasks.Add(t);
+                }
+            }
+            foreach (var t in tasks)
+            {
+                try
+                {
+                    await t;
+                }
+                catch (Exception e)
+                { }
+            }
         }
 
         private async Task ListenInternalAsync(int? claimId, bool isAdmin)
@@ -105,6 +130,17 @@ namespace Amiko.Server.Controllers
                                 // Seen update, we update the db
                                 var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _options);
                                 UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                            }
+                        }
+                        else if (baseMsg.Type == MessageType.ServerInfo)
+                        {
+                            if (claimId != null)
+                            {
+                                var prot = JsonSerializer.Deserialize<ServerUpdate>(Encoding.UTF8.GetString(buffer), _options);
+                                if (ServerQuery.UpdateServer(_dbContext, prot.Id, claimId.Value, prot))
+                                {
+                                    await BroadcastMessageAsync(prot.Id, prot);
+                                }
                             }
                         }
                         else if (baseMsg.Type == MessageType.Message)

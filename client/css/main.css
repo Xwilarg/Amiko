@@ -98,3 +98,12 @@
 input[type='submit'] {
     cursor: pointer;
 }
+
+/* Settings side pannel */
+#settings {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 500px;
+    z-index: 30;
+}

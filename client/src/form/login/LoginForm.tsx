@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type Metadata from '../../model/Metadata';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginForm() {
     // @ts-ignore
@@ -12,6 +13,7 @@ export default function LoginForm() {
     const [error, setError] = useState('');
 
     let navigate = useNavigate();
+    let { t } = useTranslation();
 
     function checkInstance()
     {
@@ -26,11 +28,11 @@ export default function LoginForm() {
             if (configuration.baseUrl() === "")
             {
                 setInstance("");
-                setError("There is no Amiko instance found at this address");
+                setError(t("login.noInstance"));
             }
             else
             {
-                setError("Failed to connect to Amiko");
+                setError(t("login.genericError"));
             }
         });
     }
@@ -48,7 +50,7 @@ export default function LoginForm() {
 
         if (metadata === null) { // Metadata not set, we need to connect to a backend
             if (!instance) {
-                setError("Please enter your Amiko server");
+                setError(t("login.missingInstance"));
                 return;
             }
 
@@ -56,12 +58,12 @@ export default function LoginForm() {
         } else {
             if (metadata.isInit) { // Metadata are set and the instance already have an admin user
                 if (!username) {
-                    setError("Please enter an username");
+                    setError(t("login.missingUsername"));
                     return;
                 }
 
                 if (!password) {
-                    setError("Please enter a password");
+                    setError(t("login.missingPassword"));
                     return;
                 }
 
@@ -83,12 +85,12 @@ export default function LoginForm() {
                     navigate(`/`);
                 })
                 .catch((_) => {
-                    setError("Invalid username/password combination");
+                    setError(t("login.badLogin"));
                 });
 
             } else { // No admin user, we need to create one
                 if (!adminToken) {
-                    setError("Please enter your admin token");
+                    setError(t("login.missingAdminToken"));
                     return;
                 }
 
@@ -110,7 +112,7 @@ export default function LoginForm() {
                     navigate(`/join?token=${text}&instance=${encodeURI(instance)}`);
                 })
                 .catch((_) => {
-                    setError("Invalid admin password");
+                    setError(t("login.badAdminToken"));
                 });
             }
         }
@@ -125,7 +127,7 @@ export default function LoginForm() {
             instanceLoginForm =
             <>
             <div className="field">
-                <label className="label">Username</label>
+                <label className="label">{t("login.username")}</label>
                 <div className="control">
                     <input className="input" name="username" type="text"
                         value={username} onChange={(e) => setUsername(e.target.value)}
@@ -133,7 +135,7 @@ export default function LoginForm() {
                 </div>
             </div>
             <div className="field">
-                <label className="label">Password</label>
+                <label className="label">{t("login.password")}</label>
                 <div className="control">
                     <input className="input" name="password" type="password" 
                     value={password} onChange={(e) => setPassword(e.target.value)}
@@ -146,7 +148,7 @@ export default function LoginForm() {
         {
             instanceLoginForm = 
                 <div className="field">
-                    <label className="label">Enter your admin password (config.json at your backend root)</label>
+                    <label className="label">{t("login.adminToken")}</label>
                     <div className="control">
                         <input className="input" name="password" type="text"
                         value={adminToken} onChange={(e) => setAdminToken(e.target.value)}
@@ -163,7 +165,7 @@ export default function LoginForm() {
         <div className="modal-background"></div>
         <div className="modal-content">
             <div className="field pb-6">
-                <label className="label">Website</label>
+                <label className="label">{t("login.website")}</label>
                 <div className="control">
                     <input className="input" name="instance" type="text" disabled={instance != ""}
                         value={instance} onChange={(e) => setInstance(e.target.value)}
@@ -179,7 +181,7 @@ export default function LoginForm() {
                 <p className="control is-expanded">
                     <button className="button is-info is-fullwidth"
                         onClick={(e) => { navigate(`/join?instance=${encodeURI(instance)}`); }}
-                    >...or join with an invitation link</button>
+                    >{t("login.joinInvitation")}</button>
                 </p>
             </div>
         </div>

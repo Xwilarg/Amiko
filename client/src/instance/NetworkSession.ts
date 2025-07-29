@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type SessionRenderingContext from "../context/SessionRenderingContext";
 import MessagingSession from "./MessagingSession";
 
@@ -14,12 +15,16 @@ export default class NetworkSession
 
     messaging: MessagingSession;
 
+    t: TFunction<"translation", undefined>;
+
     // Allow to refresh the React state
     refreshState: () => void;
     renderingContext: SessionRenderingContext;
 
-    constructor(instance: string, token: string | null, renderingContext: SessionRenderingContext, refreshState: () => void)
+    constructor(instance: string, token: string | null, renderingContext: SessionRenderingContext, refreshState: () => void, t: TFunction<"translation", undefined>)
     {
+        this.t = t;
+
         this.instance = instance;
         this.token = token;
         this.socket = null;
@@ -67,7 +72,7 @@ export default class NetworkSession
             onSuccess(text);
         })
         .catch(async (e) => {
-            alert("Invitation creation failed")
+            alert(this.t("invitation.error"))
         });
     }
 
@@ -84,11 +89,11 @@ export default class NetworkSession
         else this.socket = new WebSocket(endpoint, ["client", this.token!]);
         const self = this;
         
-        self.messaging.sendSystemMessage("Connecting...");
+        self.messaging.sendSystemMessage(this.t("socket.connecting"));
 
         // Connection opened
         this.socket.addEventListener("open", (_) => {
-            self.messaging.sendSystemMessage("Connected to server");
+            self.messaging.sendSystemMessage(this.t("socket.connected"));
             /*
             for (const s of Object.values(this.renderer.servers)) {
                 s.element.classList.remove("inactive");
@@ -104,7 +109,7 @@ export default class NetworkSession
         });
 
         this.socket.addEventListener("close", async (_) => {
-            self.messaging.sendErrorMessage("Connection closed");
+            self.messaging.sendErrorMessage(this.t("socket.closed"));
             /*self.renderer.clearAll();
             for (const s of Object.values(this.renderer.servers)) {
                 s.element.classList.add("inactive");
@@ -116,7 +121,7 @@ export default class NetworkSession
         });
 
         this.socket.addEventListener("error", (e) => {
-            self.messaging.sendErrorMessage("Websocket error");
+            self.messaging.sendErrorMessage(this.t("socket.closed"));
         });
 
         // Listen for messages
@@ -152,11 +157,11 @@ export default class NetworkSession
 
                         if (Object.keys(self.messaging.users).length === 1) {
                             let intro = "";
-                            intro += "# Welcome in Amiko!\n";
-                            intro += "What is next?\n";
-                            intro += `- Use the invite button to invite people <span class="material-symbols-outlined">person_add</span>\n`;
-                            intro += `- Configure your server how you like it <span class="material-symbols-outlined">admin_panel_settings</span>\n\n`;
-                            intro += "*This message is automatically shown because you are the only user in this instance*"
+                            intro += `# ${self.t("intro.welcome1")}\n`;
+                            intro += `${self.t("intro.welcome2")}\n`;
+                            intro += `- ${self.t("intro.welcome3")} <span class="material-symbols-outlined">person_add</span>\n`;
+                            intro += `- ${self.t("intro.welcome4")} <span class="material-symbols-outlined">admin_panel_settings</span>\n\n`;
+                            intro += `*${self.t("intro.welcome5")}*`
                             self.messaging.sendSystemMessage(intro);
                         }
 

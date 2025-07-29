@@ -1,0 +1,63 @@
+{
+    "name": "English",
+    "iso3166": "en",
+
+    "socket": {
+        "connecting": "Connecting...",
+        "connected": "Connected to server",
+        "closed": "Connection closed",
+        "error": "Websocket error"
+    },
+
+    "intro": {
+        "welcome1": "Welcome in Amiko!",
+        "welcome2": "What is next?",
+        "welcome3": "Use the invite button to bring some friends",
+        "welcome4": "Configure your server how you like it",
+        "welcome5": "This message is automatically shown because you are the only user in this instance"
+    },
+
+    "invitation": {
+        "forInstance": "For instance",
+        "invitationToken": "Invitation token",
+
+        "error": "Invitation creation failed"
+    },
+
+    "login": {
+        "welcome": "Welcome to Amiko!",
+        "catchphrase": "Let's create your account!",
+
+        "username": "Username",
+        "password": "Password",
+        "passwordConfirm": "Confirm your password",
+        "adminToken": "Enter your admin password (config.json at your backend root)",
+        "invitationToken": "Invitation token",
+        "website": "Website",
+
+        "joinInvitation": "...or join with an invitation token",
+
+        "noInstance": "There is no Amiko instance found at this address",
+        "genericError": "Failed to connect to Amiko",
+
+        "missingInstance": "Amiko instance URL cannot be empty",
+        "missingUsername": "Username cannot be empty",
+        "missingPassword": "Password cannot be empty",
+        "missingInvitation": "Invitation token cannot be empty",
+        "missingAdminToken": "Admin token cannot be empty",
+        "passwordDontMatch": "Your passwords doesn't match",
+
+        "badLogin": "Invalid username/password combination",
+        "badAdminToken": "Invalid admin token",
+        "badInvitation": "Invalid invitation token"
+    },
+
+    "settings": {
+        "server": {
+            "title": "Server settings",
+
+            "symbol": "Symbol",
+            "color": "Color"
+        }
+    }
+}

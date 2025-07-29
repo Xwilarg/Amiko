@@ -1,6 +1,7 @@
 ﻿using Amiko.Server.Database.Context;
 using Amiko.Server.Models.Response;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 
 namespace Amiko.Server.Database.Dao;
 
@@ -114,6 +115,17 @@ public static class ServerQuery
         ctx.SaveChanges();
 
         return serv.Id;
+    }
+
+    public static bool UpdateServer(SqliteContext ctx, int servId, int claimId, ServerUpdate msg)
+    {
+        var s = GetServer(ctx, servId, claimId, null, ServerIncludes.None);
+
+        if (s == null) return false;
+
+        if (msg.Color != null) s.Color = (msg.Color.R << 16 | (msg.Color.G << 8 | (msg.Color.B;
+        if (msg.Character != null) s.Character = msg.Character;
+        return true;
     }
 
     public static bool CanAccessServer(SqliteContext ctx, ServerContext s, int servId, int? claimId)

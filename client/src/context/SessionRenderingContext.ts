@@ -1,9 +1,11 @@
 import EmojiConvertor from 'emoji-js';
 import { marked } from "marked";
 import NetworkSession from "../instance/NetworkSession";
-import type Message from "../model/Message";
 import type { MessageFlag } from "../model/MessageFlag";
 import type User from "../model/User";
+import type Message from '../model/Message';
+import type Server from '../model/Server';
+import type { TFunction } from 'i18next';
 
 export default class SessionRenderingContext
 {
@@ -123,8 +125,8 @@ export default class SessionRenderingContext
         return ids.map(x => users[x]);
     }
 
-    addInstance(instance: string, token: string, refreshState: () => void) {
-        this.sessions.push(new NetworkSession(instance, token, this, refreshState));
+    addInstance(instance: string, token: string, refreshState: () => void, t: TFunction<"translation", undefined>) {
+        this.sessions.push(new NetworkSession(instance, token, this, refreshState, t));
     }
 
     isCurrentInstance(s: NetworkSession) {
@@ -180,5 +182,9 @@ export default class SessionRenderingContext
 
     getCurrentInstance() : string {
         return this.sessions[this.currInstance].instance;
+    }
+
+    getCurrentServer() : Server {
+        return this.sessions[this.currInstance].messaging.servers[this.currServ];
     }
 }

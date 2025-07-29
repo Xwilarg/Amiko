@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 export default function NewUserForm() {
     const [error, setError] = useState('');
@@ -19,27 +20,28 @@ export default function NewUserForm() {
     });
     
     let navigate = useNavigate();
+    let { t } = useTranslation();
 
     function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
         setError("");
 
         if (!username) {
-            setError("Please enter an username");
+            setError(t("login.missingUsername"));
             return;
         }
 
         if (!password) {
-            setError("Please enter a password");
+            setError(t("login.missingPassword"));
             return;
         }
 
         if (!token) {
-            setError("Invitation token can't be empty");
+            setError(t("login.missingInvitation"));
             return;
         }
 
         if (password !== passwordConfirm) {
-            setError("Your passwords doesn't match")
+            setError(t("login.passwordDontMatch"))
             return;
         }
 
@@ -59,7 +61,7 @@ export default function NewUserForm() {
             navigate(`/login`);
         })
         .catch((_) => {
-            setError("Invalid invitation link");
+            setError(t("login.badInvitation"));
         });
     }
     
@@ -67,10 +69,10 @@ export default function NewUserForm() {
     <div className="modal is-active">
         <div className="modal-background"></div>
         <div className="modal-content">
-            <h2 className="title">Welcome to Amiko!</h2>
-            <h3 className="subtitle">Let's create your account!</h3>
+            <h2 className="title">{t("login.welcome")}</h2>
+            <h3 className="subtitle">{t("login.catchphrase")}</h3>
             <div className="field pb-6 mt-6">
-                <label className="label">Website</label>
+                <label className="label">{t("login.website")}</label>
                 <div className="control">
                     <input className="input" type="text" disabled={instance != ""}
                         value={instance} onChange={(e) => setInstance(e.target.value)}
@@ -78,7 +80,7 @@ export default function NewUserForm() {
                 </div>
             </div>
             <div className="field pb-6 mt-6">
-                <label className="label">Invitation Token</label>
+                <label className="label">{t("login.invitationToken")}</label>
                 <div className="control">
                     <input className="input" type="text" 
                         value={token} onChange={(e) => setToken(e.target.value)}
@@ -86,7 +88,7 @@ export default function NewUserForm() {
                 </div>
             </div>
             <div className="field">
-                <label className="label">Username</label>
+                <label className="label">{t("login.username")}</label>
                 <div className="control">
                     <input className="input" type="text"
                         value={username} onChange={(e) => setUsername(e.target.value)}
@@ -94,7 +96,7 @@ export default function NewUserForm() {
                 </div>
             </div>
             <div className="field">
-                <label className="label">Password</label>
+                <label className="label">{t("login.password")}</label>
                 <div className="control">
                     <input className="input" type="password"
                     value={password} onChange={(e) => setPassword(e.target.value)}
@@ -102,7 +104,7 @@ export default function NewUserForm() {
                 </div>
             </div>
             <div className="field">
-                <label className="label">Confirm your password</label>
+                <label className="label">{t("login.passwordConfirm")}</label>
                 <div className="control">
                     <input className="input" type="password"
                     value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)}
