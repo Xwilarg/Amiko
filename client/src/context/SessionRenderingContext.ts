@@ -6,6 +6,7 @@ import type User from "../model/User";
 import type Message from '../model/Message';
 import type Server from '../model/Server';
 import type { TFunction } from 'i18next';
+import type Color from '../model/Color';
 
 export default class SessionRenderingContext
 {
@@ -23,7 +24,13 @@ export default class SessionRenderingContext
     // Message parsing
     emojiParser: any;
 
+    refreshGlobalState: (() => void) | null;
+    refreshServerDisplayState: (() => void) | null;
+
     constructor() {
+        this.refreshGlobalState = null;
+        this.refreshServerDisplayState = null;
+
         this.emojiParser = new EmojiConvertor();
         this.emojiParser.replace_mode = "unified";
 
@@ -126,7 +133,7 @@ export default class SessionRenderingContext
     }
 
     addInstance(instance: string, token: string, refreshState: () => void, t: TFunction<"translation", undefined>) {
-        this.sessions.push(new NetworkSession(instance, token, this, refreshState, t));
+        this.sessions.push(new NetworkSession(instance, token, this, t));
     }
 
     isCurrentInstance(s: NetworkSession) {
@@ -186,5 +193,16 @@ export default class SessionRenderingContext
 
     getCurrentServer() : Server {
         return this.sessions[this.currInstance].messaging.servers[this.currServ];
+    }
+
+    /* SETTINGS */
+    updateServerInfo(name: string, color: Color, character: string) {
+        return this.sessions[this.currInstance].sendNetworkMessage({
+            type: 8,
+            id: this.currServ,
+            color: color,
+            character: character,
+            name: name
+        });
     }
 }

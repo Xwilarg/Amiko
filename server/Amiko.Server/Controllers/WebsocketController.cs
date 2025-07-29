@@ -132,13 +132,14 @@ namespace Amiko.Server.Controllers
                                 UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
                         }
-                        else if (baseMsg.Type == MessageType.ServerInfo)
+                        else if (baseMsg.Type == MessageType.ServerUpdate)
                         {
                             if (claimId != null)
                             {
                                 var prot = JsonSerializer.Deserialize<ServerUpdate>(Encoding.UTF8.GetString(buffer), _options);
                                 if (ServerQuery.UpdateServer(_dbContext, prot.Id, claimId.Value, prot))
                                 {
+                                    prot.Type = MessageType.ServerUpdate;
                                     await BroadcastMessageAsync(prot.Id, prot);
                                 }
                             }

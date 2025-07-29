@@ -17,11 +17,9 @@ export default class NetworkSession
 
     t: TFunction<"translation", undefined>;
 
-    // Allow to refresh the React state
-    refreshState: () => void;
     renderingContext: SessionRenderingContext;
 
-    constructor(instance: string, token: string | null, renderingContext: SessionRenderingContext, refreshState: () => void, t: TFunction<"translation", undefined>)
+    constructor(instance: string, token: string | null, renderingContext: SessionRenderingContext, t: TFunction<"translation", undefined>)
     {
         this.t = t;
 
@@ -35,7 +33,6 @@ export default class NetworkSession
         this.isConnected = false;
 
         this.messaging = new MessagingSession(this);
-        this.refreshState = refreshState;
 
         if (this.token === null) {
             this.#openNetworkConnection(false);
@@ -165,7 +162,7 @@ export default class NetworkSession
                             self.messaging.sendSystemMessage(intro);
                         }
 
-                        self.refreshState();
+                        self.renderingContext.refreshGlobalState!();
                     }
                     break;
 
@@ -195,6 +192,11 @@ export default class NetworkSession
 
                 case 7: // A message was modified
                     //self.renderer.editMessage(json, renderer_getMessageById(json.id))
+                    break;
+
+                case 8: // A server settings were modified
+                    self.messaging.updateServerInfo(json);
+                        self.renderingContext.refreshServerDisplayState!();
                     break;
             }
         });

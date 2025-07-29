@@ -57,7 +57,8 @@
             "title": "Server settings",
 
             "symbol": "Symbol",
-            "color": "Color"
+            "color": "Color",
+            "name": "Name"
         }
     }
 }

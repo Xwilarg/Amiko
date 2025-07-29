@@ -11,10 +11,30 @@ export default function ServerSettingsForm () {
     const [color, setColor] = useState<Color>(() => {
         return ctx.getCurrentServer().color;
     });
+    const [name, setName] = useState<string>(() => {
+        return ctx.getCurrentServer().name;
+    });
     
     let { t } = useTranslation();
 
+    function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
+        ctx.updateServerInfo(name, color, character);
+    }
+
+    function prependZero(str: string) {
+        if (str.length == 1) return `0${str}`;
+        return str;
+    }
+
     return <>
+        <div className="field">
+            <label className="label">{t("settings.server.name")}</label>
+            <div className="control">
+                <input className="input" type="text"
+                value={name} onChange={(e) => setName(e.target.value)}
+            />
+            </div>
+        </div>
         <div className="field">
             <label className="label">{t("settings.server.symbol")}</label>
             <div className="control">
@@ -27,7 +47,7 @@ export default function ServerSettingsForm () {
             <label className="label">{t("settings.server.color")}</label>
             <div className="control">
                 <input className="input" type="color"
-                value={`#${color.r.toString(16)}${color.g.toString(16)}${color.b.toString(16)}`} onChange={(e) =>
+                value={`#${prependZero(color.r.toString(16))}${prependZero(color.g.toString(16))}${prependZero(color.b.toString(16))}`} onChange={(e) =>
                     setColor({
                         r: parseInt(e.target.value.substring(1, 3), 16),
                         g: parseInt(e.target.value.substring(3, 5), 16),
@@ -36,6 +56,9 @@ export default function ServerSettingsForm () {
                 }
             />
             </div>
+        </div>
+        <div className="field pt-3">
+            <input className="input is-primary" type="submit" onClick={onSubmit} />
         </div>
     </>
 }

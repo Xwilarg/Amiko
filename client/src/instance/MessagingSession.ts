@@ -126,7 +126,11 @@ export default class MessagingSession
     }
 
     updateServerInfo(msg: any) {
-        if (msg.id in this.servers) { // server was already instanciated, TODO: update
+        if (msg.id in this.servers) {
+            let s = this.servers[msg.id];
+            if (msg.color) s.color = msg.color;
+            if (msg.character) s.character = msg.character;
+            if (msg.name) s.name = msg.name;
             return;
         }
 

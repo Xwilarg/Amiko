@@ -42,6 +42,7 @@ export default function AppForm() {
     function refreshPage() { // Need to clean this
         forceRefresh(r + 1);
     }
+    context.refreshGlobalState = refreshPage;
 
     useEffect(() => {
         // @ts-ignore

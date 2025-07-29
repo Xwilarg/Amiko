@@ -57,7 +57,8 @@
             "title": "Options du serveur",
 
             "symbol": "Symbole",
-            "color": "Couleur"
+            "color": "Couleur",
+            "name": "Nom"
         }
     }
 }

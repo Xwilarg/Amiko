@@ -123,8 +123,11 @@ public static class ServerQuery
 
         if (s == null) return false;
 
-        if (msg.Color != null) s.Color = (msg.Color.R << 16 | (msg.Color.G << 8 | (msg.Color.B;
+        if (msg.Color != null) s.Color = msg.Color.R << 16 | msg.Color.G << 8 | msg.Color.B;
         if (msg.Character != null) s.Character = msg.Character;
+        if (msg.Name != null) s.Name = msg.Name;
+
+        ctx.SaveChanges();
         return true;
     }
 
