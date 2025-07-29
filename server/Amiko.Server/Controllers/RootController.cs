@@ -23,7 +23,8 @@ public class RootController : ControllerBase
     {
         return StatusCode(StatusCodes.Status200OK, new InstanceInfo()
         {
-            IsInit = UserQuery.GetUsers(_dbContext, UserIncludes.None).Any()
+            IsInit = UserQuery.GetUsers(_dbContext, UserIncludes.None).Any(),
+            AllowsGuest = ServerQuery.IsAnyServerPublic(_dbContext)
         });
     }
 }

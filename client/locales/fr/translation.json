@@ -36,6 +36,7 @@
         "website": "Site web",
 
         "joinInvitation": "...ou rejoint avec un token d'invitation",
+        "joinGuest": "...ou rejoint en tant qu'invité",
 
         "noInstance": "Aucune instance d'Amiko trouvé à cette addresse",
         "genericError": "Impossible de se connecter à Amiko",
@@ -58,7 +59,12 @@
 
             "symbol": "Symbole",
             "color": "Couleur",
-            "name": "Nom"
+            "name": "Nom",
+            "allowsGuest": "Autoriser les comptes invités",
+            "isEphemeral": "Automatiquement supprimer les anciens messages",
+
+            "allowsGuestExpl": "Si activé, les utilisateurs n'ont pas besoin de créer un compte pour rejoindre ce serveur",
+            "isEphemeralExpl": "Si activé, seulement les 50 derniers messages sont conservés"
         }
     }
 }

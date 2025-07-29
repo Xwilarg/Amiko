@@ -34,8 +34,8 @@ export default class NetworkSession
 
         this.messaging = new MessagingSession(this);
 
-        if (this.token === null) {
-            this.#openNetworkConnection(false);
+        if (this.token === "guest") {
+            this.#openNetworkConnection(true);
         } else {
             this.#checkToken();
         }
@@ -82,7 +82,7 @@ export default class NetworkSession
 
         let endpoint = `${this.instance}/ws/${(isGuest ? "guest" : "")}`;
 
-        if (isGuest) this.socket = new WebSocket(endpoint);
+        if (isGuest) this.socket = new WebSocket(endpoint, ["client", "guest"]);
         else this.socket = new WebSocket(endpoint, ["client", this.token!]);
         const self = this;
         
@@ -152,7 +152,7 @@ export default class NetworkSession
 
                         self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
 
-                        if (Object.keys(self.messaging.users).length === 1) {
+                        if (Object.keys(self.messaging.users).length === 1 && !self.renderingContext.getCurrentServer().allowsGuest) {
                             let intro = "";
                             intro += `# ${self.t("intro.welcome1")}\n`;
                             intro += `${self.t("intro.welcome2")}\n`;
@@ -197,6 +197,7 @@ export default class NetworkSession
                 case 8: // A server settings were modified
                     self.messaging.updateServerInfo(json);
                         self.renderingContext.refreshServerDisplayState!();
+                        self.renderingContext.refreshNavbar!();
                     break;
             }
         });

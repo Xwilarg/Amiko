@@ -183,6 +183,19 @@ export default function LoginForm() {
                         onClick={(e) => { navigate(`/join?instance=${encodeURI(instance)}`); }}
                     >{t("login.joinInvitation")}</button>
                 </p>
+                {
+                    metadata?.allowsGuest ?? false ?
+                    <p className="control is-expanded">
+                        <button className="button is-fullwidth"
+                            onClick={async (e) => {
+                                // @ts-ignore
+                                await filesystem.writeTokenAsync("guest", instance);
+                                 navigate("/"); 
+                            }}
+                        >{t("login.joinGuest")}</button>
+                    </p>
+                    : <></>
+                }
             </div>
         </div>
     </div>

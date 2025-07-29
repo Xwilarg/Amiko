@@ -1,4 +1,4 @@
-import type Channel from "./channel";
+import type Channel from "./Channel";
 import type Color from "./Color";
 
 export default interface Server {
@@ -9,6 +9,6 @@ export default interface Server {
     character: string;
 
     isEphemeral: boolean;
-    allowGuest: boolean;
+    allowsGuest: boolean;
     //notification: Notification;
 }

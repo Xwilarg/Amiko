@@ -126,10 +126,18 @@ public static class ServerQuery
         if (msg.Color != null) s.Color = msg.Color.R << 16 | msg.Color.G << 8 | msg.Color.B;
         if (msg.Character != null) s.Character = msg.Character;
         if (msg.Name != null) s.Name = msg.Name;
+        if (msg.AllowsGuest != null) s.AllowsGuest = msg.AllowsGuest.Value;
+        if (msg.IsEphemeral != null) s.IsEphemeral = msg.IsEphemeral.Value;
+        {
+            
+        }
 
         ctx.SaveChanges();
         return true;
     }
+
+    public static bool IsAnyServerPublic(SqliteContext ctx)
+        => GetServersAsQueryable(ctx, null, ServerIncludes.None).Any(s => s.AllowsGuest && s.IsPublic);
 
     public static bool CanAccessServer(SqliteContext ctx, ServerContext s, int servId, int? claimId)
     {

@@ -26,10 +26,12 @@ export default class SessionRenderingContext
 
     refreshGlobalState: (() => void) | null;
     refreshServerDisplayState: (() => void) | null;
+    refreshNavbar: (() => void) | null;
 
     constructor() {
         this.refreshGlobalState = null;
         this.refreshServerDisplayState = null;
+        this.refreshNavbar = null;
 
         this.emojiParser = new EmojiConvertor();
         this.emojiParser.replace_mode = "unified";
@@ -124,7 +126,8 @@ export default class SessionRenderingContext
     amIAdmin() : boolean {
         if (this.sessions.length === 0) return false;
         const m = this.sessions[this.currInstance].messaging;
-        return m.users[m.mainUser!].isAdmin
+        if (!m.mainUser) return false;
+        return m.users[m.mainUser].isAdmin
     }
 
     getUsers(ids: Array<number>) : Array<User> {
@@ -156,14 +159,14 @@ export default class SessionRenderingContext
         this.refMsg.current.sendMessage(msg, type);
     }
 
-    sendUserMessage(text: string) {
+    sendUserMessage(text: string, authors: number[] | null) {
         const newMsg = {
             type: 2,
             content: text,
             ackId: this.ackId++,
             serverId: this.currServ,
             channelId: this.currChannel,
-            authors: [] // TODO
+            authors: authors // TODO
         }
 
         this.sessions[this.currInstance].sendNetworkMessage(newMsg);
@@ -195,14 +198,26 @@ export default class SessionRenderingContext
         return this.sessions[this.currInstance].messaging.servers[this.currServ];
     }
 
+    getCurrentChannelName() : string {
+        return this.getCurrentServer().channels[this.currChannel].name;
+    }
+
+    getCurrentAuthors() : number[] {
+        let curr = this.sessions[this.currInstance].messaging.mainUser;
+        if (curr) return [ curr ];
+        return [];
+    }
+
     /* SETTINGS */
-    updateServerInfo(name: string, color: Color, character: string) {
+    updateServerInfo(name: string, color: Color, character: string, allowsGuest: boolean, isEphemeral: boolean) {
         return this.sessions[this.currInstance].sendNetworkMessage({
             type: 8,
             id: this.currServ,
             color: color,
             character: character,
-            name: name
+            name: name,
+            allowsGuest: allowsGuest,
+            isEphemeral: isEphemeral
         });
     }
 }

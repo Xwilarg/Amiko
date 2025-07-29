@@ -14,7 +14,7 @@ const MessageInputForm = forwardRef((
 
     function sendMessage() {
         if (message) {
-            ctx.sendUserMessage(message);
+            ctx.sendUserMessage(message, ctx.getCurrentAuthors());
             setMessage("");
         }
     }

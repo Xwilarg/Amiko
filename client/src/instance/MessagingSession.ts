@@ -12,6 +12,7 @@ export default class MessagingSession
     users: { [id: number]: User; };
     // User holding the claim for us
     // This mean even if we are currently speaking as a alt user, this still represent the one holding the password
+    // Can be null if we are a guest account
     mainUser: number | null;
     // All alt users we can speak with
     possibleUsers: number[];
@@ -60,7 +61,7 @@ export default class MessagingSession
         const msgInst: Message = {
             id: null,
             date: new Date(),
-            authors: msg.authors.length > 0 ? msg.authors : [ this.mainUser! ],
+            authors: msg.authors,
             content: msg.content,
             attachments: [],
 
@@ -131,6 +132,8 @@ export default class MessagingSession
             if (msg.color) s.color = msg.color;
             if (msg.character) s.character = msg.character;
             if (msg.name) s.name = msg.name;
+            if (msg.allowsGuest) s.allowsGuest = msg.allowsGuest;
+            if (msg.isEphemeral) s.isEphemeral = msg.isEphemeral;
             return;
         }
 
@@ -142,7 +145,7 @@ export default class MessagingSession
             character: msg.character,
 
             isEphemeral: msg.isEphemeral,
-            allowGuest: msg.allowGuest
+            allowsGuest: msg.allowsGuest
             //notification: null // TODO: Don't forget to uncomment
         };
         this.servers[msg.id] = serverInst;

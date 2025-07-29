@@ -62,7 +62,10 @@ window.filesystem = {
         let websites;
         if (pref === "") websites = [];
         else websites = pref.split(',');
-        websites.push(website);
+
+        if (!websites.includes("website")) {
+            websites.push(website);
+        }
 
         await writePrefAsync("websites", websites.join(','));
         await writePrefAsync(`website-${website}`, token);

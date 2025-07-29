@@ -14,11 +14,17 @@ export default function ServerSettingsForm () {
     const [name, setName] = useState<string>(() => {
         return ctx.getCurrentServer().name;
     });
+    const [allowsGuest, setAllowsGuest] = useState<boolean>(() => {
+        return ctx.getCurrentServer().allowsGuest;
+    });
+    const [isEphemeral, setIsEphemeral] = useState<boolean>(() => {
+        return ctx.getCurrentServer().isEphemeral;
+    });
     
     let { t } = useTranslation();
 
     function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
-        ctx.updateServerInfo(name, color, character);
+        ctx.updateServerInfo(name, color, character, allowsGuest, isEphemeral);
     }
 
     function prependZero(str: string) {
@@ -56,6 +62,26 @@ export default function ServerSettingsForm () {
                 }
             />
             </div>
+        </div>
+        <div className="field">
+            <label className="label">
+                {t("settings.server.allowsGuest")}<br/>
+                <small>{t("settings.server.allowsGuestExpl")}</small>
+            </label>
+            <label className="switch is-rounded">
+                <input type="checkbox" checked={allowsGuest} onChange={(e) => setAllowsGuest(e.target.checked)}/>
+                <span className="check"></span>
+            </label>
+        </div>
+        <div className="field">
+            <label className="label">
+                {t("settings.server.isEphemeral")}<br/>
+                <small>{t("settings.server.isEphemeralExpl")}</small>
+            </label>
+            <label className="switch is-rounded">
+                <input type="checkbox" checked={isEphemeral} onChange={(e) => setIsEphemeral(e.target.checked)}/>
+                <span className="check"></span>
+            </label>
         </div>
         <div className="field pt-3">
             <input className="input is-primary" type="submit" onClick={onSubmit} />

@@ -8,7 +8,7 @@ const SettingsContainerForm = forwardRef((
 ) => {
     const [openSettings, setOpenSettings] = useState<OpenedSettings>("None");
 
-     useImperativeHandle(settingsRef, () => ({
+    useImperativeHandle(settingsRef, () => ({
         openServerSettings() {
             setOpenSettings(openSettings === "Server" ? "None" : "Server");
         }

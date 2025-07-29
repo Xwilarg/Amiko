@@ -86,6 +86,10 @@
     height: 50px;
 }
 
+.small-icon {
+    font-size: 18px;
+}
+
 /* Bulma style override */
 
 /* Make the close button of modal less far away */
@@ -95,8 +99,14 @@
     top: 0;
 }
 
+/* Submit should show pointer cursor to hint we can click */
 input[type='submit'] {
     cursor: pointer;
+}
+
+/* Buttons in navbar don't show border to be cleaner */
+.navbar-item.button {
+    border: none;
 }
 
 /* Settings side pannel */

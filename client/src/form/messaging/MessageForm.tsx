@@ -26,6 +26,7 @@ const MessageForm = forwardRef((
     else if (type == "IsError") cssTag = "error";
 
     let pfpNode: ReactElement;
+    let username;
 
     if (msg.authors !== null) {
         let pfp: string;
@@ -35,11 +36,13 @@ const MessageForm = forwardRef((
         if (users.length === 0) { // Guest mode
             pfp = "G";
             color = { r: 53, g: 53, b: 53 };
+            username = "Guest";
         }
         else if (users.length === 1) { // Only one user, just need to take the current one!
             const u = users[0];
             pfp = u.character;
             color = { r: u.color.r, g: u.color.g, b: u.color.b };
+            username = u.username;
         } else { // There are many users, we do the average of the symbol on their PFP
             let arr: Array<number> = [];
             const characters = users.map(x => x.character).sort((a, b) => b.length - a.length);
@@ -66,6 +69,7 @@ const MessageForm = forwardRef((
                 g: users.map(x => x.color.g).reduce((a, b) => a + b, 0) / users.length,
                 b: users.map(x => x.color.b).reduce((a, b) => a + b, 0) / users.length
             }
+            username = users.map(x => x.username).join(", ");
         }
         pfpNode =
         <div className="pfp" style={{
@@ -73,8 +77,9 @@ const MessageForm = forwardRef((
         }}>{pfp}</div>;
     }
     else
-    {
+    { // TODO: Check when this can happen
         pfpNode = <div className="pfp"></div>
+        username = "Unknown";
     }
 
     let content = msg.content;
@@ -95,7 +100,7 @@ const MessageForm = forwardRef((
             {pfpNode}
             <div className="message-main">
                 <small className="date">{msg.date.toLocaleDateString(t("iso3166"), format)}</small>
-                <h2 className="subtitle">{users.map(x => x.username).join(", ")}</h2>
+                <h2 className="subtitle">{username}</h2>
                 <p className="content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}></p>
                 <div className="rich-preview is-flex is-hidden"></div>
                 <div className="attachment-info is-hidden"></div>

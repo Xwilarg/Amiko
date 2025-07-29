@@ -27,6 +27,7 @@
   "dependencies": {
     "@types/emoji-js": "^3.5.2",
     "bulma": "^1.0.4",
+    "bulma-switch-control": "^1.2.2",
     "dompurify": "^3.2.4",
     "electron-squirrel-startup": "^1.0.1",
     "emoji-js": "^3.8.1",

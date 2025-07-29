@@ -9,6 +9,13 @@ const NavbarForm = forwardRef((
     let ctx = useContext(SessionRenderingContextProvider);
     const [shownInvitation, setShownInvitation] = useState('');
     
+    const [r, forceRefresh] = useState(0);
+
+    function refreshPage() { // Need to clean this
+        forceRefresh(r + 1);
+    }
+    ctx.refreshNavbar = refreshPage;
+
     let { t } = useTranslation();
 
     function onInvite(e: React.MouseEvent<HTMLButtonElement>) {
@@ -20,10 +27,10 @@ const NavbarForm = forwardRef((
     let adminSettings =
         ctx.amIAdmin()
         ? <>
-            <button className="navbar-item" onClick={onInvite}>
+            <button className="navbar-item button" onClick={onInvite}>
                 <span className="material-symbols-outlined">person_add</span>
             </button>
-            <button className="navbar-item" onClick={(e) => {
+            <button className="navbar-item button" onClick={(e) => {
                 // @ts-ignore
                 settingsRef.current.openServerSettings();
             }}>
@@ -58,14 +65,40 @@ const NavbarForm = forwardRef((
         </div>
         : <></>
 
+    let nameDisplay : React.ReactElement;
+    if (ctx.sessions.length > 0) {
+        let serv = ctx.getCurrentServer();
+        nameDisplay =
+        <div className="level is-mobile">
+            <h3 className="subtitle" id="channel-title">{ctx.getCurrentChannelName()}</h3>
+            {
+                serv.allowsGuest ?
+                <>
+                    <span className="material-symbols-outlined small-icon" title={t("settings.server.allowsGuest")}>face</span>
+                </>
+                : <></>
+            }
+            {
+                serv.isEphemeral ?
+                <>
+                    <span className="material-symbols-outlined small-icon" title={t("settings.server.isEphemeral")}>timer</span>
+                </>
+                : <></>
+            }
+        </div>;
+    } else {
+        nameDisplay = <></>
+    }
+
     return (
         <nav className="navbar">
             {invitation}
             <div className="navbar-brand">
                 {adminSettings}
-                <button className="navbar-item">
+                <button className="navbar-item button">
                     <span className="material-symbols-outlined">settings</span>
                 </button>
+                {nameDisplay}
             </div>
         </nav>
     )
