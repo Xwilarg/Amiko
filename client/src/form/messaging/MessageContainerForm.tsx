@@ -18,9 +18,20 @@ const MessageContainerForm = forwardRef((
     // Add a div at the end of the list of message to easily scroll down
     // https://stackoverflow.com/a/52266212
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
+    const containerRef = useRef<null | HTMLDivElement>(null);
+    const container = containerRef.current;
+
+    // Approximate distance with the bottom of the page
+    let dist = 0;
+    if (container) {
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        dist = scrollHeight - scrollTop - clientHeight;
+    }
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (dist < 150) { // If user scrolled back up, we don't scroll down automatically
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
     }, [renderedMessages]);
 
     useImperativeHandle(msgRef, () => ({
@@ -40,7 +51,7 @@ const MessageContainerForm = forwardRef((
     }));
     return (
         <div id="main-screen">
-            <div className="is-flex is-flex-direction-column" id="messages">
+            <div className="is-flex is-flex-direction-column" id="messages" ref={containerRef}>
                 {renderedMessages.map(msg => <MessageForm msg={msg.msg} type={msg.flag} key={msg.msg.id ?? `ack-${msg.msg.ackId}`} />)}
                 <div ref={messagesEndRef} />
             </div>
