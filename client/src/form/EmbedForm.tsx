@@ -5,6 +5,7 @@ import { SessionRenderingContextProvider } from '../context/SessionRenderingCont
 import { initReactI18next, useTranslation } from "react-i18next";
 
 import translationEN from "../../locales/en/translation.json"
+import { useSearchParams } from 'react-router';
 
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
@@ -24,6 +25,7 @@ i18n
 export default function EmbedForm() {
     const [r, forceRefresh] = useState(0);
     
+    const [searchParams, setSearchParams] = useSearchParams();
     const {t} = useTranslation();
 
     const msgRef = React.createRef();
@@ -36,12 +38,10 @@ export default function EmbedForm() {
     context.refreshGlobalState = refreshPage;
 
     useEffect(() => {
+        let website = searchParams.get("website")
         // @ts-ignore
-        filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
-            for (let [key, value] of Object.entries(storedSessions)) {
-                context.addInstance(key, value, t);
-            }
-        });
+        let url = website ? `${configuration.baseUrl()}${website}` : configuration.baseUrl();
+        context.addInstance(url, "guest", t);
     }, [])
 
     return (

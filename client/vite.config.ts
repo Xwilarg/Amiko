@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 const isEmbed = process.env.EMBED === 'true'
 // https://vite.dev/config/
 export default defineConfig({
+    base: './',
     plugins: [react()],
     build: {
         rollupOptions: {

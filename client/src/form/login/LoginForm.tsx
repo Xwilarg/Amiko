@@ -190,7 +190,7 @@ export default function LoginForm() {
                             onClick={async (e) => {
                                 // @ts-ignore
                                 await filesystem.writeTokenAsync("guest", instance);
-                                 navigate("/"); 
+                                navigate("/"); 
                             }}
                         >{t("login.joinGuest")}</button>
                     </p>
