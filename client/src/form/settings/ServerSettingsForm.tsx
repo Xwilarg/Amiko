@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
-import { SessionRenderingContextProvider } from "../AppForm";
 import type Color from "../../model/Color";
 import { useTranslation } from "react-i18next";
+import { SessionRenderingContextProvider } from "../../context/SessionRenderingContext";
 
 export default function ServerSettingsForm () {
     let ctx = useContext(SessionRenderingContextProvider);

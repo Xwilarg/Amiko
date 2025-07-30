@@ -7,6 +7,7 @@ import type Message from '../model/Message';
 import type Server from '../model/Server';
 import type { TFunction } from 'i18next';
 import type Color from '../model/Color';
+import { createContext } from 'react';
 
 export default class SessionRenderingContext
 {
@@ -135,7 +136,7 @@ export default class SessionRenderingContext
         return ids.map(x => users[x]);
     }
 
-    addInstance(instance: string, token: string, refreshState: () => void, t: TFunction<"translation", undefined>) {
+    addInstance(instance: string, token: string, t: TFunction<"translation", undefined>) {
         this.sessions.push(new NetworkSession(instance, token, this, t));
     }
 
@@ -221,3 +222,5 @@ export default class SessionRenderingContext
         });
     }
 }
+
+export const SessionRenderingContextProvider = createContext<SessionRenderingContext>(new SessionRenderingContext());

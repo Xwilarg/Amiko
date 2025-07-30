@@ -1,10 +1,10 @@
 import { forwardRef, useContext, type ReactElement } from "react"
 import type { MessageFlag } from "../../model/MessageFlag";
-import { SessionRenderingContextProvider } from "../AppForm";
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
 import type Message from "../../model/Message";
 import { useTranslation } from "react-i18next";
+import { SessionRenderingContextProvider } from "../../context/SessionRenderingContext";
 
 interface MessageFormProps {
     msg: Message;
@@ -77,9 +77,9 @@ const MessageForm = forwardRef((
         }}>{pfp}</div>;
     }
     else
-    { // TODO: Check when this can happen
+    { // System messages don't have an author
         pfpNode = <div className="pfp"></div>
-        username = "Unknown";
+        username = "";
     }
 
     let content = msg.content;

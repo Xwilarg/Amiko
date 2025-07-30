@@ -1,6 +1,6 @@
 import { forwardRef, useContext, useState } from "react"
-import { SessionRenderingContextProvider } from "../AppForm";
 import { useTranslation } from "react-i18next";
+import { SessionRenderingContextProvider } from "../../context/SessionRenderingContext";
 
 const NavbarForm = forwardRef((
     {},

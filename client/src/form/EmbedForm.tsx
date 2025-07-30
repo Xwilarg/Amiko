@@ -1,10 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import i18n from "i18next";
-import ServerSelectionForm from './messaging/ServerSelectionForm';
 import MessageContainerForm from './messaging/MessageContainerForm';
 import { SessionRenderingContextProvider } from '../context/SessionRenderingContext';
-import NavbarForm from './navbar/NavbarForm';
-import SettingsContainerForm from './settings/SettingsContainerForm';
 import { initReactI18next, useTranslation } from "react-i18next";
 
 import translationEN from "../../locales/en/translation.json"
@@ -24,7 +21,7 @@ i18n
     }
   });
 
-export default function AppForm() {
+export default function EmbedForm() {
     const [r, forceRefresh] = useState(0);
     
     const {t} = useTranslation();
@@ -32,8 +29,6 @@ export default function AppForm() {
     const msgRef = React.createRef();
     const context = useContext(SessionRenderingContextProvider);
     context.refMsg = msgRef
-
-    const settingsRef = React.createRef();
 
     function refreshPage() { // Need to clean this
         forceRefresh(r + 1);
@@ -51,11 +46,8 @@ export default function AppForm() {
 
     return (
         <SessionRenderingContextProvider.Provider value={context}>
-            <NavbarForm ref={settingsRef} />
             <div className="is-flex">
-                <ServerSelectionForm />
                 <MessageContainerForm ref={msgRef} />
-                <SettingsContainerForm ref={settingsRef} />
             </div>
         </SessionRenderingContextProvider.Provider>
     )

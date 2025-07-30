@@ -1,5 +1,5 @@
 import { useContext, useState, type ReactElement } from 'react'
-import { SessionRenderingContextProvider } from '../AppForm';
+import { SessionRenderingContextProvider } from '../../context/SessionRenderingContext';
 
 export default function ServerSelectionForm () {
     let serverListDisplay: Array<ReactElement> = []

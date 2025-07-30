@@ -1,9 +1,12 @@
 Chat software aiming to put the user first
 
+> [!NOTE]
+> I am currently rewriting Amiko code for its V1, some features highlighted below might not be available yet
+
 ## Features
 - Switch account in one click or by prefixing your messages
 - Easily backup your data by exporting a whole channel content to markdown format
-- (More to come...)
+- Embed Amiko in others websites
 
 ## How to try it
 Development is still in progress, and each day the V1 is coming closer!
