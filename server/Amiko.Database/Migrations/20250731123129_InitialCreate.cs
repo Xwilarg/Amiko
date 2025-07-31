@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Amiko.Server.Migrations
+namespace Amiko.Database.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -96,7 +96,7 @@ namespace Amiko.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChannelSeen",
+                name: "ChannelSeenContext",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -108,9 +108,9 @@ namespace Amiko.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChannelSeen", x => x.Id);
+                    table.PrimaryKey("PK_ChannelSeenContext", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ChannelSeen_Users_UserContextId",
+                        name: "FK_ChannelSeenContext_Users_UserContextId",
                         column: x => x.UserContextId,
                         principalTable: "Users",
                         principalColumn: "Id");
@@ -170,8 +170,8 @@ namespace Amiko.Server.Migrations
                 column: "ServerContextId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChannelSeen_UserContextId",
-                table: "ChannelSeen",
+                name: "IX_ChannelSeenContext_UserContextId",
+                table: "ChannelSeenContext",
                 column: "UserContextId");
 
             migrationBuilder.CreateIndex(
@@ -190,7 +190,7 @@ namespace Amiko.Server.Migrations
                 name: "AttachmentContext");
 
             migrationBuilder.DropTable(
-                name: "ChannelSeen");
+                name: "ChannelSeenContext");
 
             migrationBuilder.DropTable(
                 name: "Invitations");

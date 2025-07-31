@@ -77,6 +77,10 @@ export default class NetworkSession
         this.socket?.send(JSON.stringify(msg));
     }
 
+    reconnect() {
+        this.socket?.close();
+    }
+
     #openNetworkConnection(isGuest: boolean) {
         this.renderingContext.clearAllMessages();
 

@@ -1,5 +1,6 @@
-﻿using Amiko.Server.Database.Context;
-using Amiko.Server.Database.Dao;
+﻿using Amiko.Database.Context;
+using Amiko.Database.Dao;
+using Amiko.Database.Queries;
 
 namespace Amiko.Server.Services;
 
@@ -23,7 +24,7 @@ public class MessageManager
         };
 
         var prefix = content.Split(' ')[0].ToLowerInvariant();
-        UserContext? targetUser = UserQuery.GetUserFromPrefix(_dbContext, prefix, claimId, UserIncludes.None);
+        UserDao? targetUser = UserQuery.GetUserFromPrefix(_dbContext, prefix, claimId, UserIncludes.None);
         if (targetUser != null) // We found a valid matching user with the prefix
         {
             retData.Content = content[prefix.Length..].TrimStart(); // We remove the prefix from the message
@@ -52,7 +53,7 @@ public class MessageManager
 
     public class UpdatedContent
     {
-        public List<UserContext>? Authors = [];
+        public List<UserDao>? Authors = [];
         public string Content;
     }
 }

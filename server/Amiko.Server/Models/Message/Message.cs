@@ -1,4 +1,4 @@
-﻿using Amiko.Server.Database.Context;
+﻿using Amiko.Database.Dao;
 
 namespace Amiko.Server.Models.Message;
 
@@ -40,7 +40,7 @@ public class Message : BaseMessage
 
     public AttachmentMessage[] Attachments { set; get; }
 
-    public static Message From(MessageContext m)
+    public static Message From(MessageDao m)
     {
         return new Message()
         {
@@ -56,7 +56,7 @@ public class Message : BaseMessage
         };
     }
 
-    public static IEnumerable<Message> GetOrderedMessages(IEnumerable<MessageContext> m)
+    public static IEnumerable<Message> GetOrderedMessages(IEnumerable<MessageDao> m)
     {
         var msgs = m.Select(From);
         return msgs.OrderBy(x => x.Id);

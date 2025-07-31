@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 export default function NewUserForm() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [error, setError] = useState('');
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -14,8 +15,7 @@ export default function NewUserForm() {
         return configuration.baseUrl() ?? ""
     });
     const [token, setToken] = useState<string>(() => {
-        const url = new URL(window.location.href);
-        var t = url.searchParams.get("token");
+        var t = searchParams.get("token");
         return t ?? ""
     });
     

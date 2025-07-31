@@ -5,6 +5,7 @@ namespace Amiko.Database.Dao;
 public record ServerDao(
     int Id,
     string Name,
+    int Color,
     string Character,
     IEnumerable<ChannelDao> Channels,
     bool IsPublic,
@@ -14,15 +15,7 @@ public record ServerDao(
 {
     internal static ServerDao From(ServerContext ctx)
     {
-        return new(
-            ctx.Id,
-            ctx.Name,
-            ctx.Character,
-            ctx.Channels.Select(ChannelDao.From),
-            ctx.IsPublic,
-            ctx.IsEphemeral,
-            ctx.AllowsGuest
-        );
+        return From(ctx, ctx.Channels.Select(ChannelDao.From));
     }
 
     internal static ServerDao From(ServerContext ctx, IEnumerable<ChannelDao> channels)
@@ -30,6 +23,7 @@ public record ServerDao(
         return new(
             ctx.Id,
             ctx.Name,
+            ctx.Color,
             ctx.Character,
             channels,
             ctx.IsPublic,

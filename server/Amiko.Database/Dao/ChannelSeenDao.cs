@@ -3,9 +3,9 @@
 namespace Amiko.Database.Dao;
 
 public record ChannelSeenDao(
-    int servId,
-    int chanId,
-    long lastSeen
+    int ServId,
+    int ChanId,
+    long LastSeen
 )
 {
     internal static ChannelSeenDao From(ChannelSeenContext ctx)

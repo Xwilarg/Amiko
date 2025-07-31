@@ -63,9 +63,10 @@ window.filesystem = {
         if (pref === "") websites = [];
         else websites = pref.split(',');
 
-        if (!websites.includes("website")) {
-            websites.push(website);
+        if (websites.includes(website)) {
+            websites.splice(websites.indexOf(website), 1); // Remove current token if exists to update it
         }
+        websites.push(website);
 
         await writePrefAsync("websites", websites.join(','));
         await writePrefAsync(`website-${website}`, token);

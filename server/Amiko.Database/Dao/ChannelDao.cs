@@ -11,12 +11,7 @@ public record ChannelDao(
 {
     internal static ChannelDao From(ChannelContext ctx)
     {
-        return new(
-            ctx.Id,
-            ctx.Name,
-            ctx.Description,
-            ctx.Messages.Select(MessageDao.From)
-        );
+        return From(ctx, ctx.Messages);
     }
 
     internal static ChannelDao From(ChannelContext ctx, IEnumerable<MessageContext> messages)

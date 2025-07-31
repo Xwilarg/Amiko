@@ -1,5 +1,5 @@
-using Amiko.Server.Database.Context;
-using Amiko.Server.Database.Dao;
+using Amiko.Database.Context;
+using Amiko.Database.Queries;
 using Amiko.Server.Models;
 using Amiko.Server.Models.Message;
 using Amiko.Server.Services;
@@ -9,7 +9,6 @@ using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Amiko.Server.Controllers
 {
@@ -40,13 +39,13 @@ namespace Amiko.Server.Controllers
             _options = options;
         }
 
-        private async Task BroadcastMessageAsync<T>(int serverId, T prot) where T : BaseMessage
+        private async Task BroadcastMessageAsync<T>(int? serverId, T prot) where T : BaseMessage
         {
             List<Task> tasks = [];
             lock (_connManager.Sockets)
             {
                 // Connected users
-                foreach (var s in _connManager.Sockets.Where(x => ServerQuery.CanAccessServer(_dbContext, serverId, x.ClaimId))) // Send the message to every users
+                foreach (var s in _connManager.Sockets.Where(x => serverId == null || ServerQuery.CanAccessServer(_dbContext, serverId.Value, x.ClaimId))) // Send the message to every users
                 {
                     var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _options));
                     Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -66,6 +65,12 @@ namespace Amiko.Server.Controllers
 
         private async Task ListenInternalAsync(int? claimId, bool isAdmin)
         {
+            var servers = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments);
+            if (claimId == null && (!servers.Any() || !servers.Any(x => x.AllowsGuest)))
+            {
+                return; // Guest account but not server allowing guests
+            }
+
             var client = await HttpContext.WebSockets.AcceptWebSocketAsync("client");
             lock (_connManager.Sockets)
             {
@@ -78,7 +83,7 @@ namespace Amiko.Server.Controllers
             var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerMessage>()
             {
                 Type = MessageType.Array,
-                Data = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments).Select(x => ServerMessage.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
+                Data = servers.Select(x => ServerMessage.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
             }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -137,7 +142,7 @@ namespace Amiko.Server.Controllers
                             if (claimId != null)
                             {
                                 var prot = JsonSerializer.Deserialize<ServerMessage>(Encoding.UTF8.GetString(buffer), _options);
-                                if (ServerQuery.UpdateServer(_dbContext, prot.Id, claimId.Value, prot))
+                                if (ServerQuery.UpdateServer(_dbContext, prot.Id, claimId.Value, prot.Color, prot.Character, prot.Name, prot.AllowsGuest, prot.IsEphemeral))
                                 {
                                     prot.Type = MessageType.ServerInfo;
                                     await BroadcastMessageAsync(prot.Id, prot);
@@ -151,10 +156,10 @@ namespace Amiko.Server.Controllers
                                 var prot = JsonSerializer.Deserialize<UserMessage>(Encoding.UTF8.GetString(buffer), _options);
                                 if (UserQuery.DoesUserFillClaim(_dbContext, claimId.Value, prot.Id))
                                 {
-                                    if (UserQuery.UpdateUser(_dbContext, prot.Id, prot))
+                                    if (UserQuery.UpdateUser(_dbContext, prot.Id, prot.Color, prot.Character, prot.Username))
                                     {
                                         prot.Type = MessageType.UserInfo;
-                                        await BroadcastMessageAsync(prot.Id, prot);
+                                        await BroadcastMessageAsync(null, prot);
                                     }
                                 }
                             }
@@ -196,12 +201,7 @@ namespace Amiko.Server.Controllers
                             _logger.Log(LogLevel.Information, $"Received message of size {updatedData.Content.Length} by {string.Join(", ", updatedData.Authors.Select(x => x.Username))}");
 
                             // Save to db
-                            var finalId = MessageQuery.AddMessage(_dbContext, prot.ServerId, prot.ChannelId, claimId, new()
-                            {
-                                CreationTime = now,
-                                Authors = updatedData.Authors.Select(x => x.Id).ToArray(),
-                                Message = updatedData.Content
-                            });
+                            var finalId = MessageQuery.AddMessage(_dbContext, prot.ServerId, prot.ChannelId, claimId, now, updatedData.Content, updatedData.Authors.Select(x => x.Id).ToArray());
 
                             var authorsIds = updatedData.Authors.Select(x => x.Id).ToArray();
                             bool wereAuthorsUpdated = prot.Authors == null || !Enumerable.SequenceEqual(prot.Authors, authorsIds);

@@ -30,6 +30,7 @@ public static class ServerQuery
                 var chans = s.Channels.Select(x => ChannelDao.From(x, MessageQuery.GetMessages(ctx, s.Id, x.Id, claimId, msgCount, includes)));
                 daos.Add(ServerDao.From(s, chans));
             }
+            return daos;
         }
         return servers.Select(ServerDao.From);
     }

@@ -23,22 +23,23 @@ public static class UserQuery
         return ctx.Users;
     }
 
-    internal static IEnumerable<UserContext> GetUsers(SqliteContext ctx, UserIncludes includes)
+    public static IEnumerable<UserDao> GetUsers(SqliteContext ctx, UserIncludes includes)
     {
         return GetUsersAsQueryable(ctx, includes).Select(UserDao.From);
     }
 
-    internal static IEnumerable<UserContext> GetServerWebhooks(SqliteContext ctx, int servId, UserIncludes includes)
+    public static IEnumerable<UserDao> GetServerWebhooks(SqliteContext ctx, int servId, UserIncludes includes)
     {
-        return GetUsersAsQueryable(ctx, includes).Where(x => x.Webhook != null).AsEnumerable().Where(x => ServerQuery.CanAccessServer(ctx, servId, x.Id));
+        return GetUsersAsQueryable(ctx, includes).Where(x => x.Webhook != null).AsEnumerable().Where(x => ServerQuery.CanAccessServer(ctx, servId, x.Id)).Select(UserDao.From);
     }
 
     /// <summary>
     /// See if prefix given in parameter match a user
     /// </summary>
-    internal static UserContext? GetUserFromPrefix(SqliteContext ctx, string prefix, int claimId, UserIncludes includes)
+    public static UserDao? GetUserFromPrefix(SqliteContext ctx, string prefix, int claimId, UserIncludes includes)
     {
-        return GetUsersAsQueryable(ctx, includes).AsEnumerable().FirstOrDefault(x => x.Prefix == prefix && DoesUserFillClaim(ctx, x.Id, claimId));
+        var u = GetUsersAsQueryable(ctx, includes).AsEnumerable().FirstOrDefault(x => x.Prefix == prefix && DoesUserFillClaim(ctx, x.Id, claimId));
+        return u == null ? null : UserDao.From(u);
     }
 
     internal static UserContext? GetUserInternal(SqliteContext ctx, int id, UserIncludes includes)
@@ -71,7 +72,7 @@ public static class UserQuery
         return null;
     }
 
-    internal static bool UpdateLastSeen(SqliteContext ctx, int servId, int chanId, int claimId, long now)
+    public static bool UpdateLastSeen(SqliteContext ctx, int servId, int chanId, int claimId, long now)
     {
         var s = ServerQuery.GetServerInternal(ctx, servId, claimId, null, ServerIncludes.None);
         if (s == null) return false; // We can't access this server!
@@ -118,7 +119,7 @@ public static class UserQuery
 
 
 
-    internal static bool UpdateUser(SqliteContext ctx, int userId,
+    public static bool UpdateUser(SqliteContext ctx, int userId,
         Color? color, string? character, string? username)
     {
         var u = GetUserInternal(ctx, userId, UserIncludes.None);
@@ -137,7 +138,7 @@ public static class UserQuery
     /// Does the identity given (who the user pretend to be) allowed by current claim
     /// This mean targetted account is either us or an account that depends on us
     /// </summary>
-    internal static bool DoesUserFillClaim(SqliteContext ctx, int claimId, int identity)
+    public static bool DoesUserFillClaim(SqliteContext ctx, int claimId, int identity)
     {
         if (claimId == identity) // User is claim
             return true;

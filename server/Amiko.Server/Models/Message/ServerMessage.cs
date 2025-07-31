@@ -1,4 +1,5 @@
-﻿using Amiko.Server.Database.Context;
+﻿using Amiko.Database;
+using Amiko.Database.Dao;
 
 namespace Amiko.Server.Models.Message;
 
@@ -13,7 +14,7 @@ public class ServerMessage : BaseMessage
     public bool? IsEphemeral { set; get; }
     public bool? AllowsGuest { set; get; }
 
-    public static ServerMessage From(ServerContext s, UserContext? requester)
+    public static ServerMessage From(ServerDao s, UserDao? requester)
     {
         return new()
         {

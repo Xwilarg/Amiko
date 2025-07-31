@@ -1,4 +1,4 @@
-﻿using Amiko.Server.Database.Context;
+﻿using Amiko.Database.Dao;
 
 namespace Amiko.Server.Models.Message;
 
@@ -10,7 +10,7 @@ public class ChannelMessage
     public Message[] Messages { set; get; }
     public long LastSeen { set; get; }
 
-    public static ChannelMessage From(int servId, ChannelContext c, UserContext? user)
+    public static ChannelMessage From(int servId, ChannelDao c, UserDao? user)
     {
         return new ChannelMessage()
         {

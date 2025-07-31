@@ -137,7 +137,12 @@ export default class SessionRenderingContext
     }
 
     addInstance(instance: string, token: string, t: TFunction<"translation", undefined>) {
-        this.sessions.push(new NetworkSession(instance, token, this, t));
+        const s = this.sessions.find(x => x.instance === instance);
+        if (s) {
+            s.reconnect();
+        } else {
+            this.sessions.push(new NetworkSession(instance, token, this, t));
+        }
     }
 
     isCurrentInstance(s: NetworkSession) {

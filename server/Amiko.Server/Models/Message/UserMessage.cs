@@ -1,4 +1,5 @@
-﻿using Amiko.Server.Database.Context;
+﻿using Amiko.Database;
+using Amiko.Database.Dao;
 
 namespace Amiko.Server.Models.Message;
 
@@ -12,7 +13,7 @@ public class UserMessage : BaseMessage
     public Color Color { set; get; }
     public string Character { set; get; }
 
-    public static UserMessage From(UserContext u, int? myRawId)
+    public static UserMessage From(UserDao u, int? myRawId)
     {
         return new UserMessage()
         {

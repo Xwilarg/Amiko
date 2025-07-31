@@ -82,7 +82,7 @@ export default function LoginForm() {
                     // We are connected!
                     // @ts-ignore
                     await filesystem.writeTokenAsync(text, instance);
-                    navigate(`/`);
+                    navigate(`/`); // TODO: sometimes doesn't redirect
                 })
                 .catch((_) => {
                     setError(t("login.badLogin"));
