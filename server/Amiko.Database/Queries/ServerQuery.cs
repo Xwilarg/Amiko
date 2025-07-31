@@ -70,7 +70,7 @@ public static class ServerQuery
         return servers.Where(s => s.IsPublic || allowedServers.Contains(s.Id));
     }
 
-    internal static ServerContext? GetServer(
+    internal static ServerContext? GetServerInternal(
         SqliteContext ctx,
         int servId,
         int? claimId,
@@ -91,6 +91,17 @@ public static class ServerQuery
             }
         }
         return s;
+    }
+
+    public static ServerDao? GetServer(
+        SqliteContext ctx,
+        int servId,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
+    {
+        var s = GetServerInternal(ctx, servId, claimId, msgCount, includes);
+        return s == null ? null : ServerDao.From(s);
     }
 
     internal static ServerContext? GetServerRaw(SqliteContext ctx, int servId)
@@ -119,7 +130,7 @@ public static class ServerQuery
     public static bool UpdateServer(SqliteContext ctx, int servId, int claimId,
         Color? color, string? character, string? name, bool? allowsGuest, bool? isEphemeral)
     {
-        var s = GetServer(ctx, servId, claimId, null, ServerIncludes.None);
+        var s = GetServerInternal(ctx, servId, claimId, null, ServerIncludes.None);
 
         if (s == null) return false;
 
@@ -147,7 +158,7 @@ public static class ServerQuery
 
     public static bool CanAccessServer(SqliteContext ctx, int servId, int? claimId)
     {
-        var s = GetServer(ctx, servId, claimId, null, ServerIncludes.None);
+        var s = GetServerInternal(ctx, servId, claimId, null, ServerIncludes.None);
 
         if (s == null) return false;
 

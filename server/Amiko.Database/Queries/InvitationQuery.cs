@@ -1,20 +1,22 @@
 ﻿using Amiko.Database.Context;
+using Amiko.Database.Dao;
 
 namespace Amiko.Database.Queries
 {
     public class InvitationQuery
     {
         /// <returns>null mean the message was not found, else return a potentially empty array</returns>
-        public static InvitationContext? GetInvitation(
+        public static InvitationDao? GetInvitation(
             SqliteContext ctx,
             string id)
         {
-            return ctx.Invitations.FirstOrDefault(x =>  x.Id == id);
+            var i = ctx.Invitations.FirstOrDefault(x =>  x.Id == id);
+            return i == null ? null : InvitationDao.From(i);
         }
 
         public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password)
         {
-            if (UserQuery.GetUser(ctx, name, UserIncludes.None) != null) return false;
+            if (UserQuery.GetUserInternal(ctx, name, UserIncludes.None) != null) return false;
 
             var invite = ctx.Invitations.FirstOrDefault(x => x.Id == invitation);
             if (invite == null) return false;

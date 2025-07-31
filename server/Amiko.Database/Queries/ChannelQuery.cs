@@ -5,6 +5,18 @@ namespace Amiko.Database.Queries;
 
 public static class ChannelQuery
 {
+    internal static ChannelContext? GetChannelInternal(
+        SqliteContext ctx,
+        int servId,
+        int chanId,
+        int? claimId,
+        int? msgCount,
+        ServerIncludes includes)
+    {
+        var s = ServerQuery.GetServerInternal(ctx, servId, claimId, msgCount, includes);
+        return s?.Channels?.FirstOrDefault(x => x.Id == chanId);
+    }
+
     public static ChannelDao? GetChannel(
         SqliteContext ctx,
         int servId,
@@ -13,8 +25,8 @@ public static class ChannelQuery
         int? msgCount,
         ServerIncludes includes)
     {
-        var s = ServerQuery.GetServer(ctx, servId, claimId, msgCount, includes);
-        return s?.Channels?.FirstOrDefault(x => x.Id == chanId);
+        var c = GetChannelInternal(ctx, servId, chanId, claimId, msgCount, includes);
+        return c == null ? null : ChannelDao.From(c);
     }
 
     public static int AddChannel(SqliteContext ctx, int servId, string name)

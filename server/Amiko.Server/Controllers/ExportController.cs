@@ -1,5 +1,5 @@
-using Amiko.Server.Database.Context;
-using Amiko.Server.Database.Dao;
+using Amiko.Database.Context;
+using Amiko.Database.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;

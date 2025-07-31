@@ -1,5 +1,5 @@
-using Amiko.Server.Database.Context;
-using Amiko.Server.Database.Queries;
+using Amiko.Database.Context;
+using Amiko.Database.Queries;
 using Amiko.Server.Models.Message;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;

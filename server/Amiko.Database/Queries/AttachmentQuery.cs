@@ -1,11 +1,12 @@
 ﻿using Amiko.Database.Context;
+using Amiko.Database.Dao;
 
 namespace Amiko.Database.Queries
 {
     public class AttachmentQuery
     {
         /// <returns>null mean the message was not found, else return a potentially empty array</returns>
-        public static IEnumerable<AttachmentContext>? GetAttachment(
+        public static IEnumerable<AttachmentDao> GetAttachment(
             SqliteContext ctx,
             int servId,
             int chanId,
@@ -13,7 +14,8 @@ namespace Amiko.Database.Queries
             int? claimId)
         {
             var m = MessageQuery.GetMessage(ctx, servId, chanId, msgId, claimId, null, ServerIncludes.IncludesAttachments);
-            return m?.Attachments;
+            if (m == null) return [];
+            return m.Attachments.Select(AttachmentDao.From);
         }
 
         public static int? AddAttachment(
