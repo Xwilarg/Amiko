@@ -65,6 +65,13 @@
 
             "allowsGuestExpl": "If enabled, users don't need to create an account to join this server",
             "isEphemeralExpl": "If enabled, only the lasts 50 messages are kept"
+        },
+        "user": {
+            "title": "User settings",
+
+            "symbol": "Symbol",
+            "color": "Color",
+            "username": "Username"
         }
     }
 }

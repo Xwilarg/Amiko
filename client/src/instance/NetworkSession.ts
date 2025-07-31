@@ -190,14 +190,19 @@ export default class NetworkSession
                     self.renderingContext.refMsg.current.refresh();
                     break;
 
-                case 7: // A message was modified
-                    //self.renderer.editMessage(json, renderer_getMessageById(json.id))
+                case 4: // A server settings were modified
+                    self.messaging.updateServerInfo(json);
+                    self.renderingContext.refreshServerDisplayState!();
+                    self.renderingContext.refreshNavbar!();
                     break;
 
-                case 8: // A server settings were modified
-                    self.messaging.updateServerInfo(json);
-                        self.renderingContext.refreshServerDisplayState!();
-                        self.renderingContext.refreshNavbar!();
+                case 5: // A server settings were modified
+                    self.messaging.updateUserInfo(json);
+                    self.renderingContext.refreshGlobalState!();
+                    break;
+
+                case 7: // A message was modified
+                    //self.renderer.editMessage(json, renderer_getMessageById(json.id))
                     break;
             }
         });

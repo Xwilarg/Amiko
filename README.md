@@ -50,8 +50,9 @@ Go in the `client/` folder and run `npm i`
 #### Web
 - If you want to make a build, then run `npm run webbuild`
 - If you want to run the debug version of the app directly, run `npm run webdev`
+- If you want to make a build to use the website in an embed, run `npm run embedbuild`
 
 #### Desktop
-- Run `npm run appbuild`
-- If you want to make a build, then run `npm run appmake`
-- If you want to run the debug version of the app directly, run `npm run appstart`
+- Run `npm run appprep`
+- If you want to make a build, then run `npm run appbuild`
+- If you want to run the debug version of the app directly, run `npm run appdev`

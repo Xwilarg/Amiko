@@ -24,21 +24,6 @@ const NavbarForm = forwardRef((
         })
     }
 
-    let adminSettings =
-        ctx.amIAdmin()
-        ? <>
-            <button className="navbar-item button" onClick={onInvite}>
-                <span className="material-symbols-outlined">person_add</span>
-            </button>
-            <button className="navbar-item button" onClick={(e) => {
-                // @ts-ignore
-                settingsRef.current.openServerSettings();
-            }}>
-                <span className="material-symbols-outlined">admin_panel_settings</span>
-            </button>
-        </>
-        : <></>
-
     let invitation = 
         shownInvitation ?
         <div className="modal is-active">
@@ -65,7 +50,23 @@ const NavbarForm = forwardRef((
         </div>
         : <></>
 
+    let adminSettings =
+        ctx.amIAdmin()
+        ? <>
+            <button className="navbar-item button" onClick={onInvite}>
+                <span className="material-symbols-outlined">person_add</span>
+            </button>
+            <button className="navbar-item button" onClick={(e) => {
+                // @ts-ignore
+                settingsRef.current.openServerSettings();
+            }}>
+                <span className="material-symbols-outlined">admin_panel_settings</span>
+            </button>
+        </>
+        : <></>
+
     let nameDisplay : React.ReactElement;
+    let notGuest : React.ReactElement;
     if (ctx.sessions.length > 0) {
         let serv = ctx.getCurrentServer();
         nameDisplay =
@@ -86,8 +87,18 @@ const NavbarForm = forwardRef((
                 : <></>
             }
         </div>;
+
+        notGuest = !ctx.isCurrentUserGuest() ?
+            <button className="navbar-item button" onClick={(e) => {
+                // @ts-ignore
+                settingsRef.current.openUserSettings();
+            }}>
+                <span className="material-symbols-outlined">account_circle</span>
+            </button>
+        : <></>
     } else {
         nameDisplay = <></>
+        notGuest = <></>
     }
 
     return (
@@ -95,9 +106,7 @@ const NavbarForm = forwardRef((
             {invitation}
             <div className="navbar-brand">
                 {adminSettings}
-                <button className="navbar-item button">
-                    <span className="material-symbols-outlined">settings</span>
-                </button>
+                {notGuest}
                 {nameDisplay}
             </div>
         </nav>

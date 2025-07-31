@@ -107,6 +107,14 @@ export default class MessagingSession
     }
 
     updateUserInfo(msg: any) {
+        if (msg.id in this.users) {
+            let u = this.users[msg.id];
+            if (msg.color !== null) u.color = msg.color;
+            if (msg.character !== null) u.character = msg.character;
+            if (msg.username !== null) u.username = msg.username;
+            return;
+        }
+
         this.users[msg.id] = {
             id: msg.id,
             username: msg.username,
@@ -129,11 +137,11 @@ export default class MessagingSession
     updateServerInfo(msg: any) {
         if (msg.id in this.servers) {
             let s = this.servers[msg.id];
-            if (msg.color) s.color = msg.color;
-            if (msg.character) s.character = msg.character;
-            if (msg.name) s.name = msg.name;
-            if (msg.allowsGuest) s.allowsGuest = msg.allowsGuest;
-            if (msg.isEphemeral) s.isEphemeral = msg.isEphemeral;
+            if (msg.color !== null) s.color = msg.color;
+            if (msg.character !== null) s.character = msg.character;
+            if (msg.name !== null) s.name = msg.name;
+            if (msg.allowsGuest !== null) s.allowsGuest = msg.allowsGuest;
+            if (msg.isEphemeral !== null) s.isEphemeral = msg.isEphemeral;
             return;
         }
 

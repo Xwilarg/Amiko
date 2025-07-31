@@ -1,7 +1,7 @@
 using Amiko.Server.Database.Context;
 using Amiko.Server.Database.Dao;
 using Amiko.Server.Models;
-using Amiko.Server.Models.Response;
+using Amiko.Server.Models.Message;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,18 +75,18 @@ namespace Amiko.Server.Controllers
             // First connection from user!
             _logger.Log(LogLevel.Information, $"New client connected ({claimId})");
             // Send information about all servers existing
-            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfo>()
+            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerMessage>()
             {
                 Type = MessageType.Array,
-                Data = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments).Select(x => ServerInfo.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
+                Data = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments).Select(x => ServerMessage.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
             }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
             // Send information about all users existing
-            bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfo>()
+            bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserMessage>()
             {
                 Type = MessageType.Array,
-                Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserInfo.From(x, claimId)).ToArray()
+                Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserMessage.From(x, claimId)).ToArray()
             }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -128,19 +128,34 @@ namespace Amiko.Server.Controllers
                             if (claimId != null)
                             {
                                 // Seen update, we update the db
-                                var prot = JsonSerializer.Deserialize<SeenUpdate>(Encoding.UTF8.GetString(buffer), _options);
+                                var prot = JsonSerializer.Deserialize<SeenUpdateMessage>(Encoding.UTF8.GetString(buffer), _options);
                                 UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
                         }
-                        else if (baseMsg.Type == MessageType.ServerUpdate)
+                        else if (baseMsg.Type == MessageType.ServerInfo)
                         {
                             if (claimId != null)
                             {
-                                var prot = JsonSerializer.Deserialize<ServerUpdate>(Encoding.UTF8.GetString(buffer), _options);
+                                var prot = JsonSerializer.Deserialize<ServerMessage>(Encoding.UTF8.GetString(buffer), _options);
                                 if (ServerQuery.UpdateServer(_dbContext, prot.Id, claimId.Value, prot))
                                 {
-                                    prot.Type = MessageType.ServerUpdate;
+                                    prot.Type = MessageType.ServerInfo;
                                     await BroadcastMessageAsync(prot.Id, prot);
+                                }
+                            }
+                        }
+                        else if (baseMsg.Type == MessageType.UserInfo)
+                        {
+                            if (claimId != null)
+                            {
+                                var prot = JsonSerializer.Deserialize<UserMessage>(Encoding.UTF8.GetString(buffer), _options);
+                                if (UserQuery.DoesUserFillClaim(_dbContext, claimId.Value, prot.Id))
+                                {
+                                    if (UserQuery.UpdateUser(_dbContext, prot.Id, prot))
+                                    {
+                                        prot.Type = MessageType.UserInfo;
+                                        await BroadcastMessageAsync(prot.Id, prot);
+                                    }
                                 }
                             }
                         }
@@ -168,7 +183,7 @@ namespace Amiko.Server.Controllers
 
                             if (updatedData == null)
                             {
-                                var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
+                                var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new AcknowledgeMessage()
                                 {
                                     Type = MessageType.Acknowledge,
                                     AckId = prot.AckId,
@@ -212,7 +227,7 @@ namespace Amiko.Server.Controllers
                                     tasks.Add(t);
                                 }
                                 { // Send an acknowledgment to the user that sent it
-                                    var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Acknowledge()
+                                    var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new AcknowledgeMessage()
                                     {
                                         Type = MessageType.Acknowledge,
                                         AckId = prot.AckId,

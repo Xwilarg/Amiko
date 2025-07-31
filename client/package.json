@@ -3,9 +3,9 @@
     "webdev": "vite",
     "webbuild": "vite build",
     "embedbuild": "cross-env EMBED=true vite build",
-    "appbuild": "esbuild src/routes.tsx --jsx=automatic --bundle --minify --outfile=js/routes.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
-    "appstart": "electron-forge start",
-    "appmake": "electron-forge make"
+    "appprep": "esbuild src/routes.tsx --jsx=automatic --bundle --minify --outfile=js/routes.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
+    "appdev": "electron-forge start",
+    "appbuild": "electron-forge make"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.6.0",

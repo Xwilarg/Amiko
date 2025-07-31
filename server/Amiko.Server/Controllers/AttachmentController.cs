@@ -1,6 +1,6 @@
 using Amiko.Server.Database.Context;
 using Amiko.Server.Database.Queries;
-using Amiko.Server.Models.Response;
+using Amiko.Server.Models.Message;
 using Amiko.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -93,7 +93,7 @@ public class AttachmentController : ControllerBase
             return StatusCode(StatusCodes.Status403Forbidden);
         }
 
-        await _connManager.PropagateAttachment(msgId, [ new AttachmentInfo() { Id = id.Value, Name = files[0].FileName } ]);
+        await _connManager.PropagateAttachment(msgId, [ new AttachmentMessage() { Id = id.Value, Name = files[0].FileName } ]);
 
         return StatusCode(StatusCodes.Status204NoContent);
     }

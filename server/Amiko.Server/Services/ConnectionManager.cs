@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text;
-using Amiko.Server.Models.Response;
+using Amiko.Server.Models.Message;
 
 namespace Amiko.Server.Services;
 
@@ -18,7 +18,7 @@ public class ConnectionManager
     public List<UserSocket> Sockets { get; } = [];
     private JsonSerializerOptions _options;
 
-    public async Task PropagateAttachment(int msgId, AttachmentInfo[] attachments)
+    public async Task PropagateAttachment(int msgId, AttachmentMessage[] attachments)
     {
         List<Task> tasks = [];
         lock (Sockets)

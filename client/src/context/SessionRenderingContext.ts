@@ -209,16 +209,35 @@ export default class SessionRenderingContext
         return [];
     }
 
+    getCurrentClaimUser(): User {
+        let m = this.sessions[this.currInstance].messaging;
+        return m.users[m.mainUser!];
+    }
+
+    isCurrentUserGuest(): boolean {
+        return this.sessions[this.currInstance].messaging.mainUser === null;
+    }
+
     /* SETTINGS */
     updateServerInfo(name: string, color: Color, character: string, allowsGuest: boolean, isEphemeral: boolean) {
         return this.sessions[this.currInstance].sendNetworkMessage({
-            type: 8,
+            type: 4,
             id: this.currServ,
             color: color,
             character: character,
             name: name,
             allowsGuest: allowsGuest,
             isEphemeral: isEphemeral
+        });
+    }
+
+    updateUserInfo(username: string, color: Color, character: string) {
+        return this.sessions[this.currInstance].sendNetworkMessage({
+            type: 5,
+            id: this.sessions[this.currInstance].messaging.mainUser, // Handle alters
+            color: color,
+            character: character,
+            username: username
         });
     }
 }

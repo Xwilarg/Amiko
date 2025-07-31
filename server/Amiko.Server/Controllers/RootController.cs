@@ -21,7 +21,7 @@ public class RootController : ControllerBase
     [HttpGet()]
     public IActionResult Get()
     {
-        return StatusCode(StatusCodes.Status200OK, new InstanceInfo()
+        return StatusCode(StatusCodes.Status200OK, new InstanceResponse()
         {
             IsInit = UserQuery.GetUsers(_dbContext, UserIncludes.None).Any(),
             AllowsGuest = ServerQuery.IsAnyServerPublic(_dbContext)

@@ -32,7 +32,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("createAdmin")]
-    public async Task<IActionResult> CreateInvitation([FromBody] InvitationCreationInfo creationInfo)
+    public async Task<IActionResult> CreateInvitation([FromBody] InvitationCreationRequest creationInfo)
     {
         if (creationInfo.AdminToken == _configManager.GetConfig().AdminKey)
         {
@@ -43,7 +43,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("createUser")]
-    public async Task<IActionResult> CreateUser([FromBody] UserCreationInfo creationInfo)
+    public async Task<IActionResult> CreateUser([FromBody] UserCreationRequest creationInfo)
     {
         var isFirstUser = InvitationQuery.GetInvitation(_dbContext, creationInfo.Invitation).IsAdmin && !UserQuery.GetUsers(_dbContext, UserIncludes.None).Any();
 

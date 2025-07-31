@@ -25,7 +25,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("token")]
-    public IActionResult GetToken([FromBody] UserLogin loginData)
+    public IActionResult GetToken([FromBody] UserLoginRequest loginData)
     {
         var user = UserQuery.GetUserFromPassword(_dbContext, loginData.Username, loginData.Password);
 
