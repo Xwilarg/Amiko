@@ -43,7 +43,7 @@ export default function LoginForm() {
         }
     }, []);
 
-    function onLogin(e: React.MouseEvent<HTMLInputElement>) {
+    async function onLogin(e: React.MouseEvent<HTMLInputElement>) {
         e.preventDefault();
 
         setError(""); // Clear error message
@@ -67,7 +67,7 @@ export default function LoginForm() {
                     return;
                 }
 
-                fetch(`${instance}/api/auth/token`, {
+                const res = await fetch(`${instance}/api/auth/token`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -76,17 +76,15 @@ export default function LoginForm() {
                         username: username,
                         password: password
                     })
-                })
-                .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
-                .then(async text => {
+                });
+                if (res.ok) {
                     // We are connected!
                     // @ts-ignore
-                    await filesystem.writeTokenAsync(text, instance);
-                    navigate(`/`); // TODO: sometimes doesn't redirect
-                })
-                .catch((_) => {
+                    await filesystem.writeTokenAsync(await res.text(), instance);
+                    navigate(`/`);
+                } else {
                     setError(t("login.badLogin"));
-                });
+                }
 
             } else { // No admin user, we need to create one
                 if (!adminToken) {
@@ -94,7 +92,7 @@ export default function LoginForm() {
                     return;
                 }
 
-                fetch(`${instance}/api/invitation/createAdmin`,
+                const res = await fetch(`${instance}/api/invitation/createAdmin`,
                 {
                     method: "POST",
                     headers: {
@@ -104,16 +102,13 @@ export default function LoginForm() {
                         adminToken: adminToken,
                         isAdmin: true
                     })
-                }
-                )
-                .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
-                .then(text => {
-                    // We generated an invitation token, we redirect to the join page so the admon can create his account
-                    navigate(`/join?token=${text}&instance=${encodeURI(instance)}`);
                 })
-                .catch((_) => {
+                if (res.ok) {
+                    // We generated an invitation token, we redirect to the join page so the admon can create his account
+                    navigate(`/join?token=${await res.text()}&instance=${encodeURI(instance)}`);
+                } else {
                     setError(t("login.badAdminToken"));
-                });
+                }
             }
         }
     }

@@ -22,7 +22,7 @@ export default function NewUserForm() {
     let navigate = useNavigate();
     let { t } = useTranslation();
 
-    function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
+    async function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
         setError("");
 
         if (!username) {
@@ -45,7 +45,7 @@ export default function NewUserForm() {
             return;
         }
 
-        fetch(`${instance}/api/invitation/createUser`, {
+        const res = await fetch(`${instance}/api/invitation/createUser`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -56,13 +56,11 @@ export default function NewUserForm() {
                 password: password
             })
         })
-        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
-        .then(_ => {
+        if (res.ok) {
             navigate(`/login`);
-        })
-        .catch((_) => {
+        } else {
             setError(t("login.badInvitation"));
-        });
+        }
     }
     
     return (
