@@ -24,7 +24,7 @@ jobs:
     - name: Create release
       run: dotnet publish -c Release -r linux-x64
     - name: Generate database
-      working-directory: ./server/Amiko.Server
+      working-directory: ./server/Amiko.Database
       run: dotnet ef database update
 
     - uses: actions/upload-artifact@v4
@@ -49,8 +49,10 @@ jobs:
         cache-dependency-path: 'client/package-lock.json'
     - name: Install JS dependencies
       run: npm i
+    - name: Prepare scripts
+      run: npm run appprep
     - name: Make executable
-      run: npm run appmake
+      run: npm run appbuild
 
     - uses: actions/upload-artifact@v4
       with:
