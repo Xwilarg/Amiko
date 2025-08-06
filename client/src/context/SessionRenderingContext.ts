@@ -261,8 +261,6 @@ export default class SessionRenderingContext
     async setDisplayModeAsync(mode: DisplayMode) {
         // @ts-ignore
         await filesystem.writePrefAsync("displayMode", mode);
-
-        this.refreshGlobalState?.();
     }
 }
 

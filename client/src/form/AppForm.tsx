@@ -44,6 +44,13 @@ export default function AppForm() {
         // We need to get current display mode to know how we render things
         context.getDisplayModeAsync().then((displayMode: DisplayMode) => {
             context.displayMode = displayMode;
+            if (context.displayMode === "Default") {
+                // @ts-ignore
+                import("../../css/options/regular.css");
+            } else if (context.displayMode === "Minimalist") {
+                // @ts-ignore
+                import("../../css/options/minimalist.css");
+            }
 
             // Read token
             // @ts-ignore
@@ -55,12 +62,6 @@ export default function AppForm() {
         })
 
     }, [])
-
-    if (context.displayMode === "Default") {
-        import("../../css/options/regular.css");
-    } else if (context.displayMode === "Minimalist") {
-        require("../../css/options/minimalist.css");
-    }
 
     return (
         <SessionRenderingContextProvider.Provider value={context}>

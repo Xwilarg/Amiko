@@ -76,6 +76,9 @@
         "general": {
             "title": "General settings",
 
+            "refreshNeeded": "Some of the changes needs the page to be refreshed",
+            "refresh": "Refresh",
+
             "display": {
                 "title": "Display mode",
                 "default": "Default",

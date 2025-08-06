@@ -16,3 +16,11 @@
     width: 100px;
     flex-shrink: 0;
 }
+
+.message > .is-flex {
+    align-items: center;
+}
+
+.message .pfp {
+    margin-top: 0;
+}
