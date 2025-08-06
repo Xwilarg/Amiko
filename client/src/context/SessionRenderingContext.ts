@@ -125,6 +125,14 @@ export default class SessionRenderingContext
         return marked.parse(str);
     }
 
+    sendWarning(text: string) {
+        this.sessions[this.currInstance].messaging.sendSystemMessage(text);
+    }
+
+    sendError(text: string) {
+        this.sessions[this.currInstance].messaging.sendErrorMessage(text);
+    }
+
     /* USER MANAGEMENT */
 
     // Does current user have admin perms
@@ -248,6 +256,27 @@ export default class SessionRenderingContext
             character: character,
             username: username
         });
+    }
+
+    downloadExport() {
+        fetch(`${this.getCurrentInstance()}/api/export/${this.currServ}/${this.currChannel}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.sessions[this.currInstance].token}`
+            }
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(text => {
+            var e = document.createElement('a');
+            // https://stackoverflow.com/questions/65050679/javascript-a-simple-way-to-save-a-text-file/73775602#73775602
+            e.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            e.setAttribute('download', `export-${this.getCurrentChannelName()}-${new Date().toDateString()}.md`);
+            e.style.display = 'none';
+            document.body.appendChild(e);
+            e.click();
+            document.body.removeChild(e);
+        })
+        .catch((err) => { this.sendError(`Export failed: ${err}`); });
     }
 
     /* User preferences */

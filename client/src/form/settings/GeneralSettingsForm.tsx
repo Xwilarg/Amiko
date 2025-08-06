@@ -37,7 +37,19 @@ export default function GeneralSettingsForm () {
                     </select>
                 </div>
             </div>
-            {refreshChanges}
         </div>
+        <div className="field">
+            <label className="label">{t("settings.general.exportTitle")}</label>
+            <div className="control">
+                <button className="button" onClick={(e) => {
+                    if (ctx.getCurrentServer().isEphemeral) {
+                        ctx.sendWarning(t("settings.general.exportDisabled"));
+                    } else {
+                        ctx.downloadExport();
+                    }
+                }}>{t("settings.general.exportDesc")}</button>
+            </div>
+        </div>
+        {refreshChanges}
     </>
 }

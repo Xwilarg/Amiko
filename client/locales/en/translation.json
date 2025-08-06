@@ -79,6 +79,10 @@
             "refreshNeeded": "Some of the changes needs the page to be refreshed",
             "refresh": "Refresh",
 
+            "exportTitle": "Export current channel",
+            "exportDesc": "Export",
+            "exportDisabled": "Ephemeral servers can't be exported",
+
             "display": {
                 "title": "Display mode",
                 "default": "Default",
