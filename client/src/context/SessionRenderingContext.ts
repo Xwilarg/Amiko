@@ -25,6 +25,8 @@ export default class SessionRenderingContext
     // Message parsing
     emojiParser: any;
 
+    displayMode: DisplayMode;
+
     refreshGlobalState: (() => void) | null;
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
@@ -36,6 +38,8 @@ export default class SessionRenderingContext
 
         this.emojiParser = new EmojiConvertor();
         this.emojiParser.replace_mode = "unified";
+
+        this.displayMode = "Default";
 
         // Override function
         const walkTokens = (token: any) => {/* TODO: bold reading
@@ -245,6 +249,23 @@ export default class SessionRenderingContext
             username: username
         });
     }
+
+    /* User preferences */
+
+    async getDisplayModeAsync(): Promise<DisplayMode> {
+        // @ts-ignore
+        let raw = await filesystem.readPrefAsync("displayMode", "Default");
+        return raw;
+    }
+
+    async setDisplayModeAsync(mode: DisplayMode) {
+        // @ts-ignore
+        await filesystem.writePrefAsync("displayMode", mode);
+
+        this.refreshGlobalState?.();
+    }
 }
 
 export const SessionRenderingContextProvider = createContext<SessionRenderingContext>(new SessionRenderingContext());
+
+export type DisplayMode = 'Default' | 'Minimalist';

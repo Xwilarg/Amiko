@@ -72,6 +72,15 @@
             "symbol": "Symbol",
             "color": "Color",
             "username": "Username"
+        },
+        "general": {
+            "title": "General settings",
+
+            "display": {
+                "title": "Display mode",
+                "default": "Default",
+                "minimalist": "Minimalist"
+            }
         }
     }
 }

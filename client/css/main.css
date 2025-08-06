@@ -116,4 +116,6 @@ input[type='submit'] {
     top: 0;
     width: 500px;
     z-index: 30;
+    height: 100%;
+    background-color: var(--bulma-scheme-main);
 }

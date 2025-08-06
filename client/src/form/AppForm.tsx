@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import i18n from "i18next";
 import ServerSelectionForm from './messaging/ServerSelectionForm';
 import MessageContainerForm from './messaging/MessageContainerForm';
-import { SessionRenderingContextProvider } from '../context/SessionRenderingContext';
+import { SessionRenderingContextProvider, type DisplayMode } from '../context/SessionRenderingContext';
 import NavbarForm from './navbar/NavbarForm';
 import SettingsContainerForm from './settings/SettingsContainerForm';
 import { initReactI18next, useTranslation } from "react-i18next";
@@ -41,13 +41,26 @@ export default function AppForm() {
     context.refreshGlobalState = refreshPage;
 
     useEffect(() => {
-        // @ts-ignore
-        filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
-            for (let [key, value] of Object.entries(storedSessions)) {
-                context.addInstance(key, value, t);
-            }
-        });
+        // We need to get current display mode to know how we render things
+        context.getDisplayModeAsync().then((displayMode: DisplayMode) => {
+            context.displayMode = displayMode;
+
+            // Read token
+            // @ts-ignore
+            filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
+                for (let [key, value] of Object.entries(storedSessions)) {
+                    context.addInstance(key, value, t);
+                }
+            });
+        })
+
     }, [])
+
+    if (context.displayMode === "Default") {
+        import("../../css/options/regular.css");
+    } else if (context.displayMode === "Minimalist") {
+        require("../../css/options/minimalist.css");
+    }
 
     return (
         <SessionRenderingContextProvider.Provider value={context}>

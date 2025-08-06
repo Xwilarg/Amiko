@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 export default function NewUserForm() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [error, setError] = useState('');
@@ -19,7 +19,6 @@ export default function NewUserForm() {
         return t ?? ""
     });
     
-    let navigate = useNavigate();
     let { t } = useTranslation();
 
     async function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
@@ -57,7 +56,7 @@ export default function NewUserForm() {
             })
         })
         if (res.ok) {
-            navigate(`/login`);
+            window.location.href = `/#/login`;
         } else {
             setError(t("login.badInvitation"));
         }

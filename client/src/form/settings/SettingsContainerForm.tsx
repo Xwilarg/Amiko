@@ -2,6 +2,7 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import ServerSettingsForm from "./ServerSettingsForm";
 import { useTranslation } from "react-i18next";
 import UserSettingsForm from "./UserSettingsForm";
+import GeneralSettingsForm from "./GeneralSettingsForm";
 
 const SettingsContainerForm = forwardRef((
     {},
@@ -15,6 +16,9 @@ const SettingsContainerForm = forwardRef((
         },
         openUserSettings() {
             setOpenSettings(openSettings == "User" ? "None" : "User");
+        },
+        openGeneralSettings() {
+            setOpenSettings(openSettings == "General" ? "None" : "General");
         }
     }));
     let { t } = useTranslation();
@@ -30,6 +34,10 @@ const SettingsContainerForm = forwardRef((
         title = t("settings.user.title");
         node = <UserSettingsForm />
     }
+    else if (openSettings === "General") {
+        title = t("settings.general.title");
+        node = <GeneralSettingsForm />
+    }
     else return <></>
 
 
@@ -41,6 +49,6 @@ const SettingsContainerForm = forwardRef((
     )
 });
 
-type OpenedSettings = 'None' | 'Server' | 'User';
+type OpenedSettings = 'None' | 'Server' | 'User' | 'General';
 
 export default SettingsContainerForm;

@@ -1,11 +1,9 @@
 async function readPrefAsync(key, def) {
-    var match = document.cookie.match(new RegExp(`(^| )${key}=([^;]+)`));
-    if (match) return match[2];
-    return def;
+    return sessionStorage.getItem(key) ?? def;
 }
 
 async function writePrefAsync(key, value) {
-    document.cookie = `${key}=${value}; max-age=34560000; path=/; SameSite=Strict`;
+    sessionStorage.setItem(key, value);
 }
 
 let canUseNotification = false;

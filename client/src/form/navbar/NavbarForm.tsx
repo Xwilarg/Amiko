@@ -107,6 +107,12 @@ const NavbarForm = forwardRef((
             <div className="navbar-brand">
                 {adminSettings}
                 {notGuest}
+                <button className="navbar-item button" onClick={(e) => {
+                    // @ts-ignore
+                    settingsRef.current.openGeneralSettings();
+                }}>
+                    <span className="material-symbols-outlined">settings</span>
+                </button>
                 {nameDisplay}
             </div>
         </nav>

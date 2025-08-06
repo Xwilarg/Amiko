@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type Metadata from '../../model/Metadata';
-import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 export default function LoginForm() {
@@ -12,7 +11,6 @@ export default function LoginForm() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
 
-    let navigate = useNavigate();
     let { t } = useTranslation();
 
     function checkInstance()
@@ -81,7 +79,7 @@ export default function LoginForm() {
                     // We are connected!
                     // @ts-ignore
                     await filesystem.writeTokenAsync(await res.text(), instance);
-                    navigate(`/`);
+                    window.location.href = "/#/";
                 } else {
                     setError(t("login.badLogin"));
                 }
@@ -105,7 +103,7 @@ export default function LoginForm() {
                 })
                 if (res.ok) {
                     // We generated an invitation token, we redirect to the join page so the admon can create his account
-                    navigate(`/join?token=${await res.text()}&instance=${encodeURI(instance)}`);
+                    window.location.href = `/#/join?token=${await res.text()}&instance=${encodeURI(instance)}`;
                 } else {
                     setError(t("login.badAdminToken"));
                 }
@@ -175,7 +173,7 @@ export default function LoginForm() {
                 </p>
                 <p className="control is-expanded">
                     <button className="button is-info is-fullwidth"
-                        onClick={(e) => { navigate(`/join?instance=${encodeURI(instance)}`); }}
+                        onClick={(e) => { window.location.href = `/join?instance=${encodeURI(instance)}`; }}
                     >{t("login.joinInvitation")}</button>
                 </p>
                 {
@@ -185,7 +183,7 @@ export default function LoginForm() {
                             onClick={async (e) => {
                                 // @ts-ignore
                                 await filesystem.writeTokenAsync("guest", instance);
-                                navigate("/"); 
+                                window.location.href = "/#/"; 
                             }}
                         >{t("login.joinGuest")}</button>
                     </p>
