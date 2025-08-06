@@ -58,6 +58,9 @@ export default function AppForm() {
                 for (let [key, value] of Object.entries(storedSessions)) {
                     context.addInstance(key, value, t);
                 }
+                for (let s of context.sessions) {
+                    s.connect();
+                }
             });
         })
 

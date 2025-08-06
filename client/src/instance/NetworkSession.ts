@@ -33,6 +33,13 @@ export default class NetworkSession
         this.isConnected = false;
 
         this.messaging = new MessagingSession(this);
+    }
+
+    connect() {
+        if (this.socket) {
+            this.socket.close(); // Socket already exist so we just force it to reconnect
+            return;
+        }
 
         if (this.token === "guest") {
             this.#openNetworkConnection(true);
@@ -48,12 +55,17 @@ export default class NetworkSession
                 'Authorization': `Bearer ${this.token}`
             }
         })
-        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(resp => resp.ok ? resp.text() : Promise.reject(resp.status))
         .then(_ => {
             this.#openNetworkConnection(false);
         })
         .catch(async (e) => {
             console.error(`Session for ${this.instance} expired`);
+            if (e === 401 && this.renderingContext.sessions.length === 1) {
+                // Session expired and we were only connected to one instance
+                // So only thing we can do is login again
+                window.location.href = "/#/login";
+            }
         });
     }
 
@@ -75,10 +87,6 @@ export default class NetworkSession
 
     sendNetworkMessage(msg: any) {
         this.socket?.send(JSON.stringify(msg));
-    }
-
-    reconnect() {
-        this.socket?.close();
     }
 
     #openNetworkConnection(isGuest: boolean) {
