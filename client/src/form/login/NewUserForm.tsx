@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 export default function NewUserForm() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [error, setError] = useState('');
@@ -8,8 +8,7 @@ export default function NewUserForm() {
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [instance, setInstance] = useState<string>(() => {
-        const url = new URL(window.location.href);
-        var i = url.searchParams.get("instance");
+        var i = searchParams.get("instance");
         if (i) return decodeURI(i);
         // @ts-ignore
         return configuration.baseUrl() ?? ""
@@ -20,6 +19,7 @@ export default function NewUserForm() {
     });
     
     let { t } = useTranslation();
+    const navigate = useNavigate();
 
     async function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
         setError("");
@@ -56,7 +56,7 @@ export default function NewUserForm() {
             })
         })
         if (res.ok) {
-            window.location.href = `/#/login`;
+            navigate("/login");
         } else {
             setError(t("login.badInvitation"));
         }
