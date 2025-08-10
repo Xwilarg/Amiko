@@ -7,6 +7,7 @@ export default function ServerSelectionForm () {
     let ctx = useContext(SessionRenderingContextProvider);
     
     const [r, forceRefresh] = useState(0);
+    const [showChannels, setShowChannels] = useState(false);
 
     function refreshPage() { // Need to clean this
         forceRefresh(r + 1);
@@ -14,7 +15,6 @@ export default function ServerSelectionForm () {
     ctx.refreshServerDisplayState = refreshPage;
 
     useEffect(() => {
-        console.log("show")
         let servs: Array<ReactElement> = [];
         let chans: Array<ReactElement> = [];
         for (let ns of ctx.sessions) {
@@ -23,13 +23,13 @@ export default function ServerSelectionForm () {
             {
                 const isCurrentServer = ctx.isCurrentServer(ns, parseInt(key));
                 servs.push(
-                    <div key={value.name} className={"button profile is-flex is-flex-wrap-wrap " + (isCurrentServer ? "is-primary" : "")}>
+                    <button key={value.name} className={"button profile is-flex is-flex-wrap-wrap " + (isCurrentServer ? "is-primary" : "")}>
                         <div className="pfp" style={{
                             background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                         }}>{value.character}
                         </div>
                         <p>{value.name}</p>
-                    </div>
+                    </button>
                 );
 
                 if (isCurrentServer) {
@@ -37,9 +37,9 @@ export default function ServerSelectionForm () {
                     for (let [chanKey, chanValue] of chanEntries) {
                         const isCurrentChannel = ctx.isCurrentChannel(ns, parseInt(key), parseInt(chanKey));
                         chans.push(
-                            <div key={value.name} className={"button " + (isCurrentChannel ? "is-primary" : "")}>
+                            <button key={value.name} className={"button " + (isCurrentChannel ? "is-primary" : "")}>
                                 <p>{chanValue.name}</p>
-                            </div>
+                            </button>
                         );
                     }
                 }
