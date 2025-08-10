@@ -50,14 +50,12 @@ export default function ServerSelectionForm () {
     }, [r]);
 
     return (
-    <div className="fixed-grid">
-        <div className="grid is-gapless">
-            <div id="server-list">
-                {serverListDisplay}
-            </div>
-            <div id="channel-list">
-                {channelListDisplay}
-            </div>
+    <div className="is-flex no-gap">
+        <div id="server-list">
+            {serverListDisplay}
+        </div>
+        <div id="channel-list">
+            {channelListDisplay}
         </div>
     </div>
     )
