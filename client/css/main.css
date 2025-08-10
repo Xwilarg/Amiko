@@ -8,13 +8,16 @@ html {
     gap: 10px;
 }
 
-/* Server list on the side */
+/* Server and channel list on the side */
 #server-list {
     width: 75px;
+    background-color: var(--bulma-scheme-main);
 }
 
 #channel-list {
     width: 200px;
+    height: 100%;
+    background-color: var(--bulma-scheme-main);
 }
 
 #channel-list > div {
@@ -23,7 +26,19 @@ html {
 
 #server-list button, #channel-list button {
     overflow: hidden;
-    background-color: var(--bulma-scheme-main);
+}
+
+@media screen and (max-width: 750px) {
+    #channel-list {
+        position: absolute;
+        width: calc(100% - 75px);
+        left: 75px;
+        z-index: 1;
+    }
+
+    #channel-list:not(.is-active) {
+        visibility: hidden;
+    }
 }
 
 /* Profile are small icons that show icons like servers or user selection */
