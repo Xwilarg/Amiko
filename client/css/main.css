@@ -20,7 +20,7 @@ html {
     background-color: var(--bulma-scheme-main);
 }
 
-#channel-list > div {
+#channel-list > button {
     width: 100%;
 }
 

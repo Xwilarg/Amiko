@@ -23,7 +23,9 @@ export default function ServerSelectionForm () {
             {
                 const isCurrentServer = ctx.isCurrentServer(ns, parseInt(key));
                 servs.push(
-                    <button key={value.name} className={"button profile is-flex is-flex-wrap-wrap " + (isCurrentServer ? "is-primary" : "")}>
+                    <button key={value.name} className={"button profile is-flex is-flex-wrap-wrap " + (isCurrentServer ? "is-primary" : "")} onClick={() => {
+                        setShowChannels(p => !p);
+                    }}>
                         <div className="pfp" style={{
                             background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                         }}>{value.character}
@@ -37,7 +39,10 @@ export default function ServerSelectionForm () {
                     for (let [chanKey, chanValue] of chanEntries) {
                         const isCurrentChannel = ctx.isCurrentChannel(ns, parseInt(key), parseInt(chanKey));
                         chans.push(
-                            <button key={value.name} className={"button " + (isCurrentChannel ? "is-primary" : "")}>
+                            <button key={value.name} className={"button " + (isCurrentChannel ? "is-primary" : "")} onClick={() => {
+                                // TODO: set channel
+                                setShowChannels(false);
+                            }}>
                                 <p>{chanValue.name}</p>
                             </button>
                         );
@@ -54,7 +59,7 @@ export default function ServerSelectionForm () {
         <div id="server-list">
             {serverListDisplay}
         </div>
-        <div id="channel-list">
+        <div id="channel-list" className={showChannels ? "is-active" : ""}>
             {channelListDisplay}
         </div>
     </div>
