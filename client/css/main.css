@@ -1,3 +1,8 @@
+/* Remove weird react scrollbar */
+html {
+    overflow-y: auto;
+}
+
 /* Prettify Bulma */
 .is-flex {
     gap: 10px;
@@ -6,11 +11,15 @@
 /* Server list on the side */
 #server-list {
     width: 75px;
-    background-color: var(--bulma-scheme-main);
+}
+
+#channel-list {
+    width: 150px;
 }
 
 #server-list button, #channel-list button {
     overflow: hidden;
+    background-color: var(--bulma-scheme-main);
 }
 
 /* Profile are small icons that show icons like servers or user selection */

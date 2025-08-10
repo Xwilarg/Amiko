@@ -24,9 +24,7 @@ i18n
     }
   });
 
-export default function AppForm() {
-    const [r, forceRefresh] = useState(0);
-    
+export default function AppForm() {    
     const {t} = useTranslation();
 
     const msgRef = React.createRef();
@@ -34,11 +32,6 @@ export default function AppForm() {
     context.refMsg = msgRef
 
     const settingsRef = React.createRef();
-
-    function refreshPage() { // Need to clean this
-        forceRefresh(r + 1);
-    }
-    context.refreshGlobalState = refreshPage;
 
     useEffect(() => {
         // We need to get current display mode to know how we render things

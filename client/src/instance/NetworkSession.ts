@@ -174,7 +174,8 @@ export default class NetworkSession
                             self.messaging.sendSystemMessage(intro);
                         }
 
-                        self.renderingContext.refreshGlobalState!();
+                        self.renderingContext.refreshServerDisplayState!(); // Update server bar with new info we have
+                        self.renderingContext.refreshNavbar!(); // Depending of our permissions, navbar might need refresh too
                     }
                     break;
 
@@ -208,9 +209,9 @@ export default class NetworkSession
                     self.renderingContext.refreshNavbar!();
                     break;
 
-                case 5: // A server settings were modified
-                    self.messaging.updateUserInfo(json);
-                    self.renderingContext.refreshGlobalState!();
+                case 5: // A user settings were modified
+                    self.messaging.updateUserInfo(json); // todo: refresh messages
+                    //self.renderingContext.refreshGlobalState!();
                     break;
 
                 case 7: // A message was modified

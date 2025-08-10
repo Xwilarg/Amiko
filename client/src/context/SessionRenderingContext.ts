@@ -27,12 +27,10 @@ export default class SessionRenderingContext
 
     displayMode: DisplayMode;
 
-    refreshGlobalState: (() => void) | null;
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
 
     constructor() {
-        this.refreshGlobalState = null;
         this.refreshServerDisplayState = null;
         this.refreshNavbar = null;
 
@@ -153,7 +151,6 @@ export default class SessionRenderingContext
         if (!s) {
             this.sessions.push(new NetworkSession(instance, token, this, t));
         }
-        console.log(this.sessions.length);
     }
 
     isCurrentInstance(s: NetworkSession) {
