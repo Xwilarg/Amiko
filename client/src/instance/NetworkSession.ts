@@ -211,7 +211,8 @@ export default class NetworkSession
 
                 case 5: // A user settings were modified
                     self.messaging.updateUserInfo(json); // todo: refresh messages
-                    //self.renderingContext.refreshGlobalState!();
+                    // @ts-ignore
+                    self.renderingContext.refMsg.current.refresh();
                     break;
 
                 case 7: // A message was modified
