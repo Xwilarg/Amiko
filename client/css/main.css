@@ -14,7 +14,11 @@ html {
 }
 
 #channel-list {
-    width: 150px;
+    width: 200px;
+}
+
+#channel-list > div {
+    width: 100%;
 }
 
 #server-list button, #channel-list button {
