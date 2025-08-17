@@ -27,13 +27,13 @@ public class ServerController : ControllerBase
 
     [HttpPost("update")]
     [Authorize]
-    public async Task<IActionResult> UpdateUser([FromBody] ServerMessage msg)
+    public async Task<IActionResult> UpdateServer([FromBody] ServerMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
         if (ServerQuery.UpdateServer(_dbContext, msg.Id, claimId, msg.Color, msg.Character, msg.Name, msg.AllowsGuest, msg.IsEphemeral))
         {
-            msg.Type = MessageType.UserInfo;
+            msg.Type = MessageType.ServerInfo;
             await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
         }
         return StatusCode(StatusCodes.Status204NoContent);
