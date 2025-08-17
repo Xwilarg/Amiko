@@ -8,6 +8,7 @@ import type Server from '../model/Server';
 import type { TFunction } from 'i18next';
 import type Color from '../model/Color';
 import { createContext } from 'react';
+import type Channel from '../model/Channel';
 
 export default class SessionRenderingContext
 {
@@ -166,6 +167,12 @@ export default class SessionRenderingContext
             this.currChannel == chanId;
     }
 
+    setCurrentChannel(chanId: number) {
+        this.currChannel = chanId;
+        this.refreshServerDisplayState!();
+        this.replaceMessages(this.getCurrentChannel().messages)
+    }
+
     /* MESSAGE MANAGEMENT */
     
     sendMessage(msg: Message, type: MessageFlag) {
@@ -193,6 +200,15 @@ export default class SessionRenderingContext
         this.refMsg.current.clearAllMessages();
     }
     
+    // Remove all messages sent and replace by the ones given in param
+    replaceMessages(msgs: Message[]) {
+        // @ts-ignore
+        this.refMsg.current.clearAllMessages();
+        // @ts-ignore
+        this.refMsg.current.setMessages(msgs);
+    }
+
+    // Add the list of message given in param to the screen
     setMessages(msgs: Message[]) {
         // @ts-ignore
         this.refMsg.current.setMessages(msgs);
@@ -210,6 +226,10 @@ export default class SessionRenderingContext
 
     getCurrentServer() : Server {
         return this.sessions[this.currInstance].messaging.servers[this.currServ];
+    }
+
+    getCurrentChannel() : Channel {
+        return this.getCurrentServer().channels[this.currChannel];
     }
 
     getCurrentChannelName() : string {

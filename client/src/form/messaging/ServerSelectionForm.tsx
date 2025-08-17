@@ -40,7 +40,7 @@ export default function ServerSelectionForm () {
                         const isCurrentChannel = ctx.isCurrentChannel(ns, parseInt(key), parseInt(chanKey));
                         chans.push(
                             <button key={chanKey} className={"button " + (isCurrentChannel ? "is-primary" : "")} onClick={() => {
-                                // TODO: set channel
+                                ctx.setCurrentChannel(parseInt(chanKey));
                                 setShowChannels(false);
                             }}>
                                 <p>{chanValue.name}</p>
