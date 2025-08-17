@@ -32,6 +32,17 @@ export default function ServerSettingsForm () {
         return str;
     }
 
+    // Prepare channel list
+    let chans: Array<React.ReactNode> = []
+    let s = ctx.getCurrentServer()
+    for (let [key, value] of Object.entries(s.channels))
+    {
+        chans.push(<div className="is-flex">
+            <button className="button" disabled>{value.name}aze</button>
+            <button className="button is-danger"><span className="material-symbols-outlined small-icon">delete</span></button>
+        </div>)
+    }
+
     return <>
         <div className="field">
             <label className="label">{t("settings.server.name")}</label>
@@ -85,6 +96,10 @@ export default function ServerSettingsForm () {
         </div>
         <div className="field pt-3">
             <input className="input is-primary" type="submit" onClick={onSubmit} />
+        </div>
+        <hr/>
+        <div className="container">
+            {chans}
         </div>
     </>
 }
