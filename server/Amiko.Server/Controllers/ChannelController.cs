@@ -26,7 +26,7 @@ public class ChannelController : ControllerBase
     }
 
     [HttpPost("update/{servId}/{chanId}")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> UpdateChannel(int servId, int chanId, [FromBody] ChannelUpdateMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
@@ -42,7 +42,7 @@ public class ChannelController : ControllerBase
     }
 
     [HttpPost("create/{servId}")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateChannel(int servId)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
@@ -63,7 +63,7 @@ public class ChannelController : ControllerBase
     }
 
     [HttpDelete("delete/{servId}/{chanId}")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteChannel(int servId, int chanId)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);

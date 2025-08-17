@@ -145,6 +145,16 @@ public static class ServerQuery
         return true;
     }
 
+    public static bool DeleteServer(SqliteContext ctx, int servId)
+    {
+        var s = GetServerRaw(ctx, servId);
+        if (s == null) return false;
+
+        ctx.Servers.Remove(s);
+        ctx.SaveChanges();
+        return true;
+    }
+
     public static bool IsAnyServerPublic(SqliteContext ctx)
         => GetServersAsQueryable(ctx, null, ServerIncludes.None).Any(s => s.AllowsGuest && s.IsPublic);
 

@@ -36,7 +36,44 @@ public class ServerController : ControllerBase
             msg.Id = servId;
             msg.UpdateType = UpdateType.Edition;
             await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
+            return StatusCode(StatusCodes.Status200OK);
         }
-        return StatusCode(StatusCodes.Status204NoContent);
+        return StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    [HttpPost("create")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> CreateServer()
+    {
+        var s = ServerQuery.AddServer(_dbContext, "New Server");
+        if (s != -1)
+        {
+            var msg = new ServerUpdateMessage()
+            {
+                Id = s,
+                Name = "New Server",
+                UpdateType = UpdateType.Creation
+            };
+            await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
+            return StatusCode(StatusCodes.Status200OK);
+        }
+        return StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    [HttpDelete("delete/{servId}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> DeleteServer(int servId)
+    {
+        if (ServerQuery.DeleteServer(_dbContext, servId))
+        {
+            var msg = new ServerUpdateMessage()
+            {
+                Id = servId,
+                UpdateType = UpdateType.Deletion
+            };
+            await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
+            return StatusCode(StatusCodes.Status200OK);
+        }
+        return StatusCode(StatusCodes.Status403Forbidden);
     }
 }
