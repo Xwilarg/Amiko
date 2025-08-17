@@ -6,10 +6,12 @@ export default function GeneralSettingsForm () {
     let ctx = useContext(SessionRenderingContextProvider);
     let { t } = useTranslation();
     const [displayMode, setDisplayMode] = useState<DisplayMode>("Default");
+    const [originalDisplayMode, setOriginalDisplayMode] = useState<DisplayMode>("Default");
     const [needRefresh, setNeedRefresh] = useState<boolean>(false);
     const [isBoldReading, setIsBoldReading] = useState<boolean>(false);
 
     useEffect(() => {
+        setOriginalDisplayMode(ctx.getDisplayMode())
         setDisplayMode(ctx.getDisplayMode())
         setIsBoldReading(ctx.getBoldReading())
     }, []);
@@ -29,7 +31,7 @@ export default function GeneralSettingsForm () {
                         const mode = e.target.value as DisplayMode;
                         setDisplayMode(mode);
                         await ctx.setDisplayModeAsync(mode);
-                        setNeedRefresh(mode != ctx.displayMode);
+                        setNeedRefresh(mode != originalDisplayMode);
                     }} value={displayMode}>
                         <option value="Default">{t("settings.general.display.default")}</option>
                         <option value="Minimalist">{t("settings.general.display.minimalist")}</option>
