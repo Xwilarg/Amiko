@@ -39,30 +39,6 @@ namespace Amiko.Server.Controllers
             _options = options;
         }
 
-        private async Task BroadcastMessageAsync<T>(int? serverId, T prot) where T : BaseMessage
-        {
-            List<Task> tasks = [];
-            lock (_connManager.Sockets)
-            {
-                // Connected users
-                foreach (var s in _connManager.Sockets.Where(x => serverId == null || ServerQuery.CanAccessServer(_dbContext, serverId.Value, x.ClaimId))) // Send the message to every users
-                {
-                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _options));
-                    Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
-                    tasks.Add(t);
-                }
-            }
-            foreach (var t in tasks)
-            {
-                try
-                {
-                    await t;
-                }
-                catch (Exception e)
-                { }
-            }
-        }
-
         private async Task ListenInternalAsync(int? claimId, bool isAdmin)
         {
             var servers = ServerQuery.GetServers(_dbContext, claimId, 50, ServerIncludes.IncludesAttachments);
@@ -135,33 +111,6 @@ namespace Amiko.Server.Controllers
                                 // Seen update, we update the db
                                 var prot = JsonSerializer.Deserialize<SeenUpdateMessage>(Encoding.UTF8.GetString(buffer), _options);
                                 UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                            }
-                        }
-                        else if (baseMsg.Type == MessageType.ServerInfo)
-                        {
-                            if (claimId != null)
-                            {
-                                var prot = JsonSerializer.Deserialize<ServerMessage>(Encoding.UTF8.GetString(buffer), _options);
-                                if (ServerQuery.UpdateServer(_dbContext, prot.Id, claimId.Value, prot.Color, prot.Character, prot.Name, prot.AllowsGuest, prot.IsEphemeral))
-                                {
-                                    prot.Type = MessageType.ServerInfo;
-                                    await BroadcastMessageAsync(prot.Id, prot);
-                                }
-                            }
-                        }
-                        else if (baseMsg.Type == MessageType.UserInfo)
-                        {
-                            if (claimId != null)
-                            {
-                                var prot = JsonSerializer.Deserialize<UserMessage>(Encoding.UTF8.GetString(buffer), _options);
-                                if (UserQuery.DoesUserFillClaim(_dbContext, claimId.Value, prot.Id))
-                                {
-                                    if (UserQuery.UpdateUser(_dbContext, prot.Id, prot.Color, prot.Character, prot.Username))
-                                    {
-                                        prot.Type = MessageType.UserInfo;
-                                        await BroadcastMessageAsync(null, prot);
-                                    }
-                                }
                             }
                         }
                         else if (baseMsg.Type == MessageType.Message)

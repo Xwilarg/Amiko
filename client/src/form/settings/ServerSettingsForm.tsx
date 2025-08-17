@@ -38,7 +38,7 @@ export default function ServerSettingsForm () {
     for (let [key, value] of Object.entries(s.channels))
     {
         chans.push(<div className="is-flex">
-            <button className="button" disabled>{value.name}aze</button>
+            <button className="button" disabled>{value.name}</button>
             <button className="button is-danger"><span className="material-symbols-outlined small-icon">delete</span></button>
         </div>)
     }

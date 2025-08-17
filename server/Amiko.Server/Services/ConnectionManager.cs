@@ -1,7 +1,9 @@
-﻿using System.Net.WebSockets;
-using System.Text.Json;
-using System.Text;
+﻿using Amiko.Database.Context;
+using Amiko.Database.Queries;
 using Amiko.Server.Models.Message;
+using System.Net.WebSockets;
+using System.Text;
+using System.Text.Json;
 
 namespace Amiko.Server.Services;
 
@@ -17,6 +19,30 @@ public class ConnectionManager
 
     public List<UserSocket> Sockets { get; } = [];
     private JsonSerializerOptions _options;
+
+    public async Task BroadcastMessageAsync<T>(SqliteContext dbContext, int? serverId, T prot) where T : BaseMessage
+    {
+        List<Task> tasks = [];
+        lock (Sockets)
+        {
+            // Connected users
+            foreach (var s in Sockets.Where(x => serverId == null || ServerQuery.CanAccessServer(dbContext, serverId.Value, x.ClaimId))) // Send the message to every users
+            {
+                var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _options));
+                Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
+                tasks.Add(t);
+            }
+        }
+        foreach (var t in tasks)
+        {
+            try
+            {
+                await t;
+            }
+            catch (Exception e)
+            { }
+        }
+    }
 
     public async Task PropagateAttachment(int msgId, AttachmentMessage[] attachments)
     {

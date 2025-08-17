@@ -89,6 +89,22 @@ export default class NetworkSession
         this.socket?.send(JSON.stringify(msg));
     }
 
+    sendApiMessage(msg: any, endpoint: string, method: string) {
+        fetch(`${this.instance}/api/${endpoint}`, {
+            method: method,
+            body: JSON.stringify(msg),
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(text => {})
+        .catch(async (e) => {
+            alert(`API request to ${endpoint} failed: ${e}`)
+        });
+    }
+
     #openNetworkConnection(isGuest: boolean) {
         this.renderingContext.clearAllMessages();
 
