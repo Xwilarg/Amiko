@@ -18,6 +18,10 @@ export default function ServerSelectionForm () {
         let servs: Array<ReactElement> = [];
         let chans: Array<ReactElement> = [];
         for (let ns of ctx.sessions) {
+            servs.push(<p className="instance-preview" key={ns.instance}>
+                {ns.instance}
+            </p>)
+
             let entries = Object.entries(ns.messaging.servers);
             for (let [key, value] of entries)
             {

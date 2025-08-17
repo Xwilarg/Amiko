@@ -9,6 +9,11 @@ html {
 }
 
 /* Server and channel list on the side */
+.instance-preview {
+    word-break: break-all;
+    font-size: 10px;
+}
+
 #server-list {
     width: 75px;
     background-color: var(--bulma-scheme-main);
