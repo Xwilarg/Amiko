@@ -35,6 +35,47 @@ public class ChannelController : ControllerBase
         {
             msg.ServId = servId;
             msg.ChanId = chanId;
+            msg.UpdateType = UpdateType.Edition;
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+        }
+        return StatusCode(StatusCodes.Status204NoContent);
+    }
+
+    [HttpPost("create/{servId}")]
+    [Authorize]
+    public async Task<IActionResult> CreateChannel(int servId)
+    {
+        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+
+        var id = ChannelQuery.AddChannel(_dbContext, claimId, servId, "New Channel");
+        if (id != -1)
+        {
+            var msg = new ChannelUpdateMessage()
+            {
+                ServId = servId,
+                ChanId = id,
+                Name = "New Channel",
+                UpdateType = UpdateType.Creation
+            };
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+        }
+        return StatusCode(StatusCodes.Status204NoContent);
+    }
+
+    [HttpDelete("delete/{servId}/{chanId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteChannel(int servId, int chanId)
+    {
+        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+
+        if (ChannelQuery.DeleteChannel(_dbContext, claimId, servId, chanId))
+        {
+            var msg = new ChannelUpdateMessage()
+            {
+                ServId = servId,
+                ChanId = chanId,
+                UpdateType = UpdateType.Deletion
+            };
             await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
         }
         return StatusCode(StatusCodes.Status204NoContent);

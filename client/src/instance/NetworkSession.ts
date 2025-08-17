@@ -105,6 +105,20 @@ export default class NetworkSession
         });
     }
 
+    sendApiMessageNoPayload(endpoint: string, method: string) {
+        fetch(`${this.instance}/api/${endpoint}`, {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(text => {})
+        .catch(async (e) => {
+            alert(`API request to ${endpoint} failed: ${e}`)
+        });
+    }
+
     #openNetworkConnection(isGuest: boolean) {
         this.renderingContext.clearAllMessages();
 

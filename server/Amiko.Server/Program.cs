@@ -34,7 +34,7 @@ public class Program
         {
             options.AddPolicy("debug", p =>
             {
-                p.WithOrigins("http://localhost:5173").AllowAnyHeader();
+                p.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
             });
         });
 

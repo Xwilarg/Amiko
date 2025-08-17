@@ -251,6 +251,14 @@ export default class SessionRenderingContext
         }, `user/update/${this.sessions[this.currInstance].messaging.mainUser}`, "POST");
     }
 
+    createNewChannel() {
+        this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/create/${this.currServ}`, "POST");
+    }
+
+    deleteChannel(chanId: number) {
+        this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/delete/${this.currServ}/${chanId}`, "DELETE");
+    }
+
     downloadExport() {
         fetch(`${this.getCurrentInstance()}/api/export/${this.currServ}/${this.currChannel}`, {
             method: 'GET',

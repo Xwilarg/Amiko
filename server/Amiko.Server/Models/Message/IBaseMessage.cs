@@ -18,6 +18,7 @@ public class ArrayMessage<T> : IBaseMessage
 
 public enum UpdateType
 {
+    Creation,
     Edition,
     Deletion
 }

@@ -40,7 +40,9 @@ export default function ServerSettingsForm () {
         {
             chans.push(<div className="is-flex" key={key}>
                 <button className="button" disabled>{value.name}</button>
-                <button className="button is-danger"><span className="material-symbols-outlined small-icon">delete</span></button>
+                <button className="button is-danger" onClick={
+                    () => { ctx.deleteChannel(parseInt(key)); }
+                }><span className="material-symbols-outlined small-icon">delete</span></button>
             </div>)
         }
         setChannelListDisplay(chans);
@@ -103,6 +105,9 @@ export default function ServerSettingsForm () {
         <hr/>
         <div className="container">
             {channelListDisplay}
+            <button className="button is-primary" onClick={() => {ctx.createNewChannel()}}>
+                <span className="material-symbols-outlined small-icon">add</span>
+            </button>
         </div>
     </>
 }

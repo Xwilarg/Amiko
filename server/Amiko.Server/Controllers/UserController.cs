@@ -36,6 +36,7 @@ public class UserController : ControllerBase
             if (UserQuery.UpdateUser(_dbContext, userId, msg.Color, msg.Character, msg.Username))
             {
                 msg.Id = userId;
+                msg.UpdateType = UpdateType.Edition;
                 await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
             }
             return StatusCode(StatusCodes.Status204NoContent);

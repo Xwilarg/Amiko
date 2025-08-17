@@ -34,6 +34,7 @@ public class ServerController : ControllerBase
         if (ServerQuery.UpdateServer(_dbContext, servId, claimId, msg.Color, msg.Character, msg.Name, msg.AllowsGuest, msg.IsEphemeral))
         {
             msg.Id = servId;
+            msg.UpdateType = UpdateType.Edition;
             await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
         }
         return StatusCode(StatusCodes.Status204NoContent);
