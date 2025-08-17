@@ -5,7 +5,7 @@ namespace Amiko.Server.Models.Message;
 /// <summary>
 /// Represent a message sent
 /// </summary>
-public class Message : BaseMessage
+public class MessageInfo : IBaseMessage
 {
     /// <summary>
     /// Server in which the message was sent
@@ -40,9 +40,9 @@ public class Message : BaseMessage
 
     public AttachmentMessage[] Attachments { set; get; }
 
-    public static Message From(MessageDao m)
+    public static MessageInfo From(MessageDao m)
     {
-        return new Message()
+        return new MessageInfo()
         {
             Authors = m.Authors,
             Content = m.Message,
@@ -56,9 +56,11 @@ public class Message : BaseMessage
         };
     }
 
-    public static IEnumerable<Message> GetOrderedMessages(IEnumerable<MessageDao> m)
+    public static IEnumerable<MessageInfo> GetOrderedMessages(IEnumerable<MessageDao> m)
     {
         var msgs = m.Select(From);
         return msgs.OrderBy(x => x.Id);
     }
+
+    public MessageType Type => MessageType.Message;
 }

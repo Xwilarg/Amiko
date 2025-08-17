@@ -3,7 +3,7 @@
 /// <summary>
 /// Acknowledgement of message received
 /// </summary>
-public class AcknowledgeMessage : BaseMessage
+public class AcknowledgeMessage : IBaseMessage
 {
     /// <summary>
     /// New definitive ID of the message
@@ -21,4 +21,6 @@ public class AcknowledgeMessage : BaseMessage
     public string? Content { set; get; }
     public int[] Authors { set; get; }
     public bool IsError { set; get; }
+
+    public MessageType Type => MessageType.Acknowledge;
 }

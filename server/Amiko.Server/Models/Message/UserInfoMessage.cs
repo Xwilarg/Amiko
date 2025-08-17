@@ -3,21 +3,31 @@ using Amiko.Database.Dao;
 
 namespace Amiko.Server.Models.Message;
 
-public class UserMessage : BaseMessage
+public class UserMessageBase
 {
     public int Id { set; get; }
-    public bool IsMe { set; get; }
-    public bool IsMyGroup { set; get; }
-    public bool IsAdmin { set; get; }
     public string Username { set; get; }
     public Color Color { set; get; }
     public string Character { set; get; }
+}
 
-    public static UserMessage From(UserDao u, int? myRawId)
+public class UserUpdateMessage : UserMessageBase, IBaseMessage
+{
+    public UpdateType UpdateType { set; get; }
+
+    public MessageType Type => MessageType.UserUpdate;
+}
+
+public class UserInfoMessage : UserMessageBase, IBaseMessage
+{
+    public bool IsMe { set; get; }
+    public bool IsMyGroup { set; get; }
+    public bool IsAdmin { set; get; }
+
+    public static UserInfoMessage From(UserDao u, int? myRawId)
     {
-        return new UserMessage()
+        return new UserInfoMessage()
         {
-            Type = MessageType.UserInfo,
             Id = u.Id,
             Username = u.Username,
             Color = new Color()
@@ -33,4 +43,6 @@ public class UserMessage : BaseMessage
             IsMyGroup = u.Id == myRawId || u.DependsOf == myRawId
         };
     }
+
+    public MessageType Type => MessageType.UserInfo;
 }

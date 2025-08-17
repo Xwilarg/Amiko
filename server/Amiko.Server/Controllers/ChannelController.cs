@@ -27,20 +27,15 @@ public class ChannelController : ControllerBase
 
     [HttpPost("update/{servId}/{chanId}")]
     [Authorize]
-    public async Task<IActionResult> UpdateChannel(int servId, int chanId, [FromBody] ChannelMessage msg)
+    public async Task<IActionResult> UpdateChannel(int servId, int chanId, [FromBody] ChannelUpdateMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
         if (ChannelQuery.UpdateChannel(_dbContext, claimId, servId, chanId, msg.Name))
         {
-            var broadcast = new ServerMessage()
-            {
-                Id = servId,
-                Type = MessageType.ServerInfo,
-                Channels = ServerQuery.GetServer(_dbContext, servId, claimId, null, ServerIncludes.IncludesChannels).Channels
-                    .Select(x => ChannelMessage.From(servId, x, null)).ToArray()
-            };
-            await _connManager.BroadcastMessageAsync(_dbContext, servId, broadcast);
+            msg.ServId = servId;
+            msg.ChanId = chanId;
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
         }
         return StatusCode(StatusCodes.Status204NoContent);
     }

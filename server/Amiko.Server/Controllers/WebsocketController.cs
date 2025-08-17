@@ -56,18 +56,16 @@ namespace Amiko.Server.Controllers
             // First connection from user!
             _logger.Log(LogLevel.Information, $"New client connected ({claimId})");
             // Send information about all servers existing
-            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerMessage>()
+            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfoMessage>()
             {
-                Type = MessageType.Array,
-                Data = servers.Select(x => ServerMessage.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
+                Data = servers.Select(x => ServerInfoMessage.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
             }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
             // Send information about all users existing
-            bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserMessage>()
+            bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfoMessage>()
             {
-                Type = MessageType.Array,
-                Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserMessage.From(x, claimId)).ToArray()
+                Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserInfoMessage.From(x, claimId)).ToArray()
             }, _options));
             await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
 
@@ -98,7 +96,7 @@ namespace Amiko.Server.Controllers
 
                     try
                     {
-                        var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _options);
+                        var baseMsg = JsonSerializer.Deserialize<IBaseMessage>(Encoding.UTF8.GetString(buffer), _options);
 
                         if (baseMsg.Type == MessageType.Heartbeat)
                         { // Heartbeat, we just send one back
@@ -116,7 +114,7 @@ namespace Amiko.Server.Controllers
                         else if (baseMsg.Type == MessageType.Message)
                         {
                             // Parse actual message
-                            var prot = JsonSerializer.Deserialize<Message>(Encoding.UTF8.GetString(buffer), _options);
+                            var prot = JsonSerializer.Deserialize<MessageInfo>(Encoding.UTF8.GetString(buffer), _options);
 
                             if (claimId == null)
                             {
@@ -139,7 +137,6 @@ namespace Amiko.Server.Controllers
                             {
                                 var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new AcknowledgeMessage()
                                 {
-                                    Type = MessageType.Acknowledge,
                                     AckId = prot.AckId,
                                     IsError = true
                                 }, _options));
@@ -178,7 +175,6 @@ namespace Amiko.Server.Controllers
                                 { // Send an acknowledgment to the user that sent it
                                     var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new AcknowledgeMessage()
                                     {
-                                        Type = MessageType.Acknowledge,
                                         AckId = prot.AckId,
                                         NewId = finalId,
                                         IsError = false,

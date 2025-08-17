@@ -27,7 +27,7 @@ public class UserController : ControllerBase
 
     [HttpPost("update/{userId}")]
     [Authorize]
-    public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserMessage msg)
+    public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
@@ -36,7 +36,6 @@ public class UserController : ControllerBase
             if (UserQuery.UpdateUser(_dbContext, userId, msg.Color, msg.Character, msg.Username))
             {
                 msg.Id = userId;
-                msg.Type = MessageType.UserInfo;
                 await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
             }
             return StatusCode(StatusCodes.Status204NoContent);

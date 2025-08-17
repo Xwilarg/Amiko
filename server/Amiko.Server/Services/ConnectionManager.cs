@@ -20,7 +20,7 @@ public class ConnectionManager
     public List<UserSocket> Sockets { get; } = [];
     private JsonSerializerOptions _options;
 
-    public async Task BroadcastMessageAsync<T>(SqliteContext dbContext, int? serverId, T prot) where T : BaseMessage
+    public async Task BroadcastMessageAsync<T>(SqliteContext dbContext, int? serverId, T prot) where T : IBaseMessage
     {
         List<Task> tasks = [];
         lock (Sockets)
@@ -51,9 +51,8 @@ public class ConnectionManager
         {
             foreach (var s in Sockets)
             {
-                var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Message()
+                var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new MessageInfo()
                 {
-                    Type = MessageType.MessageUpdate,
                     Id = msgId,
                     Attachments = attachments
                 }, _options));
