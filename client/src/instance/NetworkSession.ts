@@ -180,6 +180,7 @@ export default class NetworkSession
                     break;
 
                 case 2: // Message received
+                    self.messaging.receiveMessage(json);
                     /*self.renderer.receiveMessage(json);
                     if (renderer_isCurrentChannel(self.renderer, json.serverId, json.channelId))
                     {

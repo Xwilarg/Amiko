@@ -17,8 +17,6 @@ export default class MessagingSession
     // All alt users we can speak with
     possibleUsers: number[];
 
-    // TODO
-    messages: Message[];
     // All the servers accessible by this instance
     servers: { [id: number] : Server; };
     // Messages we sent but weren't acknowledged by the server yet
@@ -35,7 +33,6 @@ export default class MessagingSession
         this.mainUser = null;
         this.possibleUsers = [];
 
-        this.messages = [];
         this.servers = {};
         this.pendingAcknowledgement = {};
     }
@@ -52,9 +49,20 @@ export default class MessagingSession
             ackId: null
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
-        this.messages.push(msgInst);
 
         return msgInst;
+    }
+
+    receiveMessage(msg: any) {
+        this.session.renderingContext.sendMessage({
+            id: msg.id,
+            date: new Date((msg.sentAt - (new Date().getTimezoneOffset() * 60)) * 1000),
+            authors: msg.authors,
+            content: msg.content,
+            attachments: msg.attachments,
+
+            ackId: null
+        }, "None");
     }
 
     addPendingMessage(servId: number, chanId: number, msg: any): Message {
@@ -68,7 +76,6 @@ export default class MessagingSession
             ackId: msg.ackId
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
-        this.messages.push(msgInst);
 
         this.pendingAcknowledgement[msg.ackId] = msgInst;
 
