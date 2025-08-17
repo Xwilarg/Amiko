@@ -124,7 +124,7 @@ export default function ServerSettingsForm () {
             <input className="input is-primary" type="submit" onClick={onSubmit} />
         </div>
         <hr/>
-        <div className="container">
+        <div className="container has-text-left">
             {channelListDisplay}
             <button className="button is-primary settings-chan-new" onClick={() => {ctx.createNewChannel()}}>
                 <span className="material-symbols-outlined small-icon">add</span>
