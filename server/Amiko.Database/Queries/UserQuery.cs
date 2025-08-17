@@ -91,14 +91,14 @@ public static class UserQuery
         return true;
     }
 
-    internal static void CreateUser(SqliteContext ctx, string name, bool isAdmin, string password)
+    internal static int CreateUser(SqliteContext ctx, string name, bool isAdmin, string password)
     {
         var salt = Guid.NewGuid().ToString();
         var saltBytes = Encoding.ASCII.GetBytes(salt);
         var hash = KeyDerivation.Pbkdf2(password, saltBytes, KeyDerivationPrf.HMACSHA512, 210000, 256 / 8);
         var computed = Convert.ToHexString(hash).ToLower();
 
-        ctx.Users.Add(new()
+        var user = new UserContext()
         {
             Username = name,
             IsAdmin = isAdmin,
@@ -112,9 +112,12 @@ public static class UserQuery
             LastSeens = [],
             Prefix = null,
             Webhook = null,
-        });
+        };
+        ctx.Users.Add(user);
 
         ctx.SaveChanges();
+
+        return user.Id;
     }
 
 

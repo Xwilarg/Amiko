@@ -1,5 +1,6 @@
 ﻿using Amiko.Database.Context;
 using Amiko.Database.Dao;
+using System.Xml.Linq;
 
 namespace Amiko.Database.Queries;
 
@@ -29,10 +30,12 @@ public static class ChannelQuery
         return c == null ? null : ChannelDao.From(c);
     }
 
-    public static int AddChannel(SqliteContext ctx, int servId, string name)
+    public static int AddChannel(SqliteContext ctx, int claimId, int servId, string name)
     {
         var s = ServerQuery.GetServerRaw(ctx, servId);
         if (s == null) return -1;
+
+        if (!ServerQuery.CanAccessServer(ctx, servId, claimId)) return -1;
 
         var chan = new ChannelContext()
         {
@@ -44,5 +47,30 @@ public static class ChannelQuery
         ctx.SaveChanges();
 
         return chan.Id;
+    }
+
+    public static bool UpdateChannel(SqliteContext ctx, int claimId, int servId, int chanId, string newName)
+    {
+        var c = GetChannelInternal(ctx, servId, chanId, claimId, null, ServerIncludes.IncludesChannels);
+        if (c == null) return false;
+
+        c.Name = newName;
+        ctx.SaveChanges();
+
+        return true;
+    }
+
+    public static bool DeleteChannel(SqliteContext ctx, int claimId, int servId, int chanId)
+    {
+        var c = GetChannelInternal(ctx, servId, chanId, claimId, null, ServerIncludes.IncludesChannels);
+        if (c == null) return false;
+
+        var s = ServerQuery.GetServerRaw(ctx, servId);
+        if (s == null) return false;
+
+        s.Channels.Remove(c);
+        ctx.SaveChanges();
+
+        return true;
     }
 }

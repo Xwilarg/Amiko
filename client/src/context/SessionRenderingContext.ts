@@ -234,23 +234,21 @@ export default class SessionRenderingContext
     /* SETTINGS */
     updateServerInfo(name: string, color: Color, character: string, allowsGuest: boolean, isEphemeral: boolean) {
         this.sessions[this.currInstance].sendApiMessage({
-            id: this.currServ,
             color: color,
             character: character,
             name: name,
             allowsGuest: allowsGuest,
             isEphemeral: isEphemeral
-        }, "server/update", "POST");
+        }, `server/update/${this.currServ}`, "POST");
     }
 
-    updateUserInfo(username: string, color: Color, character: string) {
+    updateUserInfo(username: string, color: Color, character: string) { // TODO: handle alters
         this.sessions[this.currInstance].sendApiMessage({
             type: 5,
-            id: this.sessions[this.currInstance].messaging.mainUser, // Handle alters
             color: color,
             character: character,
             username: username
-        }, "user/update", "POST");
+        }, `user/update/${this.sessions[this.currInstance].messaging.mainUser}`, "POST");
     }
 
     downloadExport() {

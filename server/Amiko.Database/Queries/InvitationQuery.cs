@@ -14,26 +14,26 @@ namespace Amiko.Database.Queries
             return i == null ? null : InvitationDao.From(i);
         }
 
-        public static bool CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password)
+        public static int CreateUserFromInvitation(SqliteContext ctx, string invitation, string name, string password)
         {
-            if (UserQuery.GetUserInternal(ctx, name, UserIncludes.None) != null) return false;
+            if (UserQuery.GetUserInternal(ctx, name, UserIncludes.None) != null) return -1;
 
             var invite = ctx.Invitations.FirstOrDefault(x => x.Id == invitation);
-            if (invite == null) return false;
+            if (invite == null) return -1;
 
             if (DateTime.UtcNow > invite.ExpirationDate)
             {
                 ctx.Invitations.Remove(invite);
                 ctx.SaveChanges();
-                return false; // Invitation exists but already expired!
+                return -1; // Invitation exists but already expired!
             }
 
             ctx.Invitations.Remove(invite);
-            UserQuery.CreateUser(ctx, name, invite.IsAdmin, password);
+            var id = UserQuery.CreateUser(ctx, name, invite.IsAdmin, password);
 
             // CreateUser already call ctx.SaveChanges so we don't do it again
 
-            return true;
+            return id;
         }
 
         public static string CreateInvitation(

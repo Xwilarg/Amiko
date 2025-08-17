@@ -25,15 +25,17 @@ public class ServerController : ControllerBase
         _connManager = connManager;
     }
 
-    [HttpPost("update")]
+    [HttpPost("update/{servId}")]
     [Authorize]
-    public async Task<IActionResult> UpdateServer([FromBody] ServerMessage msg)
+    public async Task<IActionResult> UpdateServer(int servId, [FromBody] ServerMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
-        if (ServerQuery.UpdateServer(_dbContext, msg.Id, claimId, msg.Color, msg.Character, msg.Name, msg.AllowsGuest, msg.IsEphemeral))
+        if (ServerQuery.UpdateServer(_dbContext, servId, claimId, msg.Color, msg.Character, msg.Name, msg.AllowsGuest, msg.IsEphemeral))
         {
+            msg.Id = servId;
             msg.Type = MessageType.ServerInfo;
+            msg.Channels = null;
             await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
         }
         return StatusCode(StatusCodes.Status204NoContent);

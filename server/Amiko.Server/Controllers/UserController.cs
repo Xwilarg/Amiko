@@ -25,16 +25,17 @@ public class UserController : ControllerBase
         _connManager = connManager;
     }
 
-    [HttpPost("update")]
+    [HttpPost("update/{userId}")]
     [Authorize]
-    public async Task<IActionResult> UpdateUser([FromBody] UserMessage msg)
+    public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 
-        if (UserQuery.DoesUserFillClaim(_dbContext, claimId, msg.Id))
+        if (UserQuery.DoesUserFillClaim(_dbContext, claimId, userId))
         {
-            if (UserQuery.UpdateUser(_dbContext, msg.Id, msg.Color, msg.Character, msg.Username))
+            if (UserQuery.UpdateUser(_dbContext, userId, msg.Color, msg.Character, msg.Username))
             {
+                msg.Id = userId;
                 msg.Type = MessageType.UserInfo;
                 await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
             }

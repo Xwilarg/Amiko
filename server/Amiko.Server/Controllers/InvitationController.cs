@@ -47,12 +47,12 @@ public class InvitationController : ControllerBase
         var isFirstUser = InvitationQuery.GetInvitation(_dbContext, creationInfo.Invitation).IsAdmin && !UserQuery.GetUsers(_dbContext, UserIncludes.None).Any();
 
         var res = InvitationQuery.CreateUserFromInvitation(_dbContext, creationInfo.Invitation, creationInfo.Username, creationInfo.Password);
-        if (res)
+        if (res != -1)
         {
             if (isFirstUser) // We automatically create a server and channel along the first user
             {
                 var id = ServerQuery.AddServer(_dbContext, $"{creationInfo.Username}'s server");
-                ChannelQuery.AddChannel(_dbContext, id, "General");
+                ChannelQuery.AddChannel(_dbContext, res, id, "General");
 
                 // Since this is the first user and he isn't connected yet, there is no use to propagate the creation because he'll get the info when login-in
             }
