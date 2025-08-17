@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState, type ReactElement } from "react";
 import type Color from "../../model/Color";
 import { useTranslation } from "react-i18next";
 import { SessionRenderingContextProvider } from "../../context/SessionRenderingContext";
@@ -20,6 +20,7 @@ export default function ServerSettingsForm () {
     const [isEphemeral, setIsEphemeral] = useState<boolean>(() => {
         return ctx.getCurrentServer().isEphemeral;
     });
+    let [channelListDisplay, setChannelListDisplay] = useState<Array<ReactElement>>([]);
     
     let { t } = useTranslation();
 
@@ -32,16 +33,18 @@ export default function ServerSettingsForm () {
         return str;
     }
 
-    // Prepare channel list
-    let chans: Array<React.ReactNode> = []
-    let s = ctx.getCurrentServer()
-    for (let [key, value] of Object.entries(s.channels))
-    {
-        chans.push(<div className="is-flex">
-            <button className="button" disabled>{value.name}</button>
-            <button className="button is-danger"><span className="material-symbols-outlined small-icon">delete</span></button>
-        </div>)
-    }
+    useEffect(() => {
+        let chans: Array<ReactElement> = []
+        let s = ctx.getCurrentServer()
+        for (let [key, value] of Object.entries(s.channels))
+        {
+            chans.push(<div className="is-flex" key={key}>
+                <button className="button" disabled>{value.name}</button>
+                <button className="button is-danger"><span className="material-symbols-outlined small-icon">delete</span></button>
+            </div>)
+        }
+        setChannelListDisplay(chans);
+    }, []);
 
     return <>
         <div className="field">
@@ -99,7 +102,7 @@ export default function ServerSettingsForm () {
         </div>
         <hr/>
         <div className="container">
-            {chans}
+            {channelListDisplay}
         </div>
     </>
 }
