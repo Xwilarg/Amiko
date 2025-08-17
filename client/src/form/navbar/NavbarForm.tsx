@@ -8,7 +8,7 @@ const NavbarForm = forwardRef((
 ) => {
     let ctx = useContext(SessionRenderingContextProvider);
     const [shownInvitation, setShownInvitation] = useState('');
-    
+
     const [r, forceRefresh] = useState(0);
 
     function refreshPage() { // Need to clean this

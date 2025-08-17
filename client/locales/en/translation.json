@@ -54,6 +54,9 @@
     },
 
     "settings": {
+        "common": {
+            "destructive": "Are you sure you want to continue? This is a destructive action"
+        },
         "server": {
             "title": "Server settings",
 

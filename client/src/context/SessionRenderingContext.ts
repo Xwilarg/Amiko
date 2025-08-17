@@ -30,10 +30,12 @@ export default class SessionRenderingContext
 
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
+    refreshServerSettings: (() => void) | null;
 
     constructor() {
         this.refreshServerDisplayState = null;
         this.refreshNavbar = null;
+        this.refreshServerSettings = null;
 
         this.emojiParser = new EmojiConvertor();
         this.emojiParser.replace_mode = "unified";

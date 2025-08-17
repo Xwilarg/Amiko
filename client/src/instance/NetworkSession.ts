@@ -247,6 +247,7 @@ export default class NetworkSession
                 case 9: // A channel settings were modified
                     self.messaging.updateChannelInfo(json);
                     self.renderingContext.refreshServerDisplayState!();
+                    self.renderingContext.refreshServerSettings?.();
                     break;
 
                 case 10: // A user settings were modified

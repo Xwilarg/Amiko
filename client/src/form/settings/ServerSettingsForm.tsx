@@ -21,8 +21,15 @@ export default function ServerSettingsForm () {
         return ctx.getCurrentServer().isEphemeral;
     });
     let [channelListDisplay, setChannelListDisplay] = useState<Array<ReactElement>>([]);
+    const [r, forceRefresh] = useState(0);
+
+    function refreshPage() { // Need to clean this
+        forceRefresh(r + 1);
+    }
     
     let { t } = useTranslation();
+
+    ctx.refreshServerSettings = refreshPage;
 
     function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
         ctx.updateServerInfo(name, color, character, allowsGuest, isEphemeral);
@@ -41,12 +48,14 @@ export default function ServerSettingsForm () {
             chans.push(<div className="is-flex" key={key}>
                 <button className="button" disabled>{value.name}</button>
                 <button className="button is-danger" onClick={
-                    () => { ctx.deleteChannel(parseInt(key)); }
+                    () => { if (confirm(t("settings.common.destructive"))) {
+                        ctx.deleteChannel(parseInt(key));
+                    } }
                 }><span className="material-symbols-outlined small-icon">delete</span></button>
             </div>)
         }
         setChannelListDisplay(chans);
-    }, []);
+    }, [r]);
 
     return <>
         <div className="field">
