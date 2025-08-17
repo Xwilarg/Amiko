@@ -7,12 +7,11 @@ export default function GeneralSettingsForm () {
     let { t } = useTranslation();
     const [displayMode, setDisplayMode] = useState<DisplayMode>("Default");
     const [needRefresh, setNeedRefresh] = useState<boolean>(false);
+    const [isBoldReading, setIsBoldReading] = useState<boolean>(false);
 
     useEffect(() => {
-        ctx.getDisplayModeAsync()
-            .then(value => {
-                setDisplayMode(value);
-            })
+        setDisplayMode(ctx.getDisplayMode())
+        setIsBoldReading(ctx.getBoldReading())
     }, []);
     let refreshChanges = needRefresh ?
     <>
@@ -37,6 +36,21 @@ export default function GeneralSettingsForm () {
                     </select>
                 </div>
             </div>
+        </div>
+        <div className="field">
+            <label className="label">
+                {t("settings.general.boldReading")}<br/>
+                <small></small>
+            </label>
+            <label className="switch is-rounded">
+                <input type="checkbox" checked={isBoldReading} onChange={async (e) => {
+                    setIsBoldReading(e.target.checked);
+                    await ctx.setBoldReadingAsync(e.target.checked);
+                    // @ts-ignore
+                    ctx.refMsg.current.refresh();
+                }}/>
+                <span className="check"></span>
+            </label>
         </div>
         <div className="field">
             <label className="label">{t("settings.general.exportTitle")}</label>

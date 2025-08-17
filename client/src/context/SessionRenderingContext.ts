@@ -27,6 +27,7 @@ export default class SessionRenderingContext
     emojiParser: any;
 
     displayMode: DisplayMode;
+    isBoldReading: boolean;
 
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
@@ -41,12 +42,14 @@ export default class SessionRenderingContext
         this.emojiParser.replace_mode = "unified";
 
         this.displayMode = "Default";
+        this.isBoldReading = false;
+        this.initPreferencesAsync();
 
         // Override function
-        const walkTokens = (token: any) => {/* TODO: bold reading
+        const walkTokens = (token: any) => {
             // Bold reading check, emphasis the start of each word by putting it in bold
             if ((token.type === "text" || token.type === "paragraph")
-                && preferences_getAccessibilityReadingMode() === ReadingMode.BoldReading
+                && this.getBoldReading()
                 && token.tokens
                 && !token.raw.includes('<span class="link">') // Placeholder, TODO: redo link parsing in marked itself
             )
@@ -88,8 +91,9 @@ export default class SessionRenderingContext
                     }
                 });
 
-                token.tokens = finalTokens;*/
+                token.tokens = finalTokens;
             }
+        };
 
         marked.use({
             walkTokens,
@@ -122,8 +126,7 @@ export default class SessionRenderingContext
 
     // Parse markdown like *this* or # that
     parseMarkdown(str: string): string {
-        // @ts-ignore
-        return marked.parse(str);
+        return marked.parse(str) as string;
     }
 
     sendWarning(text: string) {
@@ -309,16 +312,31 @@ export default class SessionRenderingContext
     }
 
     /* User preferences */
-
-    async getDisplayModeAsync(): Promise<DisplayMode> {
+    async initPreferencesAsync() {
         // @ts-ignore
-        let raw = await filesystem.readPrefAsync("displayMode", "Default");
-        return raw;
+        this.displayMode = await filesystem.readPrefAsync("displayMode", "Default");
+        // @ts-ignore
+        this.isBoldReading = await filesystem.readPrefAsync("boldReading", "0") === "1";
+    }
+
+    getDisplayMode(): DisplayMode {
+        return this.displayMode;
     }
 
     async setDisplayModeAsync(mode: DisplayMode) {
         // @ts-ignore
         await filesystem.writePrefAsync("displayMode", mode);
+        this.displayMode = mode;
+    }
+
+    getBoldReading(): boolean {
+        return this.isBoldReading;
+    }
+
+    async setBoldReadingAsync(value: boolean) {
+        // @ts-ignore
+        await filesystem.writePrefAsync("boldReading", value ? "1" : "0");
+        this.isBoldReading = value;
     }
 }
 

@@ -35,27 +35,26 @@ export default function AppForm() {
 
     useEffect(() => {
         // We need to get current display mode to know how we render things
-        context.getDisplayModeAsync().then((displayMode: DisplayMode) => {
-            context.displayMode = displayMode;
-            if (context.displayMode === "Default") {
-                // @ts-ignore
-                import("../../css/options/regular.css");
-            } else if (context.displayMode === "Minimalist") {
-                // @ts-ignore
-                import("../../css/options/minimalist.css");
-            }
-
-            // Read token
+        const displayMode = context.getDisplayMode();
+        context.displayMode = displayMode;
+        if (context.displayMode === "Default") {
             // @ts-ignore
-            filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
-                for (let [key, value] of Object.entries(storedSessions)) {
-                    context.addInstance(key, value, t);
-                }
-                for (let s of context.sessions) {
-                    s.connect();
-                }
-            });
-        })
+            import("../../css/options/regular.css");
+        } else if (context.displayMode === "Minimalist") {
+            // @ts-ignore
+            import("../../css/options/minimalist.css");
+        }
+
+        // Read token
+        // @ts-ignore
+        filesystem.readTokenAsync().then((storedSessions: Record<string, string>) => {
+            for (let [key, value] of Object.entries(storedSessions)) {
+                context.addInstance(key, value, t);
+            }
+            for (let s of context.sessions) {
+                s.connect();
+            }
+        });
 
     }, [])
 

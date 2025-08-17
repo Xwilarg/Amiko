@@ -90,7 +90,9 @@
                 "title": "Display mode",
                 "default": "Default",
                 "minimalist": "Minimalist"
-            }
+            },
+
+            "boldReading": "Bold reading"
         }
     }
 }
