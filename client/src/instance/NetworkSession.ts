@@ -176,11 +176,11 @@ export default class NetworkSession
                         switch (c.type)
                         {
                             case 4: // Server info
-                                self.messaging.updateServerInfo(c);
+                                self.messaging.addServerInfo(c);
                                 break;
 
                             case 5: // User info
-                                self.messaging.updateUserInfo(c);
+                                self.messaging.addUserInfo(c);
                                 break;
                             
                         }
@@ -242,6 +242,11 @@ export default class NetworkSession
                     self.messaging.updateServerInfo(json);
                     self.renderingContext.refreshServerDisplayState!();
                     self.renderingContext.refreshNavbar!();
+                    break;
+
+                case 9: // A channel settings were modified
+                    self.messaging.updateChannelInfo(json);
+                    self.renderingContext.refreshServerDisplayState!();
                     break;
 
                 case 10: // A user settings were modified

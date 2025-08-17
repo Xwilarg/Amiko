@@ -13,7 +13,7 @@ public class ChannelUpdateMessage : ChannelMessageBase, IBaseMessage
     public int ChanId { set; get; }
     public UpdateType UpdateType { set; get; }
 
-    public MessageType Type => MessageType.UserUpdate;
+    public MessageType Type => MessageType.ChannelUpdate;
 }
 
 public class ChannelInfoMessage : ChannelMessageBase

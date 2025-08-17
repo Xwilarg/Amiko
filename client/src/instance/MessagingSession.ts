@@ -114,11 +114,40 @@ export default class MessagingSession
     }
 
     updateUserInfo(msg: any) {
+        let u = this.users[msg.id];
+        if (msg.color !== null) u.color = msg.color;
+        if (msg.character !== null) u.character = msg.character;
+        if (msg.username !== null) u.username = msg.username;
+    }
+
+    updateChannelInfo(msg: any) {
+        let s = this.servers[msg.servId];
+        if (msg.updateType === 0) { // Creation
+            s.channels[msg.chanId] = {
+                name: msg.name,
+                description: undefined,
+                messages: []
+            };
+        }
+        else if (msg.updateType === 1) { // Edition
+            let c = s.channels[msg.chanId];
+            if (msg.name !== null) c.name = msg.name;
+        } else { // Deletion
+            delete s.channels[msg.chanId];
+        }
+    }
+
+    updateServerInfo(msg: any) {
+        let s = this.servers[msg.id];
+        if (msg.color !== null) s.color = msg.color;
+        if (msg.character !== null) s.character = msg.character;
+        if (msg.name !== null) s.name = msg.name;
+        if (msg.allowsGuest !== null) s.allowsGuest = msg.allowsGuest;
+        if (msg.isEphemeral !== null) s.isEphemeral = msg.isEphemeral;
+    }
+
+    addUserInfo(msg: any) {
         if (msg.id in this.users) {
-            let u = this.users[msg.id];
-            if (msg.color !== null) u.color = msg.color;
-            if (msg.character !== null) u.character = msg.character;
-            if (msg.username !== null) u.username = msg.username;
             return;
         }
 
@@ -141,14 +170,8 @@ export default class MessagingSession
         }
     }
 
-    updateServerInfo(msg: any) {
+    addServerInfo(msg: any) {
         if (msg.id in this.servers) {
-            let s = this.servers[msg.id];
-            if (msg.color !== null) s.color = msg.color;
-            if (msg.character !== null) s.character = msg.character;
-            if (msg.name !== null) s.name = msg.name;
-            if (msg.allowsGuest !== null) s.allowsGuest = msg.allowsGuest;
-            if (msg.isEphemeral !== null) s.isEphemeral = msg.isEphemeral;
             return;
         }
 
