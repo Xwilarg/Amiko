@@ -5,7 +5,7 @@ namespace Amiko.Server.Models.Message;
 
 public class ServerMessageBase
 {
-    public required int Id { set; get; }
+    public int Id { set; get; }
     public string? Name { set; get; }
     public Color? Color { set; get; }
     public string? Character { set; get; }

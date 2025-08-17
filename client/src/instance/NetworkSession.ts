@@ -220,20 +220,20 @@ export default class NetworkSession
                     self.renderingContext.refMsg.current.refresh();
                     break;
 
-                case 4: // A server settings were modified
+                case 7: // A message was modified
+                    //self.renderer.editMessage(json, renderer_getMessageById(json.id))
+                    break;
+
+                case 8: // A server settings were modified
                     self.messaging.updateServerInfo(json);
                     self.renderingContext.refreshServerDisplayState!();
                     self.renderingContext.refreshNavbar!();
                     break;
 
-                case 5: // A user settings were modified
+                case 10: // A user settings were modified
                     self.messaging.updateUserInfo(json); // todo: refresh messages
                     // @ts-ignore
                     self.renderingContext.refMsg.current.refresh();
-                    break;
-
-                case 7: // A message was modified
-                    //self.renderer.editMessage(json, renderer_getMessageById(json.id))
                     break;
             }
         });
