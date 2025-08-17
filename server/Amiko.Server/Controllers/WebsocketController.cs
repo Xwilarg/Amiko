@@ -96,7 +96,7 @@ namespace Amiko.Server.Controllers
 
                     try
                     {
-                        var baseMsg = JsonSerializer.Deserialize<IBaseMessage>(Encoding.UTF8.GetString(buffer), _options);
+                        var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _options);
 
                         if (baseMsg.Type == MessageType.Heartbeat)
                         { // Heartbeat, we just send one back

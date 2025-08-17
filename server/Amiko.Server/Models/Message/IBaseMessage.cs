@@ -8,6 +8,11 @@ public interface IBaseMessage
     public MessageType Type { get; }
 }
 
+public class BaseMessage : IBaseMessage // For deserialization
+{
+    public MessageType Type { set; get; }
+}
+
 public class ArrayMessage<T> : IBaseMessage
     where T : IBaseMessage
 {
