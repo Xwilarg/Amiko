@@ -147,3 +147,12 @@ input[type='submit'] {
     height: 100%;
     background-color: var(--bulma-scheme-main);
 }
+
+/* Channel settings */
+.settings-chan-preview {
+    width: 215px;
+}
+
+.settings-chan-new {
+    margin-top: 10px;
+}

@@ -277,6 +277,12 @@ export default class SessionRenderingContext
         this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/create/${this.currServ}`, "POST");
     }
 
+    updateChannelName(chanId: number, name: string) {
+        this.sessions[this.currInstance].sendApiMessage({
+            name: name
+        }, `channel/update/${this.currServ}/${chanId}`, "POST");
+    }
+
     deleteChannel(chanId: number) {
         this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/delete/${this.currServ}/${chanId}`, "DELETE");
     }
