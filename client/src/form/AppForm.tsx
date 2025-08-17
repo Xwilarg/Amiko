@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import i18n from "i18next";
 import ServerSelectionForm from './messaging/ServerSelectionForm';
 import MessageContainerForm from './messaging/MessageContainerForm';
-import { SessionRenderingContextProvider, type DisplayMode } from '../context/SessionRenderingContext';
+import { SessionRenderingContextProvider } from '../context/SessionRenderingContext';
 import NavbarForm from './navbar/NavbarForm';
 import SettingsContainerForm from './settings/SettingsContainerForm';
 import { initReactI18next, useTranslation } from "react-i18next";

@@ -56,8 +56,13 @@ export default class SessionRenderingContext
             {
                 const finalTokens: Array<any> = [];
 
-                token.tokens.forEach((subToken: any) => { // Paragraphs may contains lot to tokens
-                    if (subToken.type === 'text') // We don't emphasis something that is already in italic or other
+                for (let i = 0; i < token.tokens.length; i++) {
+                    let subToken = token.tokens[i];
+                    if (i > 0 && subToken.type === "text" && token.tokens[i - 1].type === "html" && token.tokens[i - 1].text.includes("material-symbols-outlined"))
+                    {
+                        finalTokens.push(subToken);
+                    }
+                    else if (subToken.type === 'text') // We don't emphasis something that is already in italic or other
                     {
                         const words = subToken.text.split(' ');
                         for (let i = 0; i < words.length; i++) // We split by space so we can iterate on each word
@@ -89,7 +94,7 @@ export default class SessionRenderingContext
                     } else {
                         finalTokens.push(subToken);
                     }
-                });
+                }
 
                 token.tokens = finalTokens;
             }

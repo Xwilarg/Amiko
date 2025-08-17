@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useState, type ReactElement } from "react"
+import { forwardRef, useContext, type ReactElement } from "react"
 import type { MessageFlag } from "../../model/MessageFlag";
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
