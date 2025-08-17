@@ -26,7 +26,7 @@ public class ServerController : ControllerBase
     }
 
     [HttpPost("update/{servId}")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> UpdateServer(int servId, [FromBody] ServerUpdateMessage msg)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
