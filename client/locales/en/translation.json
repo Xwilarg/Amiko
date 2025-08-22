@@ -67,7 +67,9 @@
             "isEphemeral": "Automatically delete older messages",
 
             "allowsGuestExpl": "If enabled, users don't need to create an account to join this server",
-            "isEphemeralExpl": "If enabled, only the lasts 50 messages are kept"
+            "isEphemeralExpl": "If enabled, only the lasts 50 messages are kept",
+
+            "delete": "Delete server"
         },
         "user": {
             "title": "User settings",

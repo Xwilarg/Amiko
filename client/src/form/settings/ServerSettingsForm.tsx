@@ -130,5 +130,14 @@ export default function ServerSettingsForm () {
                 <span className="material-symbols-outlined small-icon">add</span>
             </button>
         </div>
+        <div className="container has-text-left mt-5">
+            <button className="button is-danger" onClick={() => {
+                () => { if (confirm(t("settings.common.destructive"))) {
+                    ctx.deleteServer();
+                } }
+            }}>
+                <span className="material-symbols-outlined small-icon">delete</span> {t("settings.server.delete")}
+            </button>
+        </div>
     </>
 }

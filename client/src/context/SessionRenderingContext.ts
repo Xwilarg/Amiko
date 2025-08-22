@@ -281,6 +281,14 @@ export default class SessionRenderingContext
         }, `user/update/${this.sessions[this.currInstance].messaging.mainUser}`, "POST");
     }
 
+    createNewServer() {
+        this.sessions[this.currInstance].sendApiMessageNoPayload(`server/create`, "POST");
+    }
+
+    deleteServer() {
+        this.sessions[this.currInstance].sendApiMessageNoPayload(`server/delete`, "DELETE");
+    }
+
     createNewChannel() {
         this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/create/${this.currServ}`, "POST");
     }
