@@ -260,8 +260,6 @@ export default class NetworkSession
 
                 case 3: // Acknowledgement of a message sent
                     self.messaging.acknowledgeMessage(json.ackId, json.newId, json.isError);
-                    // @ts-ignore
-                    self.renderingContext.refMsg.current.refresh();
                     break;
 
                 case 7: // A message was modified

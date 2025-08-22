@@ -64,7 +64,7 @@ export default class MessagingSession
             attachments: msg.attachments,
 
             ackId: null,
-            isError: false
+            flag: "None"
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
 
@@ -80,8 +80,8 @@ export default class MessagingSession
             attachments: msg.attachments,
 
             ackId: null,
-            isError: false
-        }, "None");
+            flag: "None"
+        });
     }
 
     addPendingMessage(servId: number, chanId: number, msg: any): Message {
@@ -93,7 +93,7 @@ export default class MessagingSession
             attachments: [],
 
             ackId: msg.ackId,
-            isError: false
+            flag: "None"
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
 
@@ -109,7 +109,7 @@ export default class MessagingSession
         delete this.pendingAcknowledgement[ackId];
 
          if (isError) {
-            msg.isError = true;
+            msg.flag = "IsError";
 
             // Message wasn't sent so we don't send the attachments
             this.discardAttachment(ackId);
@@ -120,6 +120,8 @@ export default class MessagingSession
             }
             this.discardAttachment(ackId);
         }
+        // @ts-ignore
+        this.session.renderingContext.refMsg.current.updateSingleMessage(newId, msg);
     }
 
     sendSystemMessage(text: string) {
@@ -131,8 +133,8 @@ export default class MessagingSession
             attachments: [],
 
             ackId: null,
-            isError: false
-        }, "IsSystem");
+            flag: "IsSystem"
+        });
     }
 
     sendErrorMessage(text: string) {
@@ -144,8 +146,8 @@ export default class MessagingSession
             attachments: [],
 
             ackId: null,
-            isError: false
-        }, "IsError");
+            flag: "IsError"
+        });
     }
 
     updateUserInfo(msg: any) {
@@ -289,7 +291,8 @@ export default class MessagingSession
     }
 
     editMessage(msg: any) {
-        console.log(msg);
+        // @ts-ignore
+        this.session.renderingContext.refMsg.current.updateSingleMessage(msg.id, msg);
     }
 
     // Attachment management

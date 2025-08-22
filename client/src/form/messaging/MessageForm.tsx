@@ -1,5 +1,4 @@
 import { forwardRef, useContext, type ReactElement } from "react"
-import type { MessageFlag } from "../../model/MessageFlag";
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
 import type Message from "../../model/Message";
@@ -8,11 +7,10 @@ import { SessionRenderingContextProvider } from "../../context/SessionRenderingC
 
 interface MessageFormProps {
     msg: Message;
-    type: MessageFlag
 }
 
 const MessageForm = forwardRef((
-    { msg, type }: MessageFormProps,
+    { msg }: MessageFormProps,
     _
 ) => {
     let ctx = useContext(SessionRenderingContextProvider);
@@ -22,8 +20,8 @@ const MessageForm = forwardRef((
 
     let cssTag = "";
     if (msg.ackId !== null) cssTag = "sending";
-    else if (type === "IsSystem") cssTag = "system";
-    else if (msg.isError || type == "IsError") cssTag = "error";
+    else if (msg.flag === "IsSystem") cssTag = "system";
+    else if (msg.flag === "IsError") cssTag = "error";
 
     let pfpNode: ReactElement;
     let username;

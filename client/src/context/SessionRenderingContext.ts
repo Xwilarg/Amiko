@@ -196,9 +196,9 @@ export default class SessionRenderingContext
 
     /* MESSAGE MANAGEMENT */
     
-    sendMessage(msg: Message, type: MessageFlag) {
+    sendMessage(msg: Message) {
         // @ts-ignore
-        this.refMsg.current.sendMessage(msg, type);
+        this.refMsg.current.sendMessage(msg);
     }
 
     sendUserMessage(text: string, authors: number[] | null): number | null {
@@ -219,7 +219,7 @@ export default class SessionRenderingContext
 
         this.getCurrentInstance().sendNetworkMessage(newMsg);
         const msg = this.getCurrentInstance().messaging.addPendingMessage(this.currServ, this.currChannel, newMsg);
-        this.sendMessage(msg, "None");
+        this.sendMessage(msg);
 
         return ackId;
     }

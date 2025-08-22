@@ -1,19 +1,13 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import MessageInputForm from "./MessageInputForm";
 import MessageForm from "./MessageForm";
-import type { MessageFlag } from "../../model/MessageFlag";
 import type Message from "../../model/Message";
-
-interface ScreenMessage {
-    msg: Message;
-    flag: MessageFlag
-}
 
 const MessageContainerForm = forwardRef((
     {},
     msgRef
 ) => {
-    const [renderedMessages, setRendererMessages] = useState<Array<ScreenMessage>>([]);
+    const [renderedMessages, setRendererMessages] = useState<Array<Message>>([]);
 
     // Add a div at the end of the list of message to easily scroll down
     // https://stackoverflow.com/a/52266212
@@ -35,24 +29,33 @@ const MessageContainerForm = forwardRef((
     }, [renderedMessages]);
 
     useImperativeHandle(msgRef, () => ({
-        sendMessage: (msg: Message, flag: MessageFlag) => {
-            setRendererMessages(prev => [...prev, { msg: msg, flag: flag }]);
+        sendMessage: (msg: Message) => {
+            setRendererMessages(prev => [...prev, msg]);
         },
         clearAllMessages: () => {
             setRendererMessages([]);
         },
         setMessages: (msgs: Array<Message>) => {
-            const formatted = msgs.map<ScreenMessage>(x => { return { msg: x, flag: "None" }; })
-            setRendererMessages(prev => [...prev, ...formatted]);
+            setRendererMessages(prev => [...prev, ...msgs]);
         },
         refresh:  () => {
             setRendererMessages(prev => [...prev]);
+        },
+        updateSingleMessage(id: number, p: Message) {
+            setRendererMessages(msgs => {
+                let msg = msgs.find(x => x.id === id)!;
+                msg.ackId = null;
+                msg.flag = p.flag ?? msg.flag;
+                msg.attachments = p.attachments ?? msg.attachments;
+                msg.content = p.content ?? msg.content;
+                return [...msgs];
+            });
         }
     }));
     return (
         <div id="main-screen">
             <div className="is-flex is-flex-direction-column" id="messages" ref={containerRef}>
-                {renderedMessages.map(msg => <MessageForm msg={msg.msg} type={msg.flag} key={msg.msg.id ?? `ack-${msg.msg.ackId}`} />)}
+                {renderedMessages.map(msg => <MessageForm msg={msg} />)}
                 <div ref={messagesEndRef} />
             </div>
             <MessageInputForm />
