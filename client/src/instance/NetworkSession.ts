@@ -89,6 +89,24 @@ export default class NetworkSession
         this.socket?.send(JSON.stringify(msg));
     }
 
+    sendAttachmentOverNetwork(servId: number, chanId: number, msgId: number, files: File[]) {
+        const data = new FormData();
+        for (const f of files) {
+            data.append("files", f);
+        }
+    
+        fetch(`${this.instance}/api/attachment/attach/${servId}/${chanId}/${msgId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            },
+            body: data
+        })
+        .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))
+        .then(text => {})
+        .catch((err) => { this.messaging.sendErrorMessage("Attachment upload failed: " + err) });
+    }
+
     sendApiMessage(msg: any, endpoint: string, method: string) {
         fetch(`${this.instance}/api/${endpoint}`, {
             method: method,
@@ -241,13 +259,13 @@ export default class NetworkSession
                     break;
 
                 case 3: // Acknowledgement of a message sent
-                    self.messaging.acknowledgeMessage(json.ackId, json.newId);
+                    self.messaging.acknowledgeMessage(json.ackId, json.newId, json.isError);
                     // @ts-ignore
                     self.renderingContext.refMsg.current.refresh();
                     break;
 
                 case 7: // A message was modified
-                    //self.renderer.editMessage(json, renderer_getMessageById(json.id))
+                    self.messaging.editMessage(json);
                     break;
 
                 case 8: // A server settings were modified

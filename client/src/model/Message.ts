@@ -4,6 +4,7 @@ export default interface Message {
     authors: number[] | null;
     content: string;
     attachments: string[];
+    isError: boolean;
 
     ackId: number | null;
 }

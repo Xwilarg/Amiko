@@ -63,7 +63,8 @@ export default class MessagingSession
             content: msg.content,
             attachments: msg.attachments,
 
-            ackId: null
+            ackId: null,
+            isError: false
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
 
@@ -78,7 +79,8 @@ export default class MessagingSession
             content: msg.content,
             attachments: msg.attachments,
 
-            ackId: null
+            ackId: null,
+            isError: false
         }, "None");
     }
 
@@ -90,7 +92,8 @@ export default class MessagingSession
             content: msg.content,
             attachments: [],
 
-            ackId: msg.ackId
+            ackId: msg.ackId,
+            isError: false
         };
         this.servers[servId].channels[chanId].messages.push(msgInst);
 
@@ -99,11 +102,24 @@ export default class MessagingSession
         return msgInst;
     }
 
-    acknowledgeMessage(ackId: number, newId: number) {
+    acknowledgeMessage(ackId: number, newId: number, isError: boolean) {
         const msg = this.pendingAcknowledgement[ackId];
         msg.id = newId;
         msg.ackId = null;
         delete this.pendingAcknowledgement[ackId];
+
+         if (isError) {
+            msg.isError = true;
+
+            // Message wasn't sent so we don't send the attachments
+            this.discardAttachment(ackId);
+        } else {
+            const files = this.getAttachment(ackId);
+            if (files && files.length > 0) {
+                this.session.sendAttachmentOverNetwork(this.session.renderingContext.currServ!, this.session.renderingContext.currChannel!, newId, files);
+            }
+            this.discardAttachment(ackId);
+        }
     }
 
     sendSystemMessage(text: string) {
@@ -114,7 +130,8 @@ export default class MessagingSession
             content: text,
             attachments: [],
 
-            ackId: null
+            ackId: null,
+            isError: false
         }, "IsSystem");
     }
 
@@ -126,7 +143,8 @@ export default class MessagingSession
             content: text,
             attachments: [],
 
-            ackId: null
+            ackId: null,
+            isError: false
         }, "IsError");
     }
 
@@ -268,6 +286,10 @@ export default class MessagingSession
                 }
             }
         }
+    }
+
+    editMessage(msg: any) {
+        console.log(msg);
     }
 
     // Attachment management

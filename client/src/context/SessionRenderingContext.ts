@@ -201,23 +201,27 @@ export default class SessionRenderingContext
         this.refMsg.current.sendMessage(msg, type);
     }
 
-    sendUserMessage(text: string, authors: number[] | null) {
+    sendUserMessage(text: string, authors: number[] | null): number | null {
         if (this.currServ === null || this.currChannel === null) {
-            return; // No server or channel there
+            return null; // No server or channel there
         }
+
+        let ackId = this.ackId++;
 
         const newMsg = {
             type: 2,
             content: text,
-            ackId: this.ackId++,
+            ackId: ackId,
             serverId: this.currServ,
             channelId: this.currChannel,
             authors: authors // TODO
         }
 
         this.getCurrentInstance().sendNetworkMessage(newMsg);
-        const msg = this.getCurrentInstance().messaging.addPendingMessage(this.currServ, this.currChannel, newMsg)
-        this.sendMessage(msg, "None")
+        const msg = this.getCurrentInstance().messaging.addPendingMessage(this.currServ, this.currChannel, newMsg);
+        this.sendMessage(msg, "None");
+
+        return ackId;
     }
     
     clearAllMessages() {

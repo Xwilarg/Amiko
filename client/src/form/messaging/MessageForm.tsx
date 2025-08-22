@@ -23,7 +23,7 @@ const MessageForm = forwardRef((
     let cssTag = "";
     if (msg.ackId !== null) cssTag = "sending";
     else if (type === "IsSystem") cssTag = "system";
-    else if (type == "IsError") cssTag = "error";
+    else if (msg.isError || type == "IsError") cssTag = "error";
 
     let pfpNode: ReactElement;
     let username;

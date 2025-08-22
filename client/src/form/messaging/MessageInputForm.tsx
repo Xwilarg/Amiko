@@ -13,9 +13,17 @@ export default function MessageInputForm() {
     ctx.refreshMessageInput = refreshPage;
 
     function sendMessage() {
-        if (message) {
-            ctx.sendUserMessage(message, ctx.getCurrentAuthors());
+        console.log(message)
+        if (message || ctx.getCurrentInstance().messaging.hasAttachment()) {
+            let ackId = ctx.sendUserMessage(message, ctx.getCurrentAuthors());
+            if (ackId === null) return; // Message couldn't be sent
+
             setMessage("");
+
+            if (ctx.getCurrentInstance().messaging.hasAttachment()) {
+                ctx.getCurrentInstance().messaging.addAttachmentToMessage(ackId, ctx.currServ!, ctx.currChannel!);
+                ctx.getCurrentInstance().messaging.setAttachment(null);
+            }
         }
     }
 
