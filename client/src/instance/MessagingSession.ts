@@ -170,7 +170,14 @@ export default class MessagingSession
             delete this.servers[msg.id];
             if (willBeDeleted) {
                 const keys = Object.keys(this.servers);
-                ctx.currServ = keys.length === 0 ? null : parseInt(Object.keys(this.servers)[0]);
+                if (keys.length > 0) {
+                    ctx.currServ = parseInt(Object.keys(this.servers)[0]);
+                    ctx.currChannel = this.lastVisitedChannels[ctx.currServ];
+                } else {
+                    ctx.currServ = null;
+                    ctx.currChannel = null;
+                }
+                this.lastVisitedChannels[msg.id] = null;
                 this.session.renderingContext.replaceMessages();
             }
         }

@@ -69,24 +69,28 @@ const NavbarForm = forwardRef((
     let notGuest : React.ReactElement;
     if (ctx.sessions.length > 0) {
         let serv = ctx.getCurrentServer();
-        nameDisplay =
-        <div className="level is-mobile">
-            <h3 className="subtitle" id="channel-title">{ctx.getCurrentChannelName()}</h3>
-            {
-                serv.allowsGuest ?
-                <>
-                    <span className="material-symbols-outlined small-icon" title={t("settings.server.allowsGuest")}>face</span>
-                </>
-                : <></>
-            }
-            {
-                serv.isEphemeral ?
-                <>
-                    <span className="material-symbols-outlined small-icon" title={t("settings.server.isEphemeral")}>timer</span>
-                </>
-                : <></>
-            }
-        </div>;
+        if (serv) {
+            nameDisplay =
+            <div className="level is-mobile">
+                <h3 className="subtitle" id="channel-title">{ctx.getCurrentChannelName()}</h3>
+                {
+                    serv.allowsGuest ?
+                    <>
+                        <span className="material-symbols-outlined small-icon" title={t("settings.server.allowsGuest")}>face</span>
+                    </>
+                    : <></>
+                }
+                {
+                    serv.isEphemeral ?
+                    <>
+                        <span className="material-symbols-outlined small-icon" title={t("settings.server.isEphemeral")}>timer</span>
+                    </>
+                    : <></>
+                }
+            </div>;
+        } else {
+            nameDisplay = <></>;
+        }
 
         notGuest = !ctx.isCurrentUserGuest() ?
             <button className="navbar-item button" onClick={(e) => {
