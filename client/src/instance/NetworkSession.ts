@@ -194,7 +194,7 @@ export default class NetworkSession
 
                         self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
 
-                        if (Object.keys(self.messaging.users).length === 1 && !self.renderingContext.getCurrentServer().allowsGuest) {
+                        if (Object.keys(self.messaging.users).length === 1 && !self.renderingContext.getCurrentServer()!.allowsGuest) {
                             let intro = "";
                             intro += `# ${self.t("intro.welcome1")}\n`;
                             intro += `${self.t("intro.welcome2")}\n`;

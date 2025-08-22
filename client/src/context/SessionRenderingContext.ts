@@ -15,8 +15,8 @@ export default class SessionRenderingContext
     sessions: Array<NetworkSession>
 
     currInstance: number;
-    currServ: number;
-    currChannel: number;
+    currServ: number | null;
+    currChannel: number | null;
 
     // Ref pointing to MessageContainerForm.tsx
     refMsg: React.RefObject<unknown> | null
@@ -198,6 +198,10 @@ export default class SessionRenderingContext
     }
 
     sendUserMessage(text: string, authors: number[] | null) {
+        if (this.currServ === null || this.currChannel === null) {
+            return; // No server or channel there
+        }
+
         const newMsg = {
             type: 2,
             content: text,
@@ -221,8 +225,11 @@ export default class SessionRenderingContext
     replaceMessages() {
         // @ts-ignore
         this.refMsg.current.clearAllMessages();
-        // @ts-ignore
-        this.refMsg.current.setMessages(this.getCurrentChannel().messages);
+        const chan = this.getCurrentChannel();
+        if (chan) {
+            // @ts-ignore
+            this.refMsg.current.setMessages(this.getCurrentChannel().messages);
+        }
     }
 
     // Add the list of message given in param to the screen
@@ -241,16 +248,19 @@ export default class SessionRenderingContext
         return this.sessions[this.currInstance].instance;
     }
 
-    getCurrentServer() : Server {
+    getCurrentServer() : Server | null {
+        if (this.currServ === null) return null;
         return this.sessions[this.currInstance].messaging.servers[this.currServ];
     }
 
-    getCurrentChannel() : Channel {
-        return this.getCurrentServer().channels[this.currChannel];
+    getCurrentChannel() : Channel | null {
+        if (this.currServ === null || this.currChannel === null) return null;
+        return this.getCurrentServer()!.channels[this.currChannel];
     }
 
-    getCurrentChannelName() : string {
-        return this.getCurrentServer().channels[this.currChannel].name;
+    getCurrentChannelName() : string | null {
+        if (this.currServ === null || this.currChannel === null) return null;
+        return this.getCurrentServer()!.channels[this.currChannel].name;
     }
 
     getCurrentAuthors() : number[] {

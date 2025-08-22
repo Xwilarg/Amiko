@@ -137,7 +137,8 @@ export default class MessagingSession
             let willBeDeleted = ctx.currServ == msg.servId && ctx.currChannel === msg.chanId;
             delete s.channels[msg.chanId];
             if (willBeDeleted) {
-                ctx.currChannel = parseInt(Object.keys(this.servers[ctx.currServ].channels)[0]);
+                const keys = ctx.currServ === null ? [] : Object.keys(this.servers[ctx.currServ].channels);
+                ctx.currChannel = keys.length === 0 ? null : parseInt(keys[0]);
                 this.session.renderingContext.replaceMessages();
             }
         }
@@ -159,7 +160,8 @@ export default class MessagingSession
             let willBeDeleted = ctx.currServ === msg.id; // TODO: Delete message being sent
             delete this.servers[msg.id];
             if (willBeDeleted) {
-                ctx.currServ = parseInt(Object.keys(this.servers)[0]);
+                const keys = Object.keys(this.servers);
+                ctx.currServ = keys.length === 0 ? null : parseInt(Object.keys(this.servers)[0]);
                 this.session.renderingContext.replaceMessages();
             }
         }
