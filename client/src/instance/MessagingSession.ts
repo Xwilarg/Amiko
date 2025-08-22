@@ -133,17 +133,34 @@ export default class MessagingSession
             let c = s.channels[msg.chanId];
             if (msg.name !== null) c.name = msg.name;
         } else { // Deletion
+            let ctx = this.session.renderingContext;
+            let willBeDeleted = ctx.currServ == msg.servId && ctx.currChannel === msg.chanId;
             delete s.channels[msg.chanId];
+            if (willBeDeleted) {
+                ctx.currChannel = parseInt(Object.keys(this.servers[ctx.currServ].channels)[0]);
+            }
         }
     }
 
     updateServerInfo(msg: any) {
-        let s = this.servers[msg.id];
-        if (msg.color !== null) s.color = msg.color;
-        if (msg.character !== null) s.character = msg.character;
-        if (msg.name !== null) s.name = msg.name;
-        if (msg.allowsGuest !== null) s.allowsGuest = msg.allowsGuest;
-        if (msg.isEphemeral !== null) s.isEphemeral = msg.isEphemeral;
+        if (msg.updateType === 0) { // Creation
+            let s = this.servers[msg.id];
+            if (msg.color !== null) s.color = msg.color;
+            if (msg.character !== null) s.character = msg.character;
+            if (msg.name !== null) s.name = msg.name;
+            if (msg.allowsGuest !== null) s.allowsGuest = msg.allowsGuest;
+            if (msg.isEphemeral !== null) s.isEphemeral = msg.isEphemeral;
+        }
+        else if (msg.updateType === 1) { // Edition
+            if (msg.name !== null) this.servers[msg.id].name = msg.name;
+        } else { // Deletion
+            let ctx = this.session.renderingContext;
+            let willBeDeleted = ctx.currServ === msg.id; // TODO: Delete message being sent
+            delete this.servers[msg.id];
+            if (willBeDeleted) {
+                ctx.currServ = parseInt(Object.keys(this.servers)[0]);
+            }
+        }
     }
 
     addUserInfo(msg: any) {

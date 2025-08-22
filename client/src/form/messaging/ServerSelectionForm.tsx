@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import { SessionRenderingContextProvider } from '../../context/SessionRenderingContext';
+import { t } from 'i18next';
 
 export default function ServerSelectionForm () {
     let [serverListDisplay, setServerListDisplay] = useState<Array<ReactElement>>([]);
@@ -28,6 +29,7 @@ export default function ServerSelectionForm () {
                 const isCurrentServer = ctx.isCurrentServer(ns, parseInt(key));
                 servs.push(
                     <button key={value.name} className={"button profile is-flex is-flex-wrap-wrap " + (isCurrentServer ? "is-primary" : "")} onClick={() => {
+                        ctx.setCurrentServer(parseInt(key));
                         setShowChannels(p => !p);
                     }}>
                         <div className="pfp" style={{
@@ -52,6 +54,18 @@ export default function ServerSelectionForm () {
                         );
                     }
                 }
+            }
+            if (ctx.amIAdmin()) {
+                servs.push(
+                    <button key={`${ns.instance}-new`} className="button profile is-flex is-flex-wrap-wrap" onClick={() => {
+                        ctx.createNewServer();
+                    }}>
+                        <div className="pfp">
+                            <span className="material-symbols-outlined small-icon">add</span>
+                        </div>
+                        <p>{t("serverSelection.add")}</p>
+                    </button>
+                );
             }
         }
         setServerListDisplay(servs);

@@ -177,6 +177,13 @@ export default class SessionRenderingContext
             this.currChannel == chanId;
     }
 
+    setCurrentServer(servId: number) {
+        this.currServ = servId;
+        this.refreshServerDisplayState!();
+        this.refreshServerSettings?.();
+        this.replaceMessages(this.getCurrentChannel().messages)
+    }
+
     setCurrentChannel(chanId: number) {
         this.currChannel = chanId;
         this.refreshServerDisplayState!();
@@ -286,7 +293,7 @@ export default class SessionRenderingContext
     }
 
     deleteServer() {
-        this.sessions[this.currInstance].sendApiMessageNoPayload(`server/delete`, "DELETE");
+        this.sessions[this.currInstance].sendApiMessageNoPayload(`server/delete/${this.currServ}`, "DELETE");
     }
 
     createNewChannel() {

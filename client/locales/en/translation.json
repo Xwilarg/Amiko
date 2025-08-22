@@ -53,6 +53,10 @@
         "badInvitation": "Invalid invitation token"
     },
 
+    "serverSelection": {
+        "add": "Add Server"
+    },
+
     "settings": {
         "common": {
             "destructive": "Are you sure you want to continue? This is a destructive action"

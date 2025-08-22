@@ -45,16 +45,31 @@ public class ServerController : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateServer()
     {
+        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+
         var s = ServerQuery.AddServer(_dbContext, "New Server");
         if (s != -1)
         {
-            var msg = new ServerUpdateMessage()
+            var sMsg = new ServerUpdateMessage()
             {
                 Id = s,
                 Name = "New Server",
                 UpdateType = UpdateType.Creation
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
+            await _connManager.BroadcastMessageAsync(_dbContext, null, sMsg);
+            
+            var c = ChannelQuery.AddChannel(_dbContext, claimId, s, "New Channel");
+            if (c != -1)
+            {
+                var cMsg = new ChannelUpdateMessage()
+                {
+                    ServId = s,
+                    ChanId = c,
+                    Name = "New Channel",
+                    UpdateType = UpdateType.Creation
+                };
+                await _connManager.BroadcastMessageAsync(_dbContext, s, cMsg);
+            }
             return StatusCode(StatusCodes.Status200OK);
         }
         return StatusCode(StatusCodes.Status403Forbidden);
