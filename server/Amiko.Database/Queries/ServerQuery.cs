@@ -147,8 +147,13 @@ public static class ServerQuery
 
     public static bool DeleteServer(SqliteContext ctx, int servId)
     {
-        var s = GetServerRaw(ctx, servId);
+        var s = ctx.Servers.Include(x => x.Channels).FirstOrDefault(x => x.Id == servId);
         if (s == null) return false;
+
+        var matchingIds = ctx.AllowUsers.Where(x => x.ServerId == servId);
+        ctx.AllowUsers.RemoveRange(matchingIds);
+
+        s.Channels.RemoveAll(x => true);
 
         ctx.Servers.Remove(s);
         ctx.SaveChanges();
