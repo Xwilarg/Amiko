@@ -138,6 +138,7 @@ export default class MessagingSession
             delete s.channels[msg.chanId];
             if (willBeDeleted) {
                 ctx.currChannel = parseInt(Object.keys(this.servers[ctx.currServ].channels)[0]);
+                this.session.renderingContext.replaceMessages();
             }
         }
     }
@@ -159,6 +160,7 @@ export default class MessagingSession
             delete this.servers[msg.id];
             if (willBeDeleted) {
                 ctx.currServ = parseInt(Object.keys(this.servers)[0]);
+                this.session.renderingContext.replaceMessages();
             }
         }
     }

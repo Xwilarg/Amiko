@@ -181,13 +181,13 @@ export default class SessionRenderingContext
         this.currServ = servId;
         this.refreshServerDisplayState!();
         this.refreshServerSettings?.();
-        this.replaceMessages(this.getCurrentChannel().messages)
+        this.replaceMessages()
     }
 
     setCurrentChannel(chanId: number) {
         this.currChannel = chanId;
         this.refreshServerDisplayState!();
-        this.replaceMessages(this.getCurrentChannel().messages)
+        this.replaceMessages()
     }
 
     /* MESSAGE MANAGEMENT */
@@ -217,12 +217,12 @@ export default class SessionRenderingContext
         this.refMsg.current.clearAllMessages();
     }
     
-    // Remove all messages sent and replace by the ones given in param
-    replaceMessages(msgs: Message[]) {
+    // Remove all messages sent and replace by the current ones
+    replaceMessages() {
         // @ts-ignore
         this.refMsg.current.clearAllMessages();
         // @ts-ignore
-        this.refMsg.current.setMessages(msgs);
+        this.refMsg.current.setMessages(this.getCurrentChannel().messages);
     }
 
     // Add the list of message given in param to the screen
