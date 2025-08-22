@@ -37,7 +37,7 @@ const NavbarForm = forwardRef((
                         }}>{t("invitation.forInstance")}</button>
                     </div>
                     <div className="control">
-                        <input className="input"type="text" readOnly={true} value={ctx.getCurrentInstance()} />
+                        <input className="input"type="text" readOnly={true} value={ctx.getCurrentInstanceName()} />
                     </div>
                 </div>
                 <div className="field pb-6">

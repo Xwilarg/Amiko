@@ -1,16 +1,16 @@
-import { forwardRef, useContext, useImperativeHandle, useState } from 'react'
+import { useContext, useState } from 'react'
 import { SessionRenderingContextProvider } from '../../context/SessionRenderingContext';
 
 
-const MessageInputForm = forwardRef((
-    {},
-    ref
-) => {
+export default function MessageInputForm() {
     const [message, setMessage] = useState('');
+    const [r, forceRefresh] = useState(0);
     const ctx = useContext(SessionRenderingContextProvider);
 
-    useImperativeHandle(ref, () => ({
-    }));
+    function refreshPage() { // Need to clean this
+        forceRefresh(r + 1);
+    }
+    ctx.refreshMessageInput = refreshPage;
 
     function sendMessage() {
         if (message) {
@@ -29,15 +29,21 @@ const MessageInputForm = forwardRef((
             e.preventDefault();
             sendMessage();
         }
+        else if (e.key === 'Escape') {
+            e.preventDefault();
+            ctx.getCurrentInstance().messaging.setAttachment(null);
+        }
     }
 
     return (
     <form onSubmit={onSubmit}>
         <fieldset disabled={false} id="message-form" className="field has-addons container">
             <p className="control">
-                <label htmlFor="attach-file" className="button" id="attach-file-container">
+                <label htmlFor="attach-file" className={"button" + ((ctx.getCurrentInstance()?.messaging?.hasAttachment() ?? false) ? " is-primary" : "")} id="attach-file-container">
                     <span className="material-symbols-outlined">attach_file</span>
-                    <input type="file" id="attach-file" />
+                    <input type="file" id="attach-file" onChange={(e) => {
+                        ctx.getCurrentInstance().messaging.setAttachment(e.target.files);
+                    }} />
                 </label>
             </p>
             <p className="control is-expanded">
@@ -55,6 +61,4 @@ const MessageInputForm = forwardRef((
 
     </form>
     )
-});
-
-export default MessageInputForm;
+}

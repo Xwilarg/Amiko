@@ -41,7 +41,7 @@ export default function ServerSelectionForm () {
                 );
 
                 if (isCurrentServer) {
-                    let chanEntries = Object.entries(ctx.getCurrentServer().channels);
+                    let chanEntries = Object.entries(ctx.getCurrentServer()!.channels);
                     for (let [chanKey, chanValue] of chanEntries) {
                         const isCurrentChannel = ctx.isCurrentChannel(ns, parseInt(key), parseInt(chanKey));
                         chans.push(

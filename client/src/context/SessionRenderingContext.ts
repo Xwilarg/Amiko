@@ -32,11 +32,13 @@ export default class SessionRenderingContext
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
     refreshServerSettings: (() => void) | null;
+    refreshMessageInput: (() => void) | null;
 
     constructor() {
         this.refreshServerDisplayState = null;
         this.refreshNavbar = null;
         this.refreshServerSettings = null;
+        this.refreshMessageInput = null;
 
         this.emojiParser = new EmojiConvertor();
         this.emojiParser.replace_mode = "unified";
@@ -135,11 +137,11 @@ export default class SessionRenderingContext
     }
 
     sendWarning(text: string) {
-        this.sessions[this.currInstance].messaging.sendSystemMessage(text);
+        this.getCurrentInstance().messaging.sendSystemMessage(text);
     }
 
     sendError(text: string) {
-        this.sessions[this.currInstance].messaging.sendErrorMessage(text);
+        this.getCurrentInstance().messaging.sendErrorMessage(text);
     }
 
     /* USER MANAGEMENT */
@@ -147,13 +149,13 @@ export default class SessionRenderingContext
     // Does current user have admin perms
     amIAdmin() : boolean {
         if (this.sessions.length === 0) return false;
-        const m = this.sessions[this.currInstance].messaging;
+        const m = this.getCurrentInstance().messaging;
         if (!m.mainUser) return false;
         return m.users[m.mainUser].isAdmin
     }
 
     getUsers(ids: Array<number>) : Array<User> {
-        const users = this.sessions[this.currInstance].messaging.users
+        const users = this.getCurrentInstance().messaging.users
         return ids.map(x => users[x]);
     }
 
@@ -165,11 +167,11 @@ export default class SessionRenderingContext
     }
 
     isCurrentInstance(s: NetworkSession) {
-        return s.instance == this.sessions[this.currInstance].instance;
+        return s.instance == this.getCurrentInstance().instance;
     }
 
     isCurrentServer(s: NetworkSession, servId: number) {
-        return this.isCurrentInstance(s) && this.currServ == servId;
+        return this.currServ !== null && this.isCurrentInstance(s) && this.currServ == servId;
     }
 
     isCurrentChannel(s: NetworkSession, servId: number, chanId: number) {
@@ -179,7 +181,7 @@ export default class SessionRenderingContext
 
     setCurrentServer(servId: number) {
         this.currServ = servId;
-        this.currChannel = this.sessions[this.currInstance].messaging.lastVisitedChannels[this.currServ!];
+        this.currChannel = this.getCurrentInstance().messaging.lastVisitedChannels[this.currServ!];
         this.refreshServerDisplayState!();
         this.refreshServerSettings?.();
         this.replaceMessages();
@@ -187,7 +189,7 @@ export default class SessionRenderingContext
 
     setCurrentChannel(chanId: number) {
         this.currChannel = chanId;
-        this.sessions[this.currInstance].messaging.lastVisitedChannels[this.currServ!] = chanId;
+        this.getCurrentInstance().messaging.lastVisitedChannels[this.currServ!] = chanId;
         this.refreshServerDisplayState!();
         this.replaceMessages();
     }
@@ -213,8 +215,8 @@ export default class SessionRenderingContext
             authors: authors // TODO
         }
 
-        this.sessions[this.currInstance].sendNetworkMessage(newMsg);
-        const msg = this.sessions[this.currInstance].messaging.addPendingMessage(this.currServ, this.currChannel, newMsg)
+        this.getCurrentInstance().sendNetworkMessage(newMsg);
+        const msg = this.getCurrentInstance().messaging.addPendingMessage(this.currServ, this.currChannel, newMsg)
         this.sendMessage(msg, "None")
     }
     
@@ -243,16 +245,20 @@ export default class SessionRenderingContext
     /* NAVBAR */
 
     getInvitationLink(onSuccess: (invite: string) => void) {
-        this.sessions[this.currInstance].getInvitationLink(onSuccess);
+        this.getCurrentInstance().getInvitationLink(onSuccess);
     }
 
-    getCurrentInstance() : string {
-        return this.sessions[this.currInstance].instance;
+    getCurrentInstance(): NetworkSession {
+        return this.sessions[this.currInstance];
+    }
+
+    getCurrentInstanceName() : string {
+        return this.getCurrentInstance().instance;
     }
 
     getCurrentServer() : Server | null {
         if (this.currServ === null) return null;
-        return this.sessions[this.currInstance].messaging.servers[this.currServ];
+        return this.getCurrentInstance().messaging.servers[this.currServ];
     }
 
     getCurrentChannel() : Channel | null {
@@ -266,23 +272,23 @@ export default class SessionRenderingContext
     }
 
     getCurrentAuthors() : number[] {
-        let curr = this.sessions[this.currInstance].messaging.mainUser;
+        let curr = this.getCurrentInstance().messaging.mainUser;
         if (curr) return [ curr ];
         return [];
     }
 
     getCurrentClaimUser(): User {
-        let m = this.sessions[this.currInstance].messaging;
+        let m = this.getCurrentInstance().messaging;
         return m.users[m.mainUser!];
     }
 
     isCurrentUserGuest(): boolean {
-        return this.sessions[this.currInstance].messaging.mainUser === null;
+        return this.getCurrentInstance().messaging.mainUser === null;
     }
 
     /* SETTINGS */
     updateServerInfo(name: string, color: Color, character: string, allowsGuest: boolean, isEphemeral: boolean) {
-        this.sessions[this.currInstance].sendApiMessage({
+        this.getCurrentInstance().sendApiMessage({
             color: color,
             character: character,
             name: name,
@@ -292,41 +298,41 @@ export default class SessionRenderingContext
     }
 
     updateUserInfo(username: string, color: Color, character: string) { // TODO: handle alters
-        this.sessions[this.currInstance].sendApiMessage({
+        this.getCurrentInstance().sendApiMessage({
             type: 5,
             color: color,
             character: character,
             username: username
-        }, `user/update/${this.sessions[this.currInstance].messaging.mainUser}`, "POST");
+        }, `user/update/${this.getCurrentInstance().messaging.mainUser}`, "POST");
     }
 
     createNewServer() {
-        this.sessions[this.currInstance].sendApiMessageNoPayload(`server/create`, "POST");
+        this.getCurrentInstance().sendApiMessageNoPayload(`server/create`, "POST");
     }
 
     deleteServer() {
-        this.sessions[this.currInstance].sendApiMessageNoPayload(`server/delete/${this.currServ}`, "DELETE");
+        this.getCurrentInstance().sendApiMessageNoPayload(`server/delete/${this.currServ}`, "DELETE");
     }
 
     createNewChannel() {
-        this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/create/${this.currServ}`, "POST");
+        this.getCurrentInstance().sendApiMessageNoPayload(`channel/create/${this.currServ}`, "POST");
     }
 
     updateChannelName(chanId: number, name: string) {
-        this.sessions[this.currInstance].sendApiMessage({
+        this.getCurrentInstance().sendApiMessage({
             name: name
         }, `channel/update/${this.currServ}/${chanId}`, "POST");
     }
 
     deleteChannel(chanId: number) {
-        this.sessions[this.currInstance].sendApiMessageNoPayload(`channel/delete/${this.currServ}/${chanId}`, "DELETE");
+        this.getCurrentInstance().sendApiMessageNoPayload(`channel/delete/${this.currServ}/${chanId}`, "DELETE");
     }
 
     downloadExport() {
-        fetch(`${this.getCurrentInstance()}/api/export/${this.currServ}/${this.currChannel}`, {
+        fetch(`${this.getCurrentInstanceName()}/api/export/${this.currServ}/${this.currChannel}`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${this.sessions[this.currInstance].token}`
+                'Authorization': `Bearer ${this.getCurrentInstance().token}`
             }
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(`${resp.status}`))

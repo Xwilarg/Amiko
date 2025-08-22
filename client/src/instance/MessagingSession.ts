@@ -4,6 +4,13 @@ import type Server from "../model/Server";
 import type User from "../model/User";
 import type NetworkSession from "./NetworkSession";
 
+export interface MessageAttachment
+{
+    serverId: number;
+    channelId: number;
+    files: File[];
+}
+
 export default class MessagingSession
 {
     session: NetworkSession;
@@ -26,6 +33,10 @@ export default class MessagingSession
 
     systemId: number; // Keep track of IDs for system messages
 
+    // Attachments that are being sent
+    attachments: { [id: number] : MessageAttachment; };
+    currAttachments: File[];
+
     constructor(s: NetworkSession) {
         this.session = s;
 
@@ -38,6 +49,9 @@ export default class MessagingSession
         this.servers = {};
         this.pendingAcknowledgement = {};
         this.lastVisitedChannels = {};
+
+        this.attachments = {};
+        this.currAttachments = [];
     }
 
     // Add a message to the list of messages
@@ -253,6 +267,40 @@ export default class MessagingSession
                     this.addMessageInternal(msg.id, chan.id, m);
                 }
             }
+        }
+    }
+
+    // Attachment management
+
+    setAttachment(files: FileList | null) {
+        this.currAttachments = files ? [...files] : [];
+
+        this.session.renderingContext.refreshMessageInput!();
+    }
+
+    hasAttachment() {
+        return this.currAttachments.length > 0;
+    }
+
+    addAttachmentToMessage(tempId: number, servId: number, chanId: number) {
+        this.attachments[tempId] = {
+            serverId: servId,
+            channelId: chanId,
+            files: this.currAttachments
+        };
+    }
+
+    getAttachment(tempId: number): File[] | null {
+        if (tempId in this.attachments) {
+            return this.attachments[tempId].files;
+        } else {
+            return [];
+        }
+    }
+
+    discardAttachment(tempId: number) {
+        if (tempId in this.attachments) {
+            delete this.attachments[tempId];
         }
     }
 }
