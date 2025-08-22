@@ -5,7 +5,7 @@ namespace Amiko.Server.Models.Message;
 /// <summary>
 /// Represent a message sent
 /// </summary>
-public class MessageInfo : IBaseMessage
+public abstract class BaseMessageInfo : IBaseMessage
 {
     /// <summary>
     /// Server in which the message was sent
@@ -40,6 +40,13 @@ public class MessageInfo : IBaseMessage
 
     public AttachmentMessage[] Attachments { set; get; }
 
+    public abstract MessageType Type { get; }
+}
+
+public class MessageInfo : BaseMessageInfo
+{
+    public override MessageType Type => MessageType.Message;
+
     public static MessageInfo From(MessageDao m)
     {
         return new MessageInfo()
@@ -61,6 +68,9 @@ public class MessageInfo : IBaseMessage
         var msgs = m.Select(From);
         return msgs.OrderBy(x => x.Id);
     }
+}
 
-    public MessageType Type => MessageType.Message;
+public class EditMessageInfo : BaseMessageInfo
+{
+    public override MessageType Type => MessageType.MessageUpdate;
 }
