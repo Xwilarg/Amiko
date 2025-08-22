@@ -185,16 +185,28 @@ export default class NetworkSession
                             
                         }
                     }
-                    if (json.data[0].type == 5 && self.renderingContext.isCurrentInstance(self)) {
-                        let servId = parseInt(Object.keys(self.messaging.servers)[0]);
-                        let chanId = parseInt(Object.keys(self.messaging.servers[servId].channels)[0]);
+                    if ((json.data.length === 0 || json.data[0].type == 5) && self.renderingContext.isCurrentInstance(self)) {
+                        const servKeys = Object.keys(self.messaging.servers);
+                        if (servKeys.length > 0) {
+                            let servId = parseInt(servKeys[0]);
+                            var chanKeys = Object.keys(self.messaging.servers[servId].channels);
+                            if (chanKeys.length > 0) {
+                                let chanId = parseInt(chanKeys[0]);
+                                self.renderingContext.currChannel = chanId;
 
-                        self.renderingContext.currServ = servId;
-                        self.renderingContext.currChannel = chanId;
+                                // Serv and channel exist, we display the messages
+                                self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
+                            } else {
+                                self.renderingContext.currChannel = null;
+                            }
 
-                        self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
+                            self.renderingContext.currServ = servId;
+                        } else {
+                            self.renderingContext.currServ = null;
+                            self.renderingContext.currChannel = null;
+                        }
 
-                        if (Object.keys(self.messaging.users).length === 1 && !self.renderingContext.getCurrentServer()!.allowsGuest) {
+                        if (Object.keys(self.messaging.users).length === 1 && self.renderingContext.getCurrentServer()?.allowsGuest !== true) {
                             let intro = "";
                             intro += `# ${self.t("intro.welcome1")}\n`;
                             intro += `${self.t("intro.welcome2")}\n`;

@@ -126,11 +126,16 @@ export default class MessagingSession
     updateChannelInfo(msg: any) {
         let s = this.servers[msg.servId];
         if (msg.updateType === 0) { // Creation
+            let ctx = this.session.renderingContext;
             s.channels[msg.chanId] = {
                 name: msg.name,
                 description: undefined,
                 messages: []
             };
+            if (ctx.currChannel === null) {
+                ctx.currChannel = msg.chanId;
+                this.session.renderingContext.replaceMessages();
+            }
             if (this.lastVisitedChannels[msg.servId] === null) {
                 this.lastVisitedChannels[msg.servId] = msg.chanId;
             }
@@ -155,7 +160,13 @@ export default class MessagingSession
 
     updateServerInfo(msg: any) {
         if (msg.updateType === 0) { // Creation
+            let ctx = this.session.renderingContext;
+            let needServUpdate = ctx.currServ === null;
             this.addServerInfo(msg);
+            if (needServUpdate) {
+                ctx.currServ = msg.id;
+                this.session.renderingContext.refreshNavbar!();
+            }
         }
         else if (msg.updateType === 1) { // Edition
             let s = this.servers[msg.id];
@@ -176,6 +187,7 @@ export default class MessagingSession
                 } else {
                     ctx.currServ = null;
                     ctx.currChannel = null;
+                    this.session.renderingContext.refreshNavbar!();
                 }
                 this.lastVisitedChannels[msg.id] = null;
                 this.session.renderingContext.replaceMessages();

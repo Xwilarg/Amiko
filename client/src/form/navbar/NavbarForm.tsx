@@ -56,12 +56,16 @@ const NavbarForm = forwardRef((
             <button className="navbar-item button" onClick={onInvite}>
                 <span className="material-symbols-outlined">person_add</span>
             </button>
-            <button className="navbar-item button" onClick={(e) => {
-                // @ts-ignore
-                settingsRef.current.openServerSettings();
-            }}>
-                <span className="material-symbols-outlined">admin_panel_settings</span>
-            </button>
+            {
+                ctx.getCurrentServer() ?
+                <button className="navbar-item button" onClick={(e) => {
+                    // @ts-ignore
+                    settingsRef.current.openServerSettings();
+                }}>
+                    <span className="material-symbols-outlined">admin_panel_settings</span>
+                </button>
+                : <></>
+            }
         </>
         : <></>
 

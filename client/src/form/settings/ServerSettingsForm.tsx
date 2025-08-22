@@ -6,19 +6,19 @@ import { SessionRenderingContextProvider } from "../../context/SessionRenderingC
 export default function ServerSettingsForm () {
     let ctx = useContext(SessionRenderingContextProvider);
     const [character, setCharacter] = useState<string>(() => {
-        return ctx.getCurrentServer().character;
+        return ctx.getCurrentServer()!.character;
     });
     const [color, setColor] = useState<Color>(() => {
-        return ctx.getCurrentServer().color;
+        return ctx.getCurrentServer()!.color;
     });
     const [name, setName] = useState<string>(() => {
-        return ctx.getCurrentServer().name;
+        return ctx.getCurrentServer()!.name;
     });
     const [allowsGuest, setAllowsGuest] = useState<boolean>(() => {
-        return ctx.getCurrentServer().allowsGuest;
+        return ctx.getCurrentServer()!.allowsGuest;
     });
     const [isEphemeral, setIsEphemeral] = useState<boolean>(() => {
-        return ctx.getCurrentServer().isEphemeral;
+        return ctx.getCurrentServer()!.isEphemeral;
     });
     let [channelListDisplay, setChannelListDisplay] = useState<Array<ReactElement>>([]);
     const [r, forceRefresh] = useState(0);
@@ -43,30 +43,34 @@ export default function ServerSettingsForm () {
     useEffect(() => {
         let chans: Array<ReactElement> = []
         let s = ctx.getCurrentServer()
-        for (let [key, value] of Object.entries(s.channels))
-        {
-            chans.push(<div className="is-flex" key={key}>
-                <button className="button settings-chan-preview" disabled>{value.name}</button>
-                <button className="button is-info" onClick={
-                    () => {
-                        const newName = prompt();
-                        if (newName) {
-                            ctx.updateChannelName(parseInt(key), newName);
+        if (s!.channels) {
+            for (let [key, value] of Object.entries(s!.channels))
+            {
+                chans.push(<div className="is-flex" key={key}>
+                    <button className="button settings-chan-preview" disabled>{value.name}</button>
+                    <button className="button is-info" onClick={
+                        () => {
+                            const newName = prompt();
+                            if (newName) {
+                                ctx.updateChannelName(parseInt(key), newName);
+                            }
                         }
-                    }
-                }>
-                    <span className="material-symbols-outlined small-icon">edit</span>
-                </button>
-                <button className="button is-danger" onClick={
-                    () => { if (confirm(t("settings.common.destructive"))) {
-                        ctx.deleteChannel(parseInt(key));
-                    } }
-                }>
-                    <span className="material-symbols-outlined small-icon">delete</span>
-                </button>
-            </div>)
+                    }>
+                        <span className="material-symbols-outlined small-icon">edit</span>
+                    </button>
+                    <button className="button is-danger" onClick={
+                        () => { if (confirm(t("settings.common.destructive"))) {
+                            ctx.deleteChannel(parseInt(key));
+                        } }
+                    }>
+                        <span className="material-symbols-outlined small-icon">delete</span>
+                    </button>
+                </div>)
+            }
+            setChannelListDisplay(chans);
+        } else {
+            setChannelListDisplay([]);
         }
-        setChannelListDisplay(chans);
     }, [r]);
 
     return <>
