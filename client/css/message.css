@@ -57,3 +57,8 @@
 pre, code {
     text-wrap-mode: wrap !important;
 }
+
+/* Bold reading */
+.message strong {
+    font-weight: bolder;
+}
