@@ -54,6 +54,8 @@ public class ServerController : ControllerBase
             {
                 Id = s,
                 Name = "New Server",
+                Color = new Database.Color() { R = 54, G = 54, B = 54 },
+                Character = "N",
                 UpdateType = UpdateType.Creation
             };
             await _connManager.BroadcastMessageAsync(_dbContext, null, sMsg);

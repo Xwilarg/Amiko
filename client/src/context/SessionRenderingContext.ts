@@ -179,15 +179,17 @@ export default class SessionRenderingContext
 
     setCurrentServer(servId: number) {
         this.currServ = servId;
+        this.currChannel = this.sessions[this.currInstance].messaging.lastVisitedChannels[this.currServ!];
         this.refreshServerDisplayState!();
         this.refreshServerSettings?.();
-        this.replaceMessages()
+        this.replaceMessages();
     }
 
     setCurrentChannel(chanId: number) {
         this.currChannel = chanId;
+        this.sessions[this.currInstance].messaging.lastVisitedChannels[this.currServ!] = chanId;
         this.refreshServerDisplayState!();
-        this.replaceMessages()
+        this.replaceMessages();
     }
 
     /* MESSAGE MANAGEMENT */

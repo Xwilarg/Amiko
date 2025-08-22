@@ -21,6 +21,8 @@ export default class MessagingSession
     servers: { [id: number] : Server; };
     // Messages we sent but weren't acknowledged by the server yet
     pendingAcknowledgement: { [id: number] : Message; };
+    // Last channels we visited
+    lastVisitedChannels: { [servId: number] : number | null };
 
     systemId: number; // Keep track of IDs for system messages
 
@@ -35,6 +37,7 @@ export default class MessagingSession
 
         this.servers = {};
         this.pendingAcknowledgement = {};
+        this.lastVisitedChannels = {};
     }
 
     // Add a message to the list of messages
@@ -128,6 +131,9 @@ export default class MessagingSession
                 description: undefined,
                 messages: []
             };
+            if (this.lastVisitedChannels[msg.servId] === null) {
+                this.lastVisitedChannels[msg.servId] = msg.chanId;
+            }
         }
         else if (msg.updateType === 1) { // Edition
             let c = s.channels[msg.chanId];
@@ -139,6 +145,9 @@ export default class MessagingSession
             if (willBeDeleted) {
                 const keys = ctx.currServ === null ? [] : Object.keys(this.servers[ctx.currServ].channels);
                 ctx.currChannel = keys.length === 0 ? null : parseInt(keys[0]);
+                if (keys.length === 0) {
+                    this.lastVisitedChannels[msg.servId] = null;
+                }
                 this.session.renderingContext.replaceMessages();
             }
         }
@@ -146,15 +155,15 @@ export default class MessagingSession
 
     updateServerInfo(msg: any) {
         if (msg.updateType === 0) { // Creation
+            this.addServerInfo(msg);
+        }
+        else if (msg.updateType === 1) { // Edition
             let s = this.servers[msg.id];
             if (msg.color !== null) s.color = msg.color;
             if (msg.character !== null) s.character = msg.character;
             if (msg.name !== null) s.name = msg.name;
             if (msg.allowsGuest !== null) s.allowsGuest = msg.allowsGuest;
             if (msg.isEphemeral !== null) s.isEphemeral = msg.isEphemeral;
-        }
-        else if (msg.updateType === 1) { // Edition
-            if (msg.name !== null) this.servers[msg.id].name = msg.name;
         } else { // Deletion
             let ctx = this.session.renderingContext;
             let willBeDeleted = ctx.currServ === msg.id; // TODO: Delete message being sent
@@ -209,16 +218,21 @@ export default class MessagingSession
         };
         this.servers[msg.id] = serverInst;
 
-        for (const chan of msg.channels)
-        {
-            const chanInst: Channel = {
-                name: chan.name,
-                description: chan.description,
-                messages: []
-            }
-            this.servers[msg.id].channels[chan.id] = chanInst;
-            for (const m of chan.messages) {
-                this.addMessageInternal(msg.id, chan.id, m);
+        if (!msg.channels) {
+            this.lastVisitedChannels[msg.id] = null;
+        } else {
+            this.lastVisitedChannels[msg.id] = msg.channels.length > 0 ? msg.channels[0].id : null;
+            for (const chan of msg.channels)
+            {
+                const chanInst: Channel = {
+                    name: chan.name,
+                    description: chan.description,
+                    messages: []
+                }
+                this.servers[msg.id].channels[chan.id] = chanInst;
+                for (const m of chan.messages) {
+                    this.addMessageInternal(msg.id, chan.id, m);
+                }
             }
         }
     }
