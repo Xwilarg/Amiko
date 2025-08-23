@@ -9,6 +9,10 @@
         "error": "Websocket error"
     },
 
+    "message": {
+        "fileAttached": "{{count}} file attached"
+    },
+
     "intro": {
         "welcome1": "Welcome in Amiko!",
         "welcome2": "What is next?",

@@ -159,7 +159,9 @@ const MessageForm = forwardRef((
                 <div className={"rich-preview is-flex" + (richDisplay.length > 0 ? "" : " is-hidden")}>
                     {richDisplay}
                 </div>
-                <div className="attachment-info is-hidden"></div>
+                <div className={"attachment-info" + (dm.msg.attachments.length > 0 ? "" : " is-hidden")}>
+                {dm.msg.attachments.length > 0 ? t("message.fileAttached", { "count": dm.msg.attachments.length.toString() }) : ""}
+                </div>
             </div>
         </div>
     </div>
