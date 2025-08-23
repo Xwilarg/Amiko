@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useEffect, useState, type ReactElement } from "react"
+import { forwardRef, useContext, useEffect, useState } from "react"
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ interface MessageFormProps {
 interface DisplayedAttachment {
     url: string;
     mimetype: string;
+    source: string;
 }
 
 const MessageForm = forwardRef((
@@ -90,30 +91,8 @@ const MessageForm = forwardRef((
         tmp = ctx.parseEmojis(tmp);
         tmp = ctx.parseMarkdown(tmp);
         setContent(tmp);
-    }, [dm.msg.content, dm.contentDirty]);
 
-    useEffect(() => {
-        let format: Intl.DateTimeFormatOptions = {
-            weekday: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            day: "2-digit"
-        }
-        setDateStr(dm.msg.date.toLocaleDateString(t("iso3166"), format));
-    }, [dm.msg.date]);
-
-    useEffect(() => {
-        // TODO: handle multiple attachments
-        /*
-        let attachments: Array<DisplayedAttachment> = [];
-        dm.msg.attachments.map(x => ctx.getCurrentInstance().getAttachmentOverNetwork(ctx.currServ!, ctx.currChannel!, dm.msg.id!, (b) => {
-            attachments.push({
-                url: null,
-                blob: b
-            })
-        }));*/
-        let attachments: Array<DisplayedAttachment> = [];
+        
 
         // Pattern match urls
         // Optionally at the start we can have <XXX:
@@ -173,19 +152,59 @@ const MessageForm = forwardRef((
             return `${indicatorLeft}<span class="link">${l[5]}</span>${indicatorRight}`;
         });*/
 
+        if (users.length > 0) { // Don't preview links from guests
+            setAttachments(atts => {
+                return [
+                    ...atts.filter(x => x.source !== "content"),
+                    
+                ]
+            })
+        }
+    }, [dm.msg.content, dm.contentDirty]);
+
+    useEffect(() => {
+        let format: Intl.DateTimeFormatOptions = {
+            weekday: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            day: "2-digit"
+        }
+        setDateStr(dm.msg.date.toLocaleDateString(t("iso3166"), format));
+    }, [dm.msg.date]);
+
+    useEffect(() => {
+        // TODO: handle multiple attachments
+        /*
+        let attachments: Array<DisplayedAttachment> = [];
+        dm.msg.attachments.map(x => ctx.getCurrentInstance().getAttachmentOverNetwork(ctx.currServ!, ctx.currChannel!, dm.msg.id!, (b) => {
+            attachments.push({
+                url: null,
+                blob: b
+            })
+        }));*/
+        let attachments: Array<DisplayedAttachment> = [];
+
         if (dm.msg.attachments.length > 0) {
             ctx.getCurrentInstance().getAttachmentOverNetworkAsync(ctx.currServ!, ctx.currChannel!, dm.msg.id!)
                 .then((b) => {
                     if (b) {
-                        attachments.push({
-                            url: window.URL.createObjectURL(b),
-                            mimetype: b.type
+                        setAttachments(atts => {
+                            return [...atts.filter(x => x.source !== "attachment"), {
+                                url: window.URL.createObjectURL(b),
+                                mimetype: b.type,
+                                source: "attachment"
+                            }]
                         });
                     }
-                    setAttachments(attachments);
+                    setAttachments(atts => {
+                        return [...atts.filter(x => x.source !== "attachment")];
+                    });
                 });
         } else {
-            setAttachments([]);
+            setAttachments(atts => {
+                return [...atts.filter(x => x.source !== "attachment")];
+            });
         }
     }, [dm.msg.attachments]);
 
