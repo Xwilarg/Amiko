@@ -72,7 +72,7 @@ export default class MessagingSession
     }
 
     receiveMessage(msg: any) {
-        this.session.renderingContext.sendMessage({
+        const msgInst: Message = {
             id: msg.id,
             date: new Date((msg.sentAt - (new Date().getTimezoneOffset() * 60)) * 1000),
             authors: msg.authors,
@@ -81,7 +81,10 @@ export default class MessagingSession
 
             ackId: null,
             flag: "None"
-        });
+        };
+        this.servers[msg.servId].channels[msg.chanId].messages.push(msgInst);
+
+        this.session.renderingContext.sendMessage(msg);
     }
 
     addPendingMessage(servId: number, chanId: number, msg: any): Message {
@@ -104,6 +107,7 @@ export default class MessagingSession
 
     acknowledgeMessage(ackId: number, newId: number, isError: boolean) {
         const msg = this.pendingAcknowledgement[ackId];
+        // TODO: ack msg
         msg.id = newId;
         msg.ackId = null;
         delete this.pendingAcknowledgement[ackId];

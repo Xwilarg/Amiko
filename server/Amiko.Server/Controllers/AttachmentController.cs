@@ -95,8 +95,10 @@ public class AttachmentController : ControllerBase
 
         await _connManager.BroadcastMessageAsync(_dbContext, servId, new EditMessageInfo()
         {
-            Id = id.Value,
-            Attachments = [new AttachmentMessage() { Id = id.Value, Name = files[0].FileName }]
+            Id = msgId,
+            Attachments = [new AttachmentMessage() { Id = id.Value, Name = files[0].FileName }],
+            ServerId = servId,
+            ChannelId = chanId
         });
 
         return StatusCode(StatusCodes.Status204NoContent);
