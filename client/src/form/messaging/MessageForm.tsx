@@ -92,74 +92,42 @@ const MessageForm = forwardRef((
         tmp = ctx.parseMarkdown(tmp);
         setContent(tmp);
 
-        
+        if (users.length === 0) {
+            return; // Don't preview links of guests
+        }
 
+        // TODO: Comments below are outdated version, need to add it back in the future
         // Pattern match urls
         // Optionally at the start we can have <XXX:
         // <> specify special formats (by default hide image)
         // XXX: overrides behaviors
-
         // Regex explanations:
         // First look for "<" (optional)
         // Then look for behavior specification "XXXXX:" (optional)
         // Then we look for the URL, it matches until it find one of the following strings: '^', ' ', '\n', ')', ',', ';', '>', '[end of line]'
         // We check if we have a ">" at the end (optional)
-        /*const regex = /((<)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|>|$)(>)?/gm
-        let behavior = "";
-        finalHtml = finalHtml.replace(regex, function(match, _) {
-            let l = [...match.matchAll(regex)][0];
-            if (l[2] === "&lt;" && l[6] === "&gt;")
-            {
-                switch (l[4])
-                {
-                    case "b":
-                        behavior = "blur";
-                        break;
-        
-                    default: // Don't show the image
-                    return `<span class="link-indicator">${l[1]}</span><span class="link">${l[5]}</span><span class="link-indicator">${l[6]}</span>`;
-                }
-            }
-        
-            const indicatorLeft = behavior === "" ? "" : `<span class="link-indicator">${l[2]}</span>`;
-            const indicatorRight = behavior === "" ? "" : `<span class="link-indicator">${l[6]}</span>`;
+        // const regex = /((<)(([a-zA-Z]+):)?)?(https?:\/\/.+?)(^| |\n|\)|,|;|>|$)(>)?/gm
 
-            if (safeMode) { // Safe mode: don't preview any link
-                return `${indicatorLeft}<span class="link">${l[5]}</span>${indicatorRight}`;
-            }
-        
-            let m = l[5].match(/(png|jpg|jpeg|gif|webp)$/m);
-            if (m) { // Ensure we can't inject code by closing the string
-                preview_createRichPreview(l[5], prev, behavior, `image/${m[1]}`);
-                // createRichPreviewImage(l[5], prev, behavior); // TODO: preview.js
-                return `${indicatorLeft}<span class="link link-image">${l[5]}</span>${indicatorRight}`;
-            }
-        
-            // Youtube check
-            let yt = l[5].match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
-            if (!yt) {
-                yt = l[5].match(/youtu\.be\/([0-9a-zA-Z_]+)/m); 
-            }
-            if (yt) {
-                prev.classList.remove("is-hidden");
-                if (behavior === "") {
-                    prev.innerHTML += `<div class="preview"><iframe type="text/html" width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameborder="0"></iframe></div>`;
-                } else {
-                    prev.innerHTML += `<div class="preview"><img data-yt="${yt[1]}" class="image ${behavior}" src="https://img.youtube.com/vi/${yt[1]}/0.jpg"/></div>`;
-                }
-            }
-        
-            return `${indicatorLeft}<span class="link">${l[5]}</span>${indicatorRight}`;
-        });*/
+        setAttachments(atts => {
+            atts = atts.filter(x => x.source !== "content");
 
-        if (users.length > 0) { // Don't preview links from guests
-            setAttachments(atts => {
-                return [
-                    ...atts.filter(x => x.source !== "content"),
-                    
-                ]
-            })
-        }
+            const re = /<a [^>]+>([^<]+)<\/a>/g;
+            var m;
+
+            do {
+                let m = re.exec(tmp);
+                if (m) {
+                    let url = m[1];
+                    atts.push({
+                        url: url,
+                        mimetype: url.match(/(png|jpg|jpeg|gif|webp)$/m) ? "image/" : "unknown",
+                        source: "content"
+                    })
+                }
+            } while (m);
+
+            return [...atts];
+        });
     }, [dm.msg.content, dm.contentDirty]);
 
     useEffect(() => {
@@ -183,8 +151,6 @@ const MessageForm = forwardRef((
                 blob: b
             })
         }));*/
-        let attachments: Array<DisplayedAttachment> = [];
-
         if (dm.msg.attachments.length > 0) {
             ctx.getCurrentInstance().getAttachmentOverNetworkAsync(ctx.currServ!, ctx.currChannel!, dm.msg.id!)
                 .then((b) => {
@@ -196,10 +162,11 @@ const MessageForm = forwardRef((
                                 source: "attachment"
                             }]
                         });
+                    } else {
+                        setAttachments(atts => {
+                            return [...atts.filter(x => x.source !== "attachment")];
+                        });
                     }
-                    setAttachments(atts => {
-                        return [...atts.filter(x => x.source !== "attachment")];
-                    });
                 });
         } else {
             setAttachments(atts => {
@@ -220,7 +187,17 @@ const MessageForm = forwardRef((
                 <video src={a.url}/>
             </div>)
         } else {
-            console.warn(`Unknown mimetype ${a.mimetype}`)
+            let yt = a.url.match(/youtube\.com\/watch\?v=([0-9a-zA-Z_]+)/m);
+            if (!yt) {
+                yt = a.url.match(/youtu\.be\/([0-9a-zA-Z_]+)/m);
+            }
+            if (yt) {
+                richDisplay.push(<div>
+                    <iframe /*type="text/html"*/ width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameBorder="0"></iframe>
+                </div>);
+            } else {
+                console.warn(`Unknown mimetype ${a.mimetype}`);
+            }
         }
     }
 

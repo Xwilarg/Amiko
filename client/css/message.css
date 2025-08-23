@@ -62,7 +62,7 @@ pre, code {
 }
 
 /* Rich preview */
-.rich-preview > div {
+.rich-preview > div > * {
     max-width: 256px;
     max-height: 256px;
 }
