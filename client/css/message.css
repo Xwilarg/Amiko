@@ -43,14 +43,12 @@
 }
 
 /* Links within messages */
-.link {
-    text-decoration: underline;
-    color: lightcoral;
-    cursor: pointer;
+.content a {
+    color: lightcoral !important;
 }
 
-.link:hover {
-    color: white;
+.content a:hover {
+    color: white !important;
 }
 
 /* Markdown */

@@ -1,7 +1,6 @@
 import EmojiConvertor from 'emoji-js';
 import { marked } from "marked";
 import NetworkSession from "../instance/NetworkSession";
-import type { MessageFlag } from "../model/MessageFlag";
 import type User from "../model/User";
 import type Message from '../model/Message';
 import type Server from '../model/Server';
@@ -9,6 +8,7 @@ import type { TFunction } from 'i18next';
 import type Color from '../model/Color';
 import { createContext } from 'react';
 import type Channel from '../model/Channel';
+import DOMPurify from 'dompurify';
 
 export default class SessionRenderingContext
 {
@@ -47,53 +47,74 @@ export default class SessionRenderingContext
         this.isBoldReading = false;
         this.initPreferencesAsync();
 
+        DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+            // Allow target _blank on URLs
+            const rel = node.getAttribute('rel');
+            if ('target' in node && rel && rel.includes("noopener") && rel.includes("noreferrer")) {
+                node.setAttribute('target', '_blank');
+            }
+        });
+
         // Override function
         const walkTokens = (token: any) => {
             // Bold reading check, emphasis the start of each word by putting it in bold
             if ((token.type === "text" || token.type === "paragraph")
-                && this.getBoldReading()
                 && token.tokens
-                && !token.raw.includes('<span class="link">') // Placeholder, TODO: redo link parsing in marked itself
             )
             {
                 const finalTokens: Array<any> = [];
 
                 for (let i = 0; i < token.tokens.length; i++) {
                     let subToken = token.tokens[i];
-                    if (i > 0 && subToken.type === "text" && token.tokens[i - 1].type === "html" && token.tokens[i - 1].text.includes("material-symbols-outlined"))
+                    if (subToken.text.startsWith("http://") || subToken.text.startsWith("https://"))
                     {
-                        finalTokens.push(subToken);
+                        finalTokens.push({
+                            type: 'link',
+                            href: subToken.text,
+                            tokens: [{ type: 'text', text: subToken.text }]
+                        });
                     }
-                    else if (subToken.type === 'text') // We don't emphasis something that is already in italic or other
+                    else if (this.getBoldReading())
                     {
-                        const words = subToken.text.split(' ');
-                        for (let i = 0; i < words.length; i++) // We split by space so we can iterate on each word
+                        if (i > 0 && subToken.type === "text" && token.tokens[i - 1].type === "html" && token.tokens[i - 1].text.includes("material-symbols-outlined"))
                         {
-                            const word = words[i] + ' ';
-                            if (word.length < 3)
+                            finalTokens.push(subToken);
+                        }
+                        else if (subToken.type === 'text') // We don't emphasis something that is already in italic or other
+                        {
+                            const words = subToken.text.split(' ');
+                            for (let i = 0; i < words.length; i++) // We split by space so we can iterate on each word
                             {
-                                finalTokens.push({
-                                    type: 'strong',
-                                    tokens: [{ type: 'text', text: word }]
-                                });
-                            }
-                            else
-                            {
-                                const first = word.substring(0, 3);
-                                const rest = word.substring(3);
-
-                                if (first) {
+                                const word = words[i] + ' ';
+                                if (word.length < 3)
+                                {
                                     finalTokens.push({
                                         type: 'strong',
-                                        tokens: [{ type: 'text', text: first }]
+                                        tokens: [{ type: 'text', text: word }]
                                     });
                                 }
-                                if (rest) {
-                                    finalTokens.push({ type: 'text', text: rest });
+                                else
+                                {
+                                    const first = word.substring(0, 3);
+                                    const rest = word.substring(3);
+
+                                    if (first) {
+                                        finalTokens.push({
+                                            type: 'strong',
+                                            tokens: [{ type: 'text', text: first }]
+                                        });
+                                    }
+                                    if (rest) {
+                                        finalTokens.push({ type: 'text', text: rest });
+                                    }
                                 }
                             }
+                        } else {
+                            finalTokens.push(subToken);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         finalTokens.push(subToken);
                     }
                 }
@@ -110,6 +131,12 @@ export default class SessionRenderingContext
                 link() {},
                 // @ts-ignore
                 url() {}
+            },
+            renderer: {
+                link({href, tokens}) {
+                    // @ts-ignore
+                    return `<a target="_blank" rel="noreferrer noopener" href="${href}">${tokens[0].text}</a>`;
+                }
             }
         });
 

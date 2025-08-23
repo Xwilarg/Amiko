@@ -92,16 +92,18 @@ export default class NetworkSession
         this.socket?.send(JSON.stringify(msg));
     }
 
-    getAttachmentOverNetwork(servId: number, chanId: number, msgId: number, onDone: (blob: Blob) => void) {
-        fetch(`${this.instance}/api/attachment/${(this.isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
+    async getAttachmentOverNetworkAsync (servId: number, chanId: number, msgId: number): Promise<Blob | null> {
+        const resp = await fetch(`${this.instance}/api/attachment/${(this.isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.token}`
             }
-        })
-        .then(resp => resp.ok ? resp.blob() : Promise.reject(`${resp.status}`))
-        .then(blob => onDone(blob))
-        .catch((err) => { this.messaging.sendErrorMessage("Attachment get failed: " + err); });
+        });
+        if (resp.ok) {
+            return await resp.blob();
+        }
+        this.messaging.sendErrorMessage("Attachment get failed: " + resp.status);
+        return null;
     }
 
     sendAttachmentOverNetwork(servId: number, chanId: number, msgId: number, files: File[]) {
