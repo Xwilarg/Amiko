@@ -49,7 +49,7 @@ export default function GeneralSettingsForm () {
                     setIsBoldReading(e.target.checked);
                     await ctx.setBoldReadingAsync(e.target.checked);
                     // @ts-ignore
-                    ctx.refMsg.current.refresh();
+                    ctx.refMsg.current.refreshContent();
                 }}/>
                 <span className="check"></span>
             </label>
@@ -58,7 +58,7 @@ export default function GeneralSettingsForm () {
             <label className="label">{t("settings.general.exportTitle")}</label>
             <div className="control">
                 <button className="button" onClick={(e) => {
-                    if (ctx.getCurrentServer().isEphemeral) {
+                    if (ctx.getCurrentServer()?.isEphemeral ?? false) {
                         ctx.sendWarning(t("settings.general.exportDisabled"));
                     } else {
                         ctx.downloadExport();

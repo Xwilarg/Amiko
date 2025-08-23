@@ -1,16 +1,16 @@
 import { forwardRef, useContext, useEffect, useState, type ReactElement } from "react"
 import type Color from "../../model/Color";
 import DOMPurify from 'dompurify';
-import type Message from "../../model/Message";
 import { useTranslation } from "react-i18next";
 import { SessionRenderingContextProvider } from "../../context/SessionRenderingContext";
+import type { DisplayedMessage } from "./MessageContainerForm";
 
 interface MessageFormProps {
-    msg: Message;
+    dm: DisplayedMessage;
 }
 
 const MessageForm = forwardRef((
-    { msg }: MessageFormProps,
+    { dm }: MessageFormProps,
     _
 ) => {
     const [content, setContent] = useState("");
@@ -20,17 +20,17 @@ const MessageForm = forwardRef((
     const [color, setColor] = useState<Color | null>(null);
 
     let ctx = useContext(SessionRenderingContextProvider);
-    let users = msg.authors ? ctx.getUsers(msg.authors!) : [];
+    let users = dm.msg.authors ? ctx.getUsers(dm.msg.authors!) : [];
     
     let { t } = useTranslation();
 
     let cssTag = "";
-    if (msg.ackId !== null) cssTag = "sending";
-    else if (msg.flag === "IsSystem") cssTag = "system";
-    else if (msg.flag === "IsError") cssTag = "error";
+    if (dm.msg.ackId !== null) cssTag = "sending";
+    else if (dm.msg.flag === "IsSystem") cssTag = "system";
+    else if (dm.msg.flag === "IsError") cssTag = "error";
 
     useEffect(() => {
-        if (msg.authors !== null) {
+        if (dm.msg.authors !== null) {
             // Update profile picture
             // Update character inside the PFP
             if (users.length === 0) { // Guest mode
@@ -77,14 +77,14 @@ const MessageForm = forwardRef((
             setCharacter(null);
             setUsername("")
         }
-    }, [msg.authors])
+    }, [dm.msg.authors, dm.authorDirty])
 
     useEffect(() => {
-        let tmp = msg.content;
+        let tmp = dm.msg.content;
         tmp = ctx.parseEmojis(tmp);
         tmp = ctx.parseMarkdown(tmp);
         setContent(tmp);
-    }, [msg.content])
+    }, [dm.msg.content, dm.contentDirty])
 
     useEffect(() => {
         let format: Intl.DateTimeFormatOptions = {
@@ -94,8 +94,8 @@ const MessageForm = forwardRef((
             second: "2-digit",
             day: "2-digit"
         }
-        setDateStr(msg.date.toLocaleDateString(t("iso3166"), format));
-    }, [msg.date])
+        setDateStr(dm.msg.date.toLocaleDateString(t("iso3166"), format));
+    }, [dm.msg.date])
 
     return (
     <div className={`container message is-flex-grow-0 ${cssTag}`}>
