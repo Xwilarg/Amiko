@@ -193,7 +193,7 @@ const MessageForm = forwardRef((
             }
             if (yt) {
                 richDisplay.push(<div>
-                    <iframe /*type="text/html"*/ width="256" height="256" src="https://www.youtube-nocookie.com/embed/${yt[1]}" frameBorder="0"></iframe>
+                    <iframe /*type="text/html"*/ width="512" height="256" src={`https://www.youtube-nocookie.com/embed/${yt[1]}`} frameBorder="0"></iframe>
                 </div>);
             } else {
                 console.warn(`Unknown mimetype ${a.mimetype}`);
