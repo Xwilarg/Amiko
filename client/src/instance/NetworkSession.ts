@@ -12,6 +12,7 @@ export default class NetworkSession
 
     // Is the socket connection established
     isConnected: boolean;
+    isGuest: boolean;
 
     messaging: MessagingSession;
 
@@ -31,6 +32,7 @@ export default class NetworkSession
         this.renderingContext = renderingContext;
 
         this.isConnected = false;
+        this.isGuest = false;
 
         this.messaging = new MessagingSession(this);
     }
@@ -42,7 +44,8 @@ export default class NetworkSession
         }
 
         if (this.token === "guest") {
-            this.#openNetworkConnection(true);
+            this.isGuest = true;
+            this.#openNetworkConnection();
         } else {
             this.#checkToken();
         }
@@ -57,7 +60,7 @@ export default class NetworkSession
         })
         .then(resp => resp.ok ? resp.text() : Promise.reject(resp.status))
         .then(_ => {
-            this.#openNetworkConnection(false);
+            this.#openNetworkConnection();
         })
         .catch(async (e) => {
             console.error(`Session for ${this.instance} expired`);
@@ -89,8 +92,8 @@ export default class NetworkSession
         this.socket?.send(JSON.stringify(msg));
     }
 
-    getAttachmentOverNetwork(servId: number, chanId: number, msgId: number, isGuest: boolean, onDone: (blob: Blob) => void) {
-        fetch(`${this.instance}/api/attachment/${(isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
+    getAttachmentOverNetwork(servId: number, chanId: number, msgId: number, onDone: (blob: Blob) => void) {
+        fetch(`${this.instance}/api/attachment/${(this.isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.token}`
@@ -149,12 +152,12 @@ export default class NetworkSession
         });
     }
 
-    #openNetworkConnection(isGuest: boolean) {
+    #openNetworkConnection() {
         this.renderingContext.clearAllMessages();
 
-        let endpoint = `${this.instance}/ws/${(isGuest ? "guest" : "")}`;
+        let endpoint = `${this.instance}/ws/${(this.isGuest ? "guest" : "")}`;
 
-        if (isGuest) this.socket = new WebSocket(endpoint, ["client", "guest"]);
+        if (this.isGuest) this.socket = new WebSocket(endpoint, ["client", "guest"]);
         else this.socket = new WebSocket(endpoint, ["client", this.token!]);
         const self = this;
         
@@ -186,7 +189,7 @@ export default class NetworkSession
             }
             */
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s to not spam reconnections
-            self.#openNetworkConnection(isGuest);
+            self.#openNetworkConnection();
         });
 
         this.socket.addEventListener("error", (e) => {

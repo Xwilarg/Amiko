@@ -9,6 +9,11 @@ interface MessageFormProps {
     dm: DisplayedMessage;
 }
 
+interface DisplayedAttachment {
+    url: string;
+    mimetype: string;
+}
+
 const MessageForm = forwardRef((
     { dm }: MessageFormProps,
     _
@@ -18,6 +23,7 @@ const MessageForm = forwardRef((
     const [username, setUsername] = useState("");
     const [character, setCharacter] = useState<string | null>(null); // null for system messages that doesn't show an author
     const [color, setColor] = useState<Color | null>(null);
+    const [attachments, setAttachments] = useState<Array<DisplayedAttachment>>([]);
 
     let ctx = useContext(SessionRenderingContextProvider);
     let users = dm.msg.authors ? ctx.getUsers(dm.msg.authors!) : [];
@@ -77,14 +83,14 @@ const MessageForm = forwardRef((
             setCharacter(null);
             setUsername("")
         }
-    }, [dm.msg.authors, dm.authorDirty])
+    }, [dm.msg.authors, dm.authorDirty]);
 
     useEffect(() => {
         let tmp = dm.msg.content;
         tmp = ctx.parseEmojis(tmp);
         tmp = ctx.parseMarkdown(tmp);
         setContent(tmp);
-    }, [dm.msg.content, dm.contentDirty])
+    }, [dm.msg.content, dm.contentDirty]);
 
     useEffect(() => {
         let format: Intl.DateTimeFormatOptions = {
@@ -95,7 +101,47 @@ const MessageForm = forwardRef((
             day: "2-digit"
         }
         setDateStr(dm.msg.date.toLocaleDateString(t("iso3166"), format));
-    }, [dm.msg.date])
+    }, [dm.msg.date]);
+
+    useEffect(() => {
+        // TODO: handle multiple attachments
+        /*
+        let attachments: Array<DisplayedAttachment> = [];
+        dm.msg.attachments.map(x => ctx.getCurrentInstance().getAttachmentOverNetwork(ctx.currServ!, ctx.currChannel!, dm.msg.id!, (b) => {
+            attachments.push({
+                url: null,
+                blob: b
+            })
+        }));*/
+        if (dm.msg.attachments.length > 0) {
+            ctx.getCurrentInstance().getAttachmentOverNetwork(ctx.currServ!, ctx.currChannel!, dm.msg.id!, (b) => {
+                setAttachments(x => {
+                    x.push({
+                        url: window.URL.createObjectURL(b),
+                        mimetype: b.type
+                    })
+                    return [...x];
+                });
+            });
+        } else {
+            setAttachments([]);
+        }
+    }, [dm.msg.attachments]);
+
+    let richDisplay: Array<React.ReactNode> = [];
+    for (let a of attachments) {
+        if (a.mimetype.startsWith("image/")) {
+            richDisplay.push(<div>
+                <img src={a.url}/>
+            </div>)
+        } else if (a.mimetype.startsWith("video/")) {
+            richDisplay.push(<div>
+                <video src={a.url}/>
+            </div>)
+        } else {
+            console.warn(`Unknown mimetype ${a.mimetype}`)
+        }
+    }
 
     return (
     <div className={`container message is-flex-grow-0 ${cssTag}`}>
@@ -110,7 +156,9 @@ const MessageForm = forwardRef((
                 <small className="date">{dateStr}</small>
                 <h2 className="subtitle">{username}</h2>
                 <p className="content" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}></p>
-                <div className="rich-preview is-flex"></div>
+                <div className={"rich-preview is-flex" + (richDisplay.length > 0 ? "" : " is-hidden")}>
+                    {richDisplay}
+                </div>
                 <div className="attachment-info is-hidden"></div>
             </div>
         </div>

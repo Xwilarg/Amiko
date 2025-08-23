@@ -291,6 +291,7 @@ export default class MessagingSession
     }
 
     editMessage(msg: any) {
+        this.servers[msg.serverId].channels[msg.channelId].messages[msg.id].attachments = msg.attachments;
         // @ts-ignore
         this.session.renderingContext.refMsg.current.updateSingleMessage(msg.id, msg);
     }

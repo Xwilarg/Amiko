@@ -62,3 +62,9 @@ pre, code {
 .message strong {
     font-weight: bolder;
 }
+
+/* Rich preview */
+.rich-preview > div {
+    max-width: 256px;
+    max-height: 256px;
+}
