@@ -53,7 +53,7 @@ public class MessageInfo : BaseMessageInfo
         {
             Authors = m.Authors,
             Content = m.Message,
-            SentAt = (long)(m.CreationTime.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds,
+            SentAt = (long)(m.CreationTime - DateTime.UnixEpoch).TotalSeconds,
             Id = m.Id,
             Attachments = m.Attachments.Select(a => new AttachmentMessage()
             {
