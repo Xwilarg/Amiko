@@ -154,7 +154,7 @@ namespace Amiko.Server.Controllers
                             bool wasContentUpdated = prot.Content != updatedData.Content;
 
                             // Update message data with actual values
-                            var d = now.ToUniversalTime() - DateTime.UnixEpoch;
+                            var d = now - DateTime.UnixEpoch;
                             prot.SentAt = (long)Math.Floor(d.TotalSeconds);
                             prot.Id = finalId;
                             prot.Attachments = [];

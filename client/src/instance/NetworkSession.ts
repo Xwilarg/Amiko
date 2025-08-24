@@ -89,17 +89,17 @@ export default class NetworkSession
     }
 
     sendNetworkMessage(msg: any) {
-        if (!this.isGuest) {
-            this.socket?.send(JSON.stringify(msg));
-        }
+        this.socket?.send(JSON.stringify(msg));
     }
 
     sendSeenNetworkMessage(servId: number, chanId: number) {
-        this.sendNetworkMessage({
-            type: 6,
-            serverId: servId,
-            channelId: chanId
-        });
+        if (!this.isGuest) {
+            this.sendNetworkMessage({
+                type: 6,
+                serverId: servId,
+                channelId: chanId
+            });
+        }
     }
 
     async getAttachmentOverNetworkAsync (servId: number, chanId: number, msgId: number): Promise<Blob | null> {

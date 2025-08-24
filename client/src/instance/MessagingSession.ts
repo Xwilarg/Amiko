@@ -90,7 +90,9 @@ export default class MessagingSession
         };
         this.servers[msg.serverId].channels[msg.channelId].messages.push(msgInst);
 
-        this.session.renderingContext.sendMessage(msgInst);
+        if (this.session.renderingContext.currServ === msg.serverId && this.session.renderingContext.currChannel === msg.channelId) {
+            this.session.renderingContext.sendMessage(msgInst);
+        }
     }
 
     addPendingMessage(servId: number, chanId: number, msg: any): Message {
