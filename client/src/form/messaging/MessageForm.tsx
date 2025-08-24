@@ -35,6 +35,7 @@ const MessageForm = forwardRef((
     if (dm.msg.ackId !== null) cssTag = "sending";
     else if (dm.msg.flag === "IsSystem") cssTag = "system";
     else if (dm.msg.flag === "IsError") cssTag = "error";
+    else if (ctx.getCurrentInstance().messaging.wasIMentionned(content)) cssTag = "mention";
 
     useEffect(() => {
         if (dm.msg.authors !== null) {

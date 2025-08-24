@@ -301,6 +301,40 @@ export default class MessagingSession
         this.session.renderingContext.refMsg.current.updateSingleMessage(msg.id, msg);
     }
 
+    // User data
+
+    // Get a userinfo from an ID
+    // If the ID doesn't exist, return a default user
+    getInfoFromId(id: number): User {
+        if (id in this.users) {
+            return this.users[id];
+        }
+        return {
+            id: -1,
+            username: id.toString(),
+            color: { r: 54, g: 54, b: 54 },
+            character: '?',
+            isAdmin: false
+        };
+    }
+
+    getInfoFromIdList(ids: number[]): User[] {
+        let users = [];
+        for (let id of ids) {
+            users.push(this.getInfoFromId(id));
+        }
+        return users;
+    }
+
+    // Notification
+
+    // Does the content checked have @XXXX
+    // Where XXXX is one of our possible user
+    wasIMentionned(text: string): boolean {
+        const infos = this.getInfoFromIdList(this.possibleUsers);
+        return infos.some(x => text.toLowerCase().includes(`@${x.username.toLowerCase()}`));
+    }
+
     // Attachment management
 
     setAttachment(files: FileList | null) {

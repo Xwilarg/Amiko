@@ -258,6 +258,12 @@ export default class NetworkSession
 
                 case 2: // Message received
                     self.messaging.receiveMessage(json);
+                    if (self.renderingContext.currServ === json.serverId && self.renderingContext.currChannel === json.channelId)
+                    {
+                        // @ts-ignore
+                        if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
+                        }
+                    }
                     /*self.renderer.receiveMessage(json);
                     if (renderer_isCurrentChannel(self.renderer, json.serverId, json.channelId))
                     {
