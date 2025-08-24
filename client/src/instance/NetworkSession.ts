@@ -262,6 +262,7 @@ export default class NetworkSession
                     {
                         // @ts-ignore
                         if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
+                            self.messaging.sendNotification(json);
                         }
                     }
                     /*self.renderer.receiveMessage(json);

@@ -13,6 +13,11 @@
         "fileAttached": "{{count}} file attached"
     },
 
+    "notification": {
+        "newMessageHidden": "New message received",
+        "newMessageShown": "Message from {{authors}}"
+    },
+
     "intro": {
         "welcome1": "Welcome in Amiko!",
         "welcome2": "What is next?",

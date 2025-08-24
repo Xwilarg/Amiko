@@ -37,6 +37,10 @@ export default class MessagingSession
     attachments: { [id: number] : MessageAttachment; };
     currAttachments: File[];
 
+    // Store when the last notification was received
+    // Used when notification settings is set on all messages, to not spam the user
+    lastNotificationReceived: number;
+
     constructor(s: NetworkSession) {
         this.session = s;
 
@@ -52,6 +56,8 @@ export default class MessagingSession
 
         this.attachments = {};
         this.currAttachments = [];
+
+        this.lastNotificationReceived = 0;
     }
 
     // Add a message to the list of messages
@@ -82,7 +88,7 @@ export default class MessagingSession
             ackId: null,
             flag: "None"
         };
-        this.servers[msg.servId].channels[msg.chanId].messages.push(msgInst);
+        this.servers[msg.serverId].channels[msg.channelId].messages.push(msgInst);
 
         this.session.renderingContext.sendMessage(msg);
     }
@@ -333,6 +339,46 @@ export default class MessagingSession
     wasIMentionned(text: string): boolean {
         const infos = this.getInfoFromIdList(this.possibleUsers);
         return infos.some(x => text.toLowerCase().includes(`@${x.username.toLowerCase()}`));
+    }
+
+    sendNotification(json: any) {
+        // @ts-ignore
+        if (!compatibility.notification()) return;
+
+        let shouldSend: boolean;
+
+        const notifSettings = this.session.renderingContext.getPingMode();
+
+        // If user want no notification, we can just return
+        if (notifSettings == "None") shouldSend = false;
+        if (notifSettings == "AllMessages")
+        {
+            // Only ping once every 20s
+            if (new Date().getTime() - this.lastNotificationReceived > 20000)
+            {
+                this.lastNotificationReceived = new Date().getTime();
+                shouldSend = true;
+            }
+            else
+            {
+                shouldSend = false;
+            }
+        }
+        else shouldSend = this.wasIMentionned(json.content);
+
+        if (shouldSend) {
+            const hideNotification = this.session.renderingContext.getHideNotification();
+
+            if (hideNotification) {
+                new window.Notification(this.session.t("notification.newMessageHidden"));
+            }
+            else
+            {
+                new window.Notification(this.session.t("notification.newMessageShown", {authors: this.getInfoFromIdList(json.authors).map(x => x.username).join(", ")}), {
+                    body: json.content
+                });
+            }
+        }
     }
 
     // Attachment management
