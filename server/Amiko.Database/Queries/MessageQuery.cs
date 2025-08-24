@@ -31,7 +31,7 @@ public static class MessageQuery
         {
             return c.Messages;
         }
-        return c.Messages.Take(msgCount.Value);
+        return c.Messages.TakeLast(msgCount.Value);
     }
 
     public static int AddMessage(SqliteContext ctx, int servId, int chanId, int? claimId,
