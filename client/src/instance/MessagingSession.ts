@@ -80,7 +80,7 @@ export default class MessagingSession
     receiveMessage(msg: any) {
         const msgInst: Message = {
             id: msg.id,
-            date: new Date((msg.sentAt - (new Date().getTimezoneOffset() * 60)) * 1000),
+            date: new Date(msg.sentAt * 1000),
             authors: msg.authors,
             content: msg.content,
             attachments: msg.attachments,
@@ -90,7 +90,7 @@ export default class MessagingSession
         };
         this.servers[msg.serverId].channels[msg.channelId].messages.push(msgInst);
 
-        this.session.renderingContext.sendMessage(msg);
+        this.session.renderingContext.sendMessage(msgInst);
     }
 
     addPendingMessage(servId: number, chanId: number, msg: any): Message {
