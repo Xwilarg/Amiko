@@ -216,6 +216,9 @@ export default class SessionRenderingContext
         this.refreshServerDisplayState!();
         this.refreshServerSettings?.();
         this.replaceMessages();
+        if (this.currChannel !== null) {
+            this.getCurrentInstance().sendSeenNetworkMessage(this.currServ, this.currChannel);
+        }
     }
 
     setCurrentChannel(chanId: number) {
@@ -223,6 +226,9 @@ export default class SessionRenderingContext
         this.getCurrentInstance().messaging.lastVisitedChannels[this.currServ!] = chanId;
         this.refreshServerDisplayState!();
         this.replaceMessages();
+        if (this.currChannel !== null) {
+            this.getCurrentInstance().sendSeenNetworkMessage(this.currServ!, this.currChannel);
+        }
     }
 
     /* MESSAGE MANAGEMENT */

@@ -113,7 +113,6 @@ export default class MessagingSession
 
     acknowledgeMessage(ackId: number, newId: number, isError: boolean) {
         const msg = this.pendingAcknowledgement[ackId];
-        // TODO: ack msg
         msg.id = newId;
         msg.ackId = null;
         delete this.pendingAcknowledgement[ackId];

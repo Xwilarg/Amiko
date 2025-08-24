@@ -92,6 +92,14 @@ export default class NetworkSession
         this.socket?.send(JSON.stringify(msg));
     }
 
+    sendSeenNetworkMessage(servId: number, chanId: number) {
+        this.sendNetworkMessage({
+            type: 6,
+            serverId: servId,
+            channelId: chanId
+        });
+    }
+
     async getAttachmentOverNetworkAsync (servId: number, chanId: number, msgId: number): Promise<Blob | null> {
         const resp = await fetch(`${this.instance}/api/attachment/${(this.isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
             method: 'GET',
@@ -263,6 +271,8 @@ export default class NetworkSession
                         // @ts-ignore
                         if (!await notification.isFocusedAsync()) { // We are in the current channel but window isn't focused, we send a notification
                             self.messaging.sendNotification(json);
+                        } else {
+                            self.sendSeenNetworkMessage(json.serverId, json.channelId);
                         }
                     } else {
                         self.messaging.sendNotification(json);
