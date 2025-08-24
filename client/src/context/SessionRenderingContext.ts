@@ -28,6 +28,8 @@ export default class SessionRenderingContext
 
     displayMode: DisplayMode;
     isBoldReading: boolean;
+    pingMode: PingMode;
+    hideNotification: boolean;
 
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
@@ -45,6 +47,8 @@ export default class SessionRenderingContext
 
         this.displayMode = "Default";
         this.isBoldReading = false;
+        this.pingMode = "PingOnly",
+        this.hideNotification = false;
         this.initPreferencesAsync();
 
         DOMPurify.addHook('afterSanitizeAttributes', function (node) {
@@ -386,6 +390,10 @@ export default class SessionRenderingContext
         this.displayMode = await filesystem.readPrefAsync("displayMode", "Default");
         // @ts-ignore
         this.isBoldReading = await filesystem.readPrefAsync("boldReading", "0") === "1";
+        // @ts-ignore
+        this.pingMode = await filesystem.readPrefAsync("pingMode", "PingOnly");
+        // @ts-ignore
+        this.hideNotification = await filesystem.readPrefAsync("hideNotification", "0") === "1";
     }
 
     getDisplayMode(): DisplayMode {
@@ -407,8 +415,29 @@ export default class SessionRenderingContext
         await filesystem.writePrefAsync("boldReading", value ? "1" : "0");
         this.isBoldReading = value;
     }
+
+    getPingMode(): PingMode {
+        return this.pingMode;
+    }
+
+    async setPingModeAsync(mode: PingMode) {
+        // @ts-ignore
+        await filesystem.writePrefAsync("pingMode", mode);
+        this.pingMode = mode;
+    }
+
+    getHideNotification(): boolean {
+        return this.hideNotification;
+    }
+
+    async setHideNotificationAsync(value: boolean) {
+        // @ts-ignore
+        await filesystem.writePrefAsync("hideNotification", value ? "1" : "0");
+        this.hideNotification = value;
+    }
 }
 
 export const SessionRenderingContextProvider = createContext<SessionRenderingContext>(new SessionRenderingContext());
 
 export type DisplayMode = 'Default' | 'Minimalist';
+export type PingMode = "None" | "PingOnly" | "AllMessages";

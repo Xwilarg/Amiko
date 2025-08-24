@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { SessionRenderingContextProvider, type DisplayMode } from "../../context/SessionRenderingContext";
+import { SessionRenderingContextProvider, type DisplayMode, type PingMode } from "../../context/SessionRenderingContext";
 import { useTranslation } from "react-i18next";
 
 export default function GeneralSettingsForm () {
@@ -9,12 +9,17 @@ export default function GeneralSettingsForm () {
     const [originalDisplayMode, setOriginalDisplayMode] = useState<DisplayMode>("Default");
     const [needRefresh, setNeedRefresh] = useState<boolean>(false);
     const [isBoldReading, setIsBoldReading] = useState<boolean>(false);
+    const [pingMode, setPingMode] = useState<PingMode>("PingOnly");
+    const [isHideNotification, setIsHideNotification] = useState<boolean>(false);
 
     useEffect(() => {
-        setOriginalDisplayMode(ctx.getDisplayMode())
-        setDisplayMode(ctx.getDisplayMode())
-        setIsBoldReading(ctx.getBoldReading())
+        setOriginalDisplayMode(ctx.getDisplayMode());
+        setDisplayMode(ctx.getDisplayMode());
+        setIsBoldReading(ctx.getBoldReading());
+        setPingMode(ctx.getPingMode());
+        setIsHideNotification(ctx.getHideNotification());
     }, []);
+
     let refreshChanges = needRefresh ?
     <>
         <p className="help is-danger">{t("settings.general.refreshNeeded")}</p>
@@ -65,6 +70,35 @@ export default function GeneralSettingsForm () {
                     }
                 }}>{t("settings.general.exportDesc")}</button>
             </div>
+        </div>
+        <div className="field">
+            <label className="label">{t("settings.general.notification.title")}</label>
+            <div className="control">
+                <div className="select">
+                    <select onChange={async (e) => {
+                        const mode = e.target.value as PingMode;
+                        setPingMode(mode);
+                        await ctx.setPingModeAsync(mode);
+                    }} value={pingMode}>
+                        <option value="None">{t("settings.general.notification.none")}</option>
+                        <option value="PingOnly">{t("settings.general.notification.pingOnly")}</option>
+                        <option value="AllMessages">{t("settings.general.notification.allMessages")}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div className="field">
+            <label className="label">
+                {t("settings.general.hideNotification")}<br/>
+                <small></small>
+            </label>
+            <label className="switch is-rounded">
+                <input type="checkbox" checked={isHideNotification} onChange={async (e) => {
+                    setIsHideNotification(e.target.checked);
+                    await ctx.setHideNotificationAsync(e.target.checked);
+                }}/>
+                <span className="check"></span>
+            </label>
         </div>
         {refreshChanges}
     </>

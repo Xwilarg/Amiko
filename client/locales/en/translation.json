@@ -102,7 +102,15 @@
                 "minimalist": "Minimalist"
             },
 
-            "boldReading": "Bold reading"
+            "notification": {
+                "title": "Notification mode",
+                "none": "No notification",
+                "pingOnly": "Notification on ping",
+                "allMessages": "Notification on all messages"
+            },
+
+            "boldReading": "Bold reading",
+            "hideNotification": "Hide notification text"
         }
     }
 }
