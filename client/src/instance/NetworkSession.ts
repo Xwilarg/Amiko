@@ -174,10 +174,10 @@ export default class NetworkSession
                 s.element.disabled = false;
             }*/
 
-            /*if (self.keepAliveInterval !== null) clearInterval(self.keepAliveInterval);
+            if (self.keepAliveInterval !== null) clearInterval(self.keepAliveInterval);
             self.keepAliveInterval = setInterval(() => { // Heartbeat
                 self.socket!.send(JSON.stringify({ type: 0 }));
-            }, 10_000);*/
+            }, 10_000);
 
             this.isConnected = true;
         });
