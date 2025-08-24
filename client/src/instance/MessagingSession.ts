@@ -374,7 +374,7 @@ export default class MessagingSession
             }
             else
             {
-                new window.Notification(this.session.t("notification.newMessageShown", {authors: this.getInfoFromIdList(json.authors).map(x => x.username).join(", ")}), {
+                new window.Notification(this.session.t("notification.newMessageShown", {authors: json.authors.length === 0 ? "guest" : this.getInfoFromIdList(json.authors).map(x => x.username).join(", ")}), {
                     body: json.content
                 });
             }
