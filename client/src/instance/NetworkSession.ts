@@ -89,7 +89,9 @@ export default class NetworkSession
     }
 
     sendNetworkMessage(msg: any) {
-        this.socket?.send(JSON.stringify(msg));
+        if (!this.isGuest) {
+            this.socket?.send(JSON.stringify(msg));
+        }
     }
 
     sendSeenNetworkMessage(servId: number, chanId: number) {
@@ -219,7 +221,7 @@ export default class NetworkSession
                         switch (c.type)
                         {
                             case 4: // Server info
-                                self.messaging.addServerInfo(c);
+                                self.messaging.addServerInfo(c, self.isGuest);
                                 break;
 
                             case 5: // User info
@@ -303,7 +305,7 @@ export default class NetworkSession
                     break;
 
                 case 8: // A server settings were modified
-                    self.messaging.updateServerInfo(json);
+                    self.messaging.updateServerInfo(json, self.isGuest);
                     self.renderingContext.refreshServerDisplayState!();
                     self.renderingContext.refreshNavbar!();
                     break;

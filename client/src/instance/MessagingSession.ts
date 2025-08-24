@@ -202,11 +202,11 @@ export default class MessagingSession
         }
     }
 
-    updateServerInfo(msg: any) {
+    updateServerInfo(msg: any, isGuest: boolean) {
         if (msg.updateType === 0) { // Creation
             let ctx = this.session.renderingContext;
             let needServUpdate = ctx.currServ === null;
-            this.addServerInfo(msg);
+            this.addServerInfo(msg, isGuest);
             if (needServUpdate) {
                 ctx.currServ = msg.id;
                 this.session.renderingContext.refreshNavbar!();
@@ -263,7 +263,7 @@ export default class MessagingSession
         }
     }
 
-    addServerInfo(msg: any) {
+    addServerInfo(msg: any, isGuest: boolean) {
         if (msg.id in this.servers) {
             return;
         }
@@ -290,7 +290,7 @@ export default class MessagingSession
                     name: chan.name,
                     description: chan.description,
                     messages: [],
-                    hasPendingNotification: chan.messages.length > 0 && chan.lastSeen < chan.messages[chan.messages.length - 1].sentAt
+                    hasPendingNotification: !isGuest && chan.messages.length > 0 && chan.lastSeen < chan.messages[chan.messages.length - 1].sentAt
                 }
                 this.servers[msg.id].channels[chan.id] = chanInst;
                 for (const m of chan.messages) {
