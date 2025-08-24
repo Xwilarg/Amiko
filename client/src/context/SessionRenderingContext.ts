@@ -218,6 +218,8 @@ export default class SessionRenderingContext
         this.replaceMessages();
         if (this.currChannel !== null) {
             this.getCurrentInstance().sendSeenNetworkMessage(this.currServ, this.currChannel);
+            this.getCurrentChannel()!.hasPendingNotification = false;
+            this.refreshServerDisplayState!();
         }
     }
 
@@ -228,6 +230,8 @@ export default class SessionRenderingContext
         this.replaceMessages();
         if (this.currChannel !== null) {
             this.getCurrentInstance().sendSeenNetworkMessage(this.currServ!, this.currChannel);
+            this.getCurrentChannel()!.hasPendingNotification = false;
+            this.refreshServerDisplayState!();
         }
     }
 
