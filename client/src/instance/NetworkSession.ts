@@ -241,6 +241,10 @@ export default class NetworkSession
 
                                 // Serv and channel exist, we display the messages
                                 self.renderingContext.setMessages(self.messaging.servers[servId].channels[chanId].messages);
+
+                                // Default channel, message there are seen
+                                self.sendSeenNetworkMessage(servId, chanId);
+                                self.messaging.servers[servId].channels[chanId].hasPendingNotification = false;
                             } else {
                                 self.renderingContext.currChannel = null;
                             }
