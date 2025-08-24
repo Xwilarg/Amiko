@@ -161,3 +161,18 @@ input[type='submit'] {
 .settings-chan-new {
     margin-top: 10px;
 }
+
+/* Notifications */
+.notif-container {
+    position: relative;
+}
+
+.notif {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: red;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

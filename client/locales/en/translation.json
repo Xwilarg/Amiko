@@ -10,7 +10,7 @@
     },
 
     "message": {
-        "fileAttached": "{{count}} file attached"
+        "fileAttached": "{{amount}} file attached"
     },
 
     "notification": {

@@ -173,7 +173,8 @@ export default class MessagingSession
             s.channels[msg.chanId] = {
                 name: msg.name,
                 description: undefined,
-                messages: []
+                messages: [],
+                hasPendingNotification: false
             };
             if (ctx.currChannel === null) {
                 ctx.currChannel = msg.chanId;
@@ -276,7 +277,6 @@ export default class MessagingSession
 
             isEphemeral: msg.isEphemeral,
             allowsGuest: msg.allowsGuest
-            //notification: null // TODO: Don't forget to uncomment
         };
         this.servers[msg.id] = serverInst;
 
@@ -289,7 +289,8 @@ export default class MessagingSession
                 const chanInst: Channel = {
                     name: chan.name,
                     description: chan.description,
-                    messages: []
+                    messages: [],
+                    hasPendingNotification: chan.messages.length > 0 && chan.lastSeen < chan.messages[chan.messages.length - 1].sentAt
                 }
                 this.servers[msg.id].channels[chan.id] = chanInst;
                 for (const m of chan.messages) {

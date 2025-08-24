@@ -28,10 +28,15 @@ export default function ServerSelectionForm () {
             {
                 const isCurrentServer = ctx.isCurrentServer(ns, parseInt(key));
                 servs.push(
-                    <button key={value.name} className={"button profile is-flex is-flex-wrap-wrap " + (isCurrentServer ? "is-primary" : "")} onClick={() => {
+                    <button key={value.name} className={"button profile is-flex is-flex-wrap-wrap notif-container " + (isCurrentServer ? "is-primary" : "")} onClick={() => {
                         ctx.setCurrentServer(parseInt(key));
                         setShowChannels(p => !p);
                     }}>
+                        {
+                            Object.values(value.channels).some(x => x.hasPendingNotification)
+                            ? <span className="notif"></span>
+                            : <></>
+                        }
                         <div className="pfp" style={{
                             background: `rgb(${value.color.r}, ${value.color.g}, ${value.color.b})`
                         }}>{value.character}
@@ -45,10 +50,15 @@ export default function ServerSelectionForm () {
                     for (let [chanKey, chanValue] of chanEntries) {
                         const isCurrentChannel = ctx.isCurrentChannel(ns, parseInt(key), parseInt(chanKey));
                         chans.push(
-                            <button key={chanKey} className={"button " + (isCurrentChannel ? "is-primary" : "")} onClick={() => {
+                            <button key={chanKey} className={"button notif-container " + (isCurrentChannel ? "is-primary" : "")} onClick={() => {
                                 ctx.setCurrentChannel(parseInt(chanKey));
                                 setShowChannels(false);
                             }}>
+                                {
+                                    chanValue.hasPendingNotification
+                                    ? <span className="notif"></span>
+                                    : <></>
+                                }
                                 <p>{chanValue.name}</p>
                             </button>
                         );

@@ -10,5 +10,4 @@ export default interface Server {
 
     isEphemeral: boolean;
     allowsGuest: boolean;
-    //notification: Notification;
 }
