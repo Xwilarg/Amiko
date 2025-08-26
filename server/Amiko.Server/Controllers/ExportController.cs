@@ -25,7 +25,7 @@ public class ExportController : ControllerBase
     [HttpGet("{servId}/{chanId}")]
     public IActionResult ValidateToken([Required] int servId, [Required] int chanId)
     {
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         var serv = ServerQuery.GetServer(_dbContext, servId, claimId, null, ServerIncludes.None);
         var chan = ChannelQuery.GetChannel(_dbContext, servId, chanId, claimId, null, ServerIncludes.IncludesAttachments);

@@ -38,7 +38,7 @@ public class Program
             });
         });
 
-        WebApplication app = null;
+        WebApplication? app = null;
 
         builder.Services.AddAuthentication(options =>
         {
@@ -48,7 +48,7 @@ public class Program
         {
             options.IncludeErrorDetails = true;
 
-            using var scope = app.Services.CreateScope();
+            using var scope = app!.Services.CreateScope();
             var data = Encoding.UTF8.GetBytes(scope.ServiceProvider.GetRequiredService<ConfigManager>().GetConfig().SecurityKey);
             var securityKey = new SymmetricSecurityKey(data);
 

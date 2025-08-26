@@ -44,7 +44,10 @@ public class InvitationController : ControllerBase
     [HttpPost("createUser")]
     public async Task<IActionResult> CreateUser([FromBody] UserCreationRequest creationInfo)
     {
-        var isFirstUser = InvitationQuery.GetInvitation(_dbContext, creationInfo.Invitation).IsAdmin && !UserQuery.GetUsers(_dbContext, UserIncludes.None).Any();
+        var invitation = InvitationQuery.GetInvitation(_dbContext, creationInfo.Invitation);
+        if (invitation == null) return StatusCode(StatusCodes.Status400BadRequest);
+
+        var isFirstUser = invitation.IsAdmin && !UserQuery.GetUsers(_dbContext, UserIncludes.None).Any();
 
         var res = InvitationQuery.CreateUserFromInvitation(_dbContext, creationInfo.Invitation, creationInfo.Username, creationInfo.Password);
         if (res != -1)

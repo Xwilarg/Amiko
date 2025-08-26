@@ -17,12 +17,12 @@ public class ConfigManager
 
     public Config GetConfig()
     {
-        return JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), _options);
+        return JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), _options)!;
     }
 
     public void InitConfig()
     {
-        Config config;
+        Config? config;
         if (!File.Exists("config.json"))
         {
             config = new();
@@ -30,6 +30,7 @@ public class ConfigManager
         else
         {
             config = JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), _options);
+            if (config == null) throw new InvalidOperationException("config.json is in an invalid format");
         }
 
         config.AdminKey ??= Guid.NewGuid().ToString();

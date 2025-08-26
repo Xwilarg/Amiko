@@ -29,7 +29,7 @@ public class ServerController : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> UpdateServer(int servId, [FromBody] ServerUpdateMessage msg)
     {
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         if (ServerQuery.UpdateServer(_dbContext, servId, claimId, msg.Color, msg.Character, msg.Name, msg.AllowsGuest, msg.IsEphemeral))
         {
@@ -45,7 +45,7 @@ public class ServerController : ControllerBase
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateServer()
     {
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         var s = ServerQuery.AddServer(_dbContext, "New Server");
         if (s != -1)

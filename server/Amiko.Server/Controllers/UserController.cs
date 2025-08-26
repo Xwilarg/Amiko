@@ -29,7 +29,7 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateMessage msg)
     {
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         if (UserQuery.DoesUserFillClaim(_dbContext, claimId, userId))
         {

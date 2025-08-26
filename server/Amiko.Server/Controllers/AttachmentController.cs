@@ -28,7 +28,7 @@ public class AttachmentController : ControllerBase
     [HttpGet("{servId}/{chanId}/{msgId}")]
     public async Task<IActionResult> GetAttachment([Required] int servId, [Required] int chanId, [Required] int msgId)
     {
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         var att = AttachmentQuery.GetAttachment(_dbContext, servId, chanId, msgId, claimId).ToArray();
         if (att.Length == 0)
@@ -74,7 +74,7 @@ public class AttachmentController : ControllerBase
     [RequestSizeLimit(2_000_000)]
     public async Task<IActionResult> AddAttachment([Required] int servId, [Required] int chanId, [Required] int msgId, [Required, FromForm] IFormFile[] files)
     {
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         if (files.Length == 0)
         {

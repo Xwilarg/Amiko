@@ -94,8 +94,9 @@ namespace Amiko.Server.Controllers
 
                     try
                     {
-                        var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _options);
-
+                        var baseMsg = JsonSerializer.Deserialize<BaseMessage>(Encoding.UTF8.GetString(buffer), _options)
+                            ?? throw new InvalidOperationException("Couldn't deserialize message");
+                        
                         if (baseMsg.Type == MessageType.Heartbeat)
                         { // Heartbeat, we just send one back
                             await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
@@ -105,14 +106,16 @@ namespace Amiko.Server.Controllers
                             if (claimId != null)
                             {
                                 // Seen update, we update the db
-                                var prot = JsonSerializer.Deserialize<SeenUpdateMessage>(Encoding.UTF8.GetString(buffer), _options);
+                                var prot = JsonSerializer.Deserialize<SeenUpdateMessage>(Encoding.UTF8.GetString(buffer), _options)
+                                    ?? throw new InvalidOperationException("Invalid SeenUpdate message");
                                 UserQuery.UpdateLastSeen(_dbContext, prot.ServerId, prot.ChannelId, claimId.Value, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                             }
                         }
                         else if (baseMsg.Type == MessageType.Message)
                         {
                             // Parse actual message
-                            var prot = JsonSerializer.Deserialize<MessageInfo>(Encoding.UTF8.GetString(buffer), _options);
+                            var prot = JsonSerializer.Deserialize<MessageInfo>(Encoding.UTF8.GetString(buffer), _options)
+                                ?? throw new InvalidOperationException("Invalid Message message");
 
                             if (claimId == null)
                             {
@@ -209,8 +212,8 @@ namespace Amiko.Server.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 // Info of who sent the msg
-                var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
-                var isAdmin = (User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.Role).Value.Split(",").Contains("Admin");
+                var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
+                var isAdmin = (User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.Role)!.Value.Split(",").Contains("Admin");
 
                 await ListenInternalAsync(claimId, isAdmin);
             }

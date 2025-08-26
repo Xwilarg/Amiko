@@ -54,6 +54,6 @@ public class MessageManager
     public class UpdatedContent
     {
         public List<UserDao>? Authors = [];
-        public string Content;
+        public required string Content;
     }
 }
