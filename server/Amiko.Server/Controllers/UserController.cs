@@ -46,7 +46,7 @@ public class UserController : ControllerBase
 
     [HttpPost("alt")]
     [Authorize]
-    public async Task<IActionResult> CreateChannel(int servId)
+    public IActionResult CreateAltUser(int servId)
     {/*
         var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
 

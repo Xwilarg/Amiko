@@ -2,8 +2,8 @@
 
 public class SeenUpdateMessage : IBaseMessage
 {
-    public int ServerId { set; get; }
-    public int ChannelId { set; get; }
+    public required int ServerId { set; get; }
+    public required int ChannelId { set; get; }
 
     public MessageType Type => MessageType.SeenUpdate;
 }

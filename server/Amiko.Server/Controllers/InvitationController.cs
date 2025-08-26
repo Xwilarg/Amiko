@@ -24,14 +24,14 @@ public class InvitationController : ControllerBase
 
     [HttpPost("create")]
     [Authorize]
-    public async Task<IActionResult> CreateInvitation()
+    public IActionResult CreateInvitation()
     {
         var code = InvitationQuery.CreateInvitation(_dbContext, false);
         return StatusCode(StatusCodes.Status200OK, code);
     }
 
     [HttpPost("createAdmin")]
-    public async Task<IActionResult> CreateInvitation([FromBody] InvitationCreationRequest creationInfo)
+    public IActionResult CreateInvitation([FromBody] InvitationCreationRequest creationInfo)
     {
         if (creationInfo.AdminToken == _configManager.GetConfig().AdminKey)
         {
@@ -42,7 +42,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("createUser")]
-    public async Task<IActionResult> CreateUser([FromBody] UserCreationRequest creationInfo)
+    public IActionResult CreateUser([FromBody] UserCreationRequest creationInfo)
     {
         var invitation = InvitationQuery.GetInvitation(_dbContext, creationInfo.Invitation);
         if (invitation == null) return StatusCode(StatusCodes.Status400BadRequest);
@@ -65,7 +65,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost("isValid")]
-    public async Task<IActionResult> IsValid(string code)
+    public IActionResult IsValid(string code)
     {
         return StatusCode(StatusCodes.Status200OK, InvitationQuery.IsInvitationValid(_dbContext, code) ? 1 : 0);
     }

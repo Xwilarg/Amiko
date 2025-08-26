@@ -131,8 +131,8 @@ namespace Amiko.Server.Controllers
                             }
 
                             var updatedData = claimId == null
-                                ? new MessageManager.UpdatedContent() { Authors = [], Content = prot.Content }
-                                : _msgManager.ParseMessage(prot.Content, prot.Authors, claimId.Value);
+                                ? new MessageManager.UpdatedContent() { Authors = [], Content = prot.Content ?? "" }
+                                : _msgManager.ParseMessage(prot.Content ?? string.Empty, prot.Authors, claimId.Value);
 
                             if (updatedData == null)
                             {
@@ -144,12 +144,12 @@ namespace Amiko.Server.Controllers
                                 continue;
                             }
 
-                            _logger.Log(LogLevel.Information, $"Received message of size {updatedData.Content.Length} by {string.Join(", ", updatedData.Authors.Select(x => x.Username))}");
+                            _logger.Log(LogLevel.Information, $"Received message of size {updatedData.Content.Length} by {string.Join(", ", updatedData.Authors!.Select(x => x.Username))}");
 
                             // Save to db
-                            var finalId = MessageQuery.AddMessage(_dbContext, prot.ServerId, prot.ChannelId, claimId, now, updatedData.Content, updatedData.Authors.Select(x => x.Id).ToArray());
+                            var finalId = MessageQuery.AddMessage(_dbContext, prot.ServerId, prot.ChannelId, claimId, now, updatedData.Content, updatedData.Authors!.Select(x => x.Id).ToArray());
 
-                            var authorsIds = updatedData.Authors.Select(x => x.Id).ToArray();
+                            var authorsIds = updatedData.Authors!.Select(x => x.Id).ToArray();
                             bool wereAuthorsUpdated = prot.Authors == null || !Enumerable.SequenceEqual(prot.Authors, authorsIds);
                             bool wasContentUpdated = prot.Content != updatedData.Content;
 

@@ -36,6 +36,7 @@ public class MessageManager
         }
         else
         {
+            retData.Authors = [];
             foreach (var author in authors) // In case of co-fronting, a message can have multiple authors, we need to validate each of them
             {
                 // Check for perm issues, we also throw an error is a user is there twice
@@ -43,7 +44,7 @@ public class MessageManager
                 {
                     return null;
                 }
-                targetUser = UserQuery.GetUser(_dbContext, author, UserIncludes.None);
+                targetUser = UserQuery.GetUser(_dbContext, author, UserIncludes.None)!;
                 retData.Authors.Add(targetUser);
             }
         }

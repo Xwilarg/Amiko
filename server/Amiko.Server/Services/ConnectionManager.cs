@@ -86,10 +86,10 @@ public class UserSocket
     /// </summary>
     public int? ClaimId { set; get; }
 
-    public bool IsAdmin { set; get; }
+    public required bool IsAdmin { set; get; }
 
     /// <summary>
     /// Actual web socket
     /// </summary>
-    public WebSocket WebSocket { set; get; }
+    public required WebSocket WebSocket { set; get; }
 }

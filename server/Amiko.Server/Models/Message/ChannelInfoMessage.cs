@@ -4,7 +4,7 @@ namespace Amiko.Server.Models.Message;
 
 public class ChannelMessageBase
 {
-    public string Name { set; get; }
+    public string? Name { set; get; }
 }
 
 public class ChannelUpdateMessage : ChannelMessageBase, IBaseMessage
@@ -18,10 +18,10 @@ public class ChannelUpdateMessage : ChannelMessageBase, IBaseMessage
 
 public class ChannelInfoMessage : ChannelMessageBase
 {
-    public int Id { set; get; }
+    public required int Id { set; get; }
     public string? Description { set; get; }
-    public MessageInfo[] Messages { set; get; }
-    public long LastSeen { set; get; }
+    public required MessageInfo[] Messages { set; get; }
+    public required long LastSeen { set; get; }
 
     public static ChannelInfoMessage From(int servId, ChannelDao c, UserDao? user)
     {

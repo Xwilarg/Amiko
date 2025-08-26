@@ -31,6 +31,8 @@ public class ChannelController : ControllerBase
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
+        if (msg.Name == null) return StatusCode(StatusCodes.Status400BadRequest); // For now we can only update the name
+
         if (ChannelQuery.UpdateChannel(_dbContext, claimId, servId, chanId, msg.Name))
         {
             msg.ServId = servId;

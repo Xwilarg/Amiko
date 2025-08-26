@@ -26,7 +26,7 @@ public class AttachmentController : ControllerBase
 
     [Authorize]
     [HttpGet("{servId}/{chanId}/{msgId}")]
-    public async Task<IActionResult> GetAttachment([Required] int servId, [Required] int chanId, [Required] int msgId)
+    public IActionResult GetAttachment([Required] int servId, [Required] int chanId, [Required] int msgId)
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
@@ -49,7 +49,7 @@ public class AttachmentController : ControllerBase
     }
 
     [HttpGet("guest/{servId}/{chanId}/{msgId}")]
-    public async Task<IActionResult> GetAttachmentGuest([Required] int servId, [Required] int chanId, [Required] int msgId)
+    public IActionResult GetAttachmentGuest([Required] int servId, [Required] int chanId, [Required] int msgId)
     {
         var att = AttachmentQuery.GetAttachment(_dbContext, servId, chanId, msgId, null).ToArray();
         if (att.Length == 0)

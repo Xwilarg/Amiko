@@ -23,7 +23,7 @@ public abstract class BaseMessageInfo : IBaseMessage
     /// <summary>
     /// Content of the message
     /// </summary>
-    public string Content { set; get; }
+    public string? Content { set; get; }
     /// <summary>
     /// When the message was sent
     /// </summary>
@@ -38,7 +38,7 @@ public abstract class BaseMessageInfo : IBaseMessage
     /// </summary>
     public int AckId { set; get; }
 
-    public AttachmentMessage[] Attachments { set; get; }
+    public AttachmentMessage[]? Attachments { set; get; }
 
     public abstract MessageType Type { get; }
 }

@@ -16,7 +16,7 @@ public class BaseMessage : IBaseMessage // For deserialization
 public class ArrayMessage<T> : IBaseMessage
     where T : IBaseMessage
 {
-    public T[] Data { set; get; }
+    public required T[] Data { set; get; }
 
     public MessageType Type => MessageType.Array;
 }

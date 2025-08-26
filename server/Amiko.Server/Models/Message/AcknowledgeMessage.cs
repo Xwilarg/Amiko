@@ -13,14 +13,14 @@ public class AcknowledgeMessage : IBaseMessage
     /// <summary>
     /// AckId received
     /// </summary>
-    public int AckId { set; get; }
+    public required int AckId { set; get; }
 
     /// <summary>
     /// If we use a prefix to specify a second account, the author returned can be different than the sender
     /// </summary>
     public string? Content { set; get; }
-    public int[] Authors { set; get; }
-    public bool IsError { set; get; }
+    public int[]? Authors { set; get; }
+    public required bool IsError { set; get; }
 
     public MessageType Type => MessageType.Acknowledge;
 }
