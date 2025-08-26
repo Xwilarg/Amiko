@@ -46,20 +46,22 @@ public class UserController : ControllerBase
 
     [HttpPost("alt")]
     [Authorize]
-    public IActionResult CreateAltUser(int servId)
-    {/*
-        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+    public async Task<IActionResult> CreateAltUser(int servId)
+    {
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
         var id = UserQuery.CreateAltUser(_dbContext, "New User", claimId);
         if (id != -1)
         {
             var msg = new UserUpdateMessage()
             {
-                UpdateType = UpdateType.Creation
+                UpdateType = UpdateType.Creation,
+                Id = id,
+                DependsOf = claimId
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg, except: null);
             return StatusCode(StatusCodes.Status204NoContent);
-        }*/
+        }
         return StatusCode(StatusCodes.Status403Forbidden);
     }
 }

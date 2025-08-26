@@ -42,6 +42,23 @@ export default function MessageInputForm() {
         }
     }
 
+    function onPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+        for (var item of e.clipboardData.items) {
+            if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (!file) continue;
+
+                if (file.size > 2000000) {
+                    ctx.getCurrentInstance().messaging.setAttachment(null);
+                    alert("File must be smaller than 2MB");
+                } else {
+                    ctx.getCurrentInstance().messaging.setAttachment([ file ]);
+                }
+                break;
+            }
+        }
+    }
+
     return (
     <form onSubmit={onSubmit}>
         <fieldset disabled={false} id="message-form" className="field has-addons container">
@@ -56,7 +73,7 @@ export default function MessageInputForm() {
             <p className="control is-expanded">
                 <textarea maxLength={3000} className="textarea" placeholder="Your message" id="message-field" 
                     value={message} onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={onKeyPressed}
+                    onKeyDown={onKeyPressed} onPaste={onPaste}
                 ></textarea>
             </p>
             <p className="control">

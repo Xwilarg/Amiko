@@ -14,6 +14,7 @@ public class UserMessageBase
 public class UserUpdateMessage : UserMessageBase, IBaseMessage
 {
     public UpdateType UpdateType { set; get; }
+    public int? DependsOf { set; get; }
 
     public MessageType Type => MessageType.UserUpdate;
 }
