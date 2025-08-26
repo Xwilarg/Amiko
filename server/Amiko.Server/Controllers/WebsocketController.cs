@@ -56,18 +56,16 @@ namespace Amiko.Server.Controllers
             // First connection from user!
             _logger.Log(LogLevel.Information, $"New client connected ({claimId})");
             // Send information about all servers existing
-            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<ServerInfoMessage>()
+            await _connManager.SendMessageAsync(client, new ArrayMessage<ServerInfoMessage>()
             {
                 Data = servers.Select(x => ServerInfoMessage.From(x, claimId == null ? null : UserQuery.GetUser(_dbContext, claimId.Value, UserIncludes.IncludesLastSeen))).ToArray()
-            }, _options));
-            await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+            });
 
             // Send information about all users existing
-            bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ArrayMessage<UserInfoMessage>()
+            await _connManager.SendMessageAsync(client, new ArrayMessage<UserInfoMessage>()
             {
-                Data =  UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserInfoMessage.From(x, claimId)).ToArray()
-            }, _options));
-            await client.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+                Data = UserQuery.GetUsers(_dbContext, UserIncludes.IncludesLastSeen).Select(x => UserInfoMessage.From(x, claimId)).ToArray()
+            });
 
             while (true)
             {
@@ -135,12 +133,11 @@ namespace Amiko.Server.Controllers
 
                             if (updatedData == null)
                             {
-                                var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new AcknowledgeMessage()
+                                await _connManager.SendMessageAsync(client, new AcknowledgeMessage()
                                 {
                                     AckId = prot.AckId,
                                     IsError = true
-                                }, _options));
-                                await client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
+                                });
                                 continue;
                             }
 
@@ -162,50 +159,21 @@ namespace Amiko.Server.Controllers
                             if (wasContentUpdated) prot.Content = updatedData.Content;
 
                             // Send message back
-                            List<Task> tasks = [];
-                            lock (_connManager.Sockets)
+                            await _connManager.BroadcastMessageAsync(_dbContext, prot.ServerId, prot, client);
+                            await _connManager.SendTo(_dbContext, new AcknowledgeMessage()
                             {
-                                // Connected users
-                                foreach (var s in _connManager.Sockets.Where(x => x.WebSocket != client && ServerQuery.CanAccessServer(_dbContext, prot.ServerId, x.ClaimId))) // Send the message to every users
-                                {
-                                    var msg = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(prot, _options));
-                                    Task t = s.WebSocket.SendAsync(msg, WebSocketMessageType.Text, true, CancellationToken.None);
-                                    tasks.Add(t);
-                                }
-                                { // Send an acknowledgment to the user that sent it
-                                    var ack = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new AcknowledgeMessage()
-                                    {
-                                        AckId = prot.AckId,
-                                        NewId = finalId,
-                                        IsError = false,
-                                        Content = wasContentUpdated ? prot.Content : null,
-                                        Authors = wereAuthorsUpdated ? prot.Authors : null,
-                                    }, _options));
-                                    Task t = client.SendAsync(ack, WebSocketMessageType.Text, true, CancellationToken.None);
-                                    tasks.Add(t);
-                                }
-                                // Webhooks
-                                foreach (var hook in UserQuery.GetServerWebhooks(_dbContext, prot.ServerId, UserIncludes.None))
-                                {
-                                    Task t = _httpClient.PostAsJsonAsync(hook.Webhook, new WebhookInfo() { Content = prot.Content, Username = string.Join(", ", updatedData.Authors.Select(x => x.Username)) }, _options);
-                                    tasks.Add(t);
-                                }
-                            }
-                            foreach (var t in tasks)
-                            {
-                                try
-                                {
-                                    await t;
-                                }
-                                catch (Exception e)
-                                { }
-                            }
+                                AckId = prot.AckId,
+                                NewId = finalId,
+                                IsError = false,
+                                Content = wasContentUpdated ? prot.Content : null,
+                                Authors = wereAuthorsUpdated ? prot.Authors : null,
+                            }, client);
                         }
                         else
                         {
                             throw new NotImplementedException($"Unknown message {baseMsg.Type}");
                         }
-                        }
+                    }
                     catch (Exception e)
                     {
                         _logger.LogError(e.ToString());

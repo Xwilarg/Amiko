@@ -40,7 +40,6 @@ public static class ServerQuery
         int? claimId,
         ServerIncludes includes)
     {
-        IQueryable<ServerContext> servers;
         if (includes == ServerIncludes.IncludesAttachments)
         {
             return ctx.Servers.Include(s => s.Channels).ThenInclude(c => c.Messages).ThenInclude(m => m.Attachments);

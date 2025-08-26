@@ -99,7 +99,7 @@ public class AttachmentController : ControllerBase
             Attachments = [new AttachmentMessage() { Id = id.Value, Name = files[0].FileName }],
             ServerId = servId,
             ChannelId = chanId
-        });
+        }, except: null);
 
         return StatusCode(StatusCodes.Status204NoContent);
     }

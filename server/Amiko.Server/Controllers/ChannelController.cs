@@ -36,9 +36,10 @@ public class ChannelController : ControllerBase
             msg.ServId = servId;
             msg.ChanId = chanId;
             msg.UpdateType = UpdateType.Edition;
-            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg, except: null);
+            return StatusCode(StatusCodes.Status204NoContent);
         }
-        return StatusCode(StatusCodes.Status204NoContent);
+        return StatusCode(StatusCodes.Status403Forbidden);
     }
 
     [HttpPost("{servId}")]
@@ -57,9 +58,10 @@ public class ChannelController : ControllerBase
                 Name = "New Channel",
                 UpdateType = UpdateType.Creation
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg, except: null);
+            return StatusCode(StatusCodes.Status204NoContent);
         }
-        return StatusCode(StatusCodes.Status204NoContent);
+        return StatusCode(StatusCodes.Status403Forbidden);
     }
 
     [HttpDelete("{servId}/{chanId}")]
@@ -76,8 +78,9 @@ public class ChannelController : ControllerBase
                 ChanId = chanId,
                 UpdateType = UpdateType.Deletion
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg, except: null);
+            return StatusCode(StatusCodes.Status204NoContent);
         }
-        return StatusCode(StatusCodes.Status204NoContent);
+        return StatusCode(StatusCodes.Status403Forbidden);
     }
 }

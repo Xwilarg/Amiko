@@ -120,7 +120,29 @@ public static class UserQuery
         return user.Id;
     }
 
+    public static int CreateAltUser(SqliteContext ctx, string name, int claimId)
+    {
+        var user = new UserContext()
+        {
+            Username = name,
+            IsAdmin = false,
+            Password = null,
+            Salt = null,
 
+            Character = name[0].ToString(),
+            Color = 54 << 16 | 54 << 8 | 54,
+
+            DependsOf = claimId,
+            LastSeens = [],
+            Prefix = null,
+            Webhook = null,
+        };
+        ctx.Users.Add(user);
+
+        ctx.SaveChanges();
+
+        return user.Id;
+    }
 
     public static bool UpdateUser(SqliteContext ctx, int userId,
         Color? color, string? character, string? username)

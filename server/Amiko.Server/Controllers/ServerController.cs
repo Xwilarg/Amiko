@@ -35,8 +35,8 @@ public class ServerController : ControllerBase
         {
             msg.Id = servId;
             msg.UpdateType = UpdateType.Edition;
-            await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
-            return StatusCode(StatusCodes.Status200OK);
+            await _connManager.BroadcastMessageAsync(_dbContext, null, msg, except: null);
+            return StatusCode(StatusCodes.Status204NoContent);
         }
         return StatusCode(StatusCodes.Status403Forbidden);
     }
@@ -58,7 +58,7 @@ public class ServerController : ControllerBase
                 Character = "N",
                 UpdateType = UpdateType.Creation
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, null, sMsg);
+            await _connManager.BroadcastMessageAsync(_dbContext, null, sMsg, except: null);
             
             var c = ChannelQuery.AddChannel(_dbContext, claimId, s, "New Channel");
             if (c != -1)
@@ -70,9 +70,9 @@ public class ServerController : ControllerBase
                     Name = "New Channel",
                     UpdateType = UpdateType.Creation
                 };
-                await _connManager.BroadcastMessageAsync(_dbContext, s, cMsg);
+                await _connManager.BroadcastMessageAsync(_dbContext, s, cMsg, except: null);
+                return StatusCode(StatusCodes.Status204NoContent);
             }
-            return StatusCode(StatusCodes.Status200OK);
         }
         return StatusCode(StatusCodes.Status403Forbidden);
     }
@@ -88,7 +88,7 @@ public class ServerController : ControllerBase
                 Id = servId,
                 UpdateType = UpdateType.Deletion
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
+            await _connManager.BroadcastMessageAsync(_dbContext, null, msg, except: null);
             return StatusCode(StatusCodes.Status200OK);
         }
         return StatusCode(StatusCodes.Status403Forbidden);

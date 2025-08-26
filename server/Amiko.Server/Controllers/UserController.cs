@@ -37,10 +37,29 @@ public class UserController : ControllerBase
             {
                 msg.Id = userId;
                 msg.UpdateType = UpdateType.Edition;
-                await _connManager.BroadcastMessageAsync(_dbContext, null, msg);
+                await _connManager.BroadcastMessageAsync(_dbContext, null, msg, except: null);
             }
             return StatusCode(StatusCodes.Status204NoContent);
         }
+        return StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    [HttpPost("alt")]
+    [Authorize]
+    public async Task<IActionResult> CreateChannel(int servId)
+    {/*
+        var claimId = int.Parse((User.Identity as ClaimsIdentity).FindFirst(x => x.Type == ClaimTypes.UserData).Value);
+
+        var id = UserQuery.CreateAltUser(_dbContext, "New User", claimId);
+        if (id != -1)
+        {
+            var msg = new UserUpdateMessage()
+            {
+                UpdateType = UpdateType.Creation
+            };
+            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }*/
         return StatusCode(StatusCodes.Status403Forbidden);
     }
 }
