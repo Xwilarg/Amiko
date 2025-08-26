@@ -50,12 +50,9 @@ public static class MessageQuery
             Authors = authors
         };
         chan.Messages.Add(msg);
-        Console.WriteLine($"Curr count: {chan.Messages.Count}");
         if (serv.IsEphemeral) {
             chan.Messages = chan.Messages.TakeLast(100).ToList(); // Ephemeral channels always keep 100 messages at most
         }
-        Console.WriteLine($"Final count: {chan.Messages.Count}");
-        Console.WriteLine($"Last msg: {chan.Messages.Last().Message}");
         ctx.SaveChanges();
 
         return msg.Id;

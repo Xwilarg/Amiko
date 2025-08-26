@@ -25,7 +25,7 @@ public class ChannelController : ControllerBase
         _connManager = connManager;
     }
 
-    [HttpPost("update/{servId}/{chanId}")]
+    [HttpPatch("{servId}/{chanId}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> UpdateChannel(int servId, int chanId, [FromBody] ChannelUpdateMessage msg)
     {
@@ -41,7 +41,7 @@ public class ChannelController : ControllerBase
         return StatusCode(StatusCodes.Status204NoContent);
     }
 
-    [HttpPost("create/{servId}")]
+    [HttpPost("{servId}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateChannel(int servId)
     {
@@ -62,7 +62,7 @@ public class ChannelController : ControllerBase
         return StatusCode(StatusCodes.Status204NoContent);
     }
 
-    [HttpDelete("delete/{servId}/{chanId}")]
+    [HttpDelete("{servId}/{chanId}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteChannel(int servId, int chanId)
     {

@@ -103,7 +103,7 @@ export default class NetworkSession
     }
 
     async getAttachmentOverNetworkAsync (servId: number, chanId: number, msgId: number): Promise<Blob | null> {
-        const resp = await fetch(`${this.instance}/api/attachment/${(this.isGuest ? "getGuest" : "get")}/${servId}/${chanId}/${msgId}`, {
+        const resp = await fetch(`${this.instance}/api/attachment/${(this.isGuest ? "guest" : "")}/${servId}/${chanId}/${msgId}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.token}`

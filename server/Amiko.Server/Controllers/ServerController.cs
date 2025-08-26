@@ -25,7 +25,7 @@ public class ServerController : ControllerBase
         _connManager = connManager;
     }
 
-    [HttpPost("update/{servId}")]
+    [HttpPatch("{servId}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> UpdateServer(int servId, [FromBody] ServerUpdateMessage msg)
     {
@@ -41,7 +41,7 @@ public class ServerController : ControllerBase
         return StatusCode(StatusCodes.Status403Forbidden);
     }
 
-    [HttpPost("create")]
+    [HttpPost("")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> CreateServer()
     {
@@ -77,7 +77,7 @@ public class ServerController : ControllerBase
         return StatusCode(StatusCodes.Status403Forbidden);
     }
 
-    [HttpDelete("delete/{servId}")]
+    [HttpDelete("{servId}")]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteServer(int servId)
     {

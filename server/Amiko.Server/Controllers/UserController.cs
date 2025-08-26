@@ -25,7 +25,7 @@ public class UserController : ControllerBase
         _connManager = connManager;
     }
 
-    [HttpPost("update/{userId}")]
+    [HttpPatch("{userId}")]
     [Authorize]
     public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateMessage msg)
     {

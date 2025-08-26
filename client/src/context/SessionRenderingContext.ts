@@ -339,7 +339,7 @@ export default class SessionRenderingContext
             name: name,
             allowsGuest: allowsGuest,
             isEphemeral: isEphemeral
-        }, `server/update/${this.currServ}`, "POST");
+        }, `server/${this.currServ}`, "PATCH");
     }
 
     updateUserInfo(username: string, color: Color, character: string) { // TODO: handle alters
@@ -348,29 +348,29 @@ export default class SessionRenderingContext
             color: color,
             character: character,
             username: username
-        }, `user/update/${this.getCurrentInstance().messaging.mainUser}`, "POST");
+        }, `user/${this.getCurrentInstance().messaging.mainUser}`, "PATCH");
     }
 
     createNewServer() {
-        this.getCurrentInstance().sendApiMessageNoPayload(`server/create`, "POST");
+        this.getCurrentInstance().sendApiMessageNoPayload(`server`, "POST");
     }
 
     deleteServer() {
-        this.getCurrentInstance().sendApiMessageNoPayload(`server/delete/${this.currServ}`, "DELETE");
+        this.getCurrentInstance().sendApiMessageNoPayload(`server/${this.currServ}`, "DELETE");
     }
 
     createNewChannel() {
-        this.getCurrentInstance().sendApiMessageNoPayload(`channel/create/${this.currServ}`, "POST");
+        this.getCurrentInstance().sendApiMessageNoPayload(`channel/${this.currServ}`, "POST");
     }
 
     updateChannelName(chanId: number, name: string) {
         this.getCurrentInstance().sendApiMessage({
             name: name
-        }, `channel/update/${this.currServ}/${chanId}`, "POST");
+        }, `channel/${this.currServ}/${chanId}`, "PATCH");
     }
 
     deleteChannel(chanId: number) {
-        this.getCurrentInstance().sendApiMessageNoPayload(`channel/delete/${this.currServ}/${chanId}`, "DELETE");
+        this.getCurrentInstance().sendApiMessageNoPayload(`channel/${this.currServ}/${chanId}`, "DELETE");
     }
 
     downloadExport() {

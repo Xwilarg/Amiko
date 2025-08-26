@@ -173,11 +173,15 @@ export default function LoginForm() {
                 <p className="control is-expanded">
                     <input className="input is-primary is-fullwidth" type="submit" onClick={onLogin} />
                 </p>
-                <p className="control is-expanded">
-                    <button className="button is-info is-fullwidth"
-                        onClick={(e) => { navigate(`/join?instance=${encodeURI(instance)}`); }}
-                    >{t("login.joinInvitation")}</button>
-                </p>
+                {
+                    metadata?.isInit ?? false ?
+                    <p className="control is-expanded">
+                        <button className="button is-info is-fullwidth"
+                            onClick={(e) => { navigate(`/join?instance=${encodeURI(instance)}`); }}
+                        >{t("login.joinInvitation")}</button>
+                    </p>
+                    : <></>
+                }
                 {
                     metadata?.allowsGuest ?? false ?
                     <p className="control is-expanded">
