@@ -52,6 +52,7 @@ export default function MessageInputForm() {
                     ctx.getCurrentInstance().messaging.setAttachment(null);
                     alert("File must be smaller than 2MB");
                 } else {
+                    // @ts-ignore
                     ctx.getCurrentInstance().messaging.setAttachment([ file ]);
                 }
                 break;
