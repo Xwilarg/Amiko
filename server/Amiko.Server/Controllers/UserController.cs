@@ -46,7 +46,7 @@ public class UserController : ControllerBase
 
     [HttpPost("alt")]
     [Authorize]
-    public async Task<IActionResult> CreateAltUser(int servId)
+    public async Task<IActionResult> CreateAltUser()
     {
         var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
 
@@ -59,7 +59,27 @@ public class UserController : ControllerBase
                 Id = id,
                 DependsOf = claimId
             };
-            await _connManager.BroadcastMessageAsync(_dbContext, servId, msg, except: null);
+            await _connManager.BroadcastMessageAsync(_dbContext, null, msg, except: null);
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+        return StatusCode(StatusCodes.Status403Forbidden);
+    }
+
+    [HttpDelete("{userId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteUser(int userId)
+    {
+        var claimId = int.Parse((User.Identity as ClaimsIdentity)!.FindFirst(x => x.Type == ClaimTypes.UserData)!.Value);
+
+        if (UserQuery.DeleteUser(_dbContext, userId, claimId))
+        {
+            var msg = new UserUpdateMessage()
+            {
+                UpdateType = UpdateType.Deletion,
+                Id = userId,
+                DependsOf = claimId
+            };
+            await _connManager.BroadcastMessageAsync(_dbContext, null, msg, except: null);
             return StatusCode(StatusCodes.Status204NoContent);
         }
         return StatusCode(StatusCodes.Status403Forbidden);

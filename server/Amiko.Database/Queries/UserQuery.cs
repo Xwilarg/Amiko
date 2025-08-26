@@ -120,6 +120,28 @@ public static class UserQuery
         return user.Id;
     }
 
+    public static bool DeleteUser(SqliteContext ctx, int userId, int claimId)
+    {
+        if (!DoesUserFillClaim(ctx, claimId, userId))
+            return false;
+
+        var user = ctx.Users.FirstOrDefault(x => x.Id == userId);
+        if (user == null) return false;
+
+        var matchingIds = ctx.AllowUsers.Where(x => x.UserId == userId);
+        ctx.AllowUsers.RemoveRange(matchingIds);
+
+        var parent = ctx.Users.FirstOrDefault(x => x.DependsOf == userId);
+        if (parent != null)
+        {
+            ctx.Users.Remove(parent);
+        }
+        ctx.Users.Remove(user);
+        ctx.SaveChanges();
+
+        return true;
+    }
+
     public static int CreateAltUser(SqliteContext ctx, string name, int claimId)
     {
         var user = new UserContext()
