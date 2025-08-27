@@ -153,6 +153,12 @@ input[type='submit'] {
     background-color: var(--bulma-scheme-main);
 }
 
+@media screen and (max-width: 500px) {
+    #settings {
+        width: 100%;
+    }
+}
+
 /* Channel settings */
 .settings-chan-preview {
     width: 215px;
