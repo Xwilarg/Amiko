@@ -168,6 +168,16 @@ input[type='submit'] {
     margin-top: 10px;
 }
 
+/* User settings */
+#alt-user-display-settings td {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#alt-user-display-settings {
+    margin-bottom: 5px;
+}
+
 /* Notifications */
 .notif-container {
     position: relative;

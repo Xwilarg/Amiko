@@ -353,6 +353,8 @@ export default class SessionRenderingContext
         }, `user/${this.getCurrentInstance().messaging.mainUser}`, "PATCH");
     }
 
+    /* Server / channel management */
+
     createNewServer() {
         this.getCurrentInstance().sendApiMessageNoPayload(`server`, "POST");
     }
@@ -373,6 +375,11 @@ export default class SessionRenderingContext
 
     deleteChannel(chanId: number) {
         this.getCurrentInstance().sendApiMessageNoPayload(`channel/${this.currServ}/${chanId}`, "DELETE");
+    }
+
+    /* User management */
+    createNewAltUser() {
+        this.getCurrentInstance().sendApiMessageNoPayload(`user/alt`, "POST");
     }
 
     downloadExport() {

@@ -50,7 +50,7 @@ export default function ServerSettingsForm () {
                     <button className="button settings-chan-preview" disabled>{value.name}</button>
                     <button className="button is-info" onClick={
                         () => {
-                            const newName = prompt();
+                            const newName = prompt("", value.name);
                             if (newName) {
                                 ctx.updateChannelName(parseInt(key), newName);
                             }

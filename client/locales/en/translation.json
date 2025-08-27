@@ -87,6 +87,7 @@
         "user": {
             "title": "User settings",
 
+            "prefix": "Prefix",
             "symbol": "Symbol",
             "color": "Color",
             "username": "Username"
