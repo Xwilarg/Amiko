@@ -178,13 +178,14 @@ const MessageForm = forwardRef((
 
     let richDisplay: Array<React.ReactNode> = [];
 
-    for (let a of attachments) {
+    for (let i = 0; i < attachments.length; i++) {
+        let a = attachments[i];
         if (a.mimetype.startsWith("image/")) {
-            richDisplay.push(<div>
+            richDisplay.push(<div key={`attachment-${i}`}>
                 <img src={a.url}/>
             </div>)
         } else if (a.mimetype.startsWith("video/")) {
-            richDisplay.push(<div>
+            richDisplay.push(<div key={`attachment-${i}`}>
                 <video src={a.url}/>
             </div>)
         } else {
@@ -193,7 +194,7 @@ const MessageForm = forwardRef((
                 yt = a.url.match(/youtu\.be\/([0-9a-zA-Z_]+)/m);
             }
             if (yt) {
-                richDisplay.push(<div>
+                richDisplay.push(<div key={`attachment-${i}`}>
                     <iframe /*type="text/html"*/ width="512" height="256" src={`https://www.youtube-nocookie.com/embed/${yt[1]}`} frameBorder="0"></iframe>
                 </div>);
             } else {

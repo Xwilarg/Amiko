@@ -7,7 +7,8 @@ export interface DisplayedMessage
 {
     msg: Message
     authorDirty: number,
-    contentDirty: number
+    contentDirty: number,
+    key: string
 }
 
 const MessageContainerForm = forwardRef((
@@ -35,15 +36,32 @@ const MessageContainerForm = forwardRef((
         }
     }, [renderedMessages]);
 
+    // https://stackoverflow.com/a/8076436
+    function hashCode(str: string): number {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            var code = str.charCodeAt(i);
+            hash = ((hash<<5)-hash)+code;
+            hash = hash & hash;
+        }
+        return hash;
+    }
+
+    function createKey(msg: Message): string {
+        if (msg.id) return `${msg.id}`;
+        if (msg.ackId) return `${msg.ackId}`;
+        return hashCode(msg.content) + hashCode((new Date()).valueOf().toString()).toString();
+    }
+
     useImperativeHandle(msgRef, () => ({
         sendMessage: (msg: Message) => {
-            setRendererMessages(prev => [...prev, { msg: msg, authorDirty: 0, contentDirty: 0 }]);
+            setRendererMessages(prev => [...prev, { msg: msg, authorDirty: 0, contentDirty: 0, key: createKey(msg) }]);
         },
         clearAllMessages: () => {
             setRendererMessages([]);
         },
         setMessages: (msgs: Array<Message>) => {
-            setRendererMessages(prev => [...prev, ...msgs.map(x => { return { msg: x, authorDirty: 0, contentDirty: 0 }})]);
+            setRendererMessages(prev => [...prev, ...msgs.map(x => { return { msg: x, authorDirty: 0, contentDirty: 0, key: createKey(x) }})]);
         },
         refreshAuthors:  () => {
             setRendererMessages(prev => [...prev.map(x => {
@@ -72,7 +90,7 @@ const MessageContainerForm = forwardRef((
     return (
         <div id="main-screen">
             <div className="is-flex is-flex-direction-column" id="messages" ref={containerRef}>
-                {renderedMessages.map(msg => <MessageForm dm={msg} />)}
+                {renderedMessages.map(msg => <MessageForm dm={msg} key={msg.key} />)}
                 <div ref={messagesEndRef} />
             </div>
             <MessageInputForm />
