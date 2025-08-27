@@ -34,12 +34,14 @@ export default class SessionRenderingContext
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
     refreshServerSettings: (() => void) | null;
+    refreshUserSettings : (() => void) | null;
     refreshMessageInput: (() => void) | null;
 
     constructor() {
         this.refreshServerDisplayState = null;
         this.refreshNavbar = null;
         this.refreshServerSettings = null;
+        this.refreshUserSettings = null;
         this.refreshMessageInput = null;
 
         this.emojiParser = new EmojiConvertor();

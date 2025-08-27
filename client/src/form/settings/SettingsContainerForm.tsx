@@ -45,6 +45,9 @@ const SettingsContainerForm = forwardRef((
         <div id="settings" className="has-text-centered pt-5">
             <h2 className="subtitle">{title}</h2>
             {node}
+            <button className="modal-close is-large" aria-label="close" onClick={
+                () => { setOpenSettings("None"); }
+            }></button>
         </div>
     )
 });

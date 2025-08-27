@@ -14,6 +14,13 @@ export default function UserSettingsForm () {
     const [username, setUsername] = useState<string>(() => {
         return ctx.getCurrentClaimUser().username;
     });
+    const [r, forceRefresh] = useState(0);
+
+    function refreshPage() { // Need to clean this
+        forceRefresh(r + 1);
+    }
+
+    ctx.refreshUserSettings = refreshPage;
     
     let { t } = useTranslation();
 
