@@ -9,6 +9,7 @@ public class UserMessageBase
     public string? Username { set; get; }
     public Color? Color { set; get; }
     public string? Character { set; get; }
+    public string? Prefix { set; get; }
 }
 
 public class UserUpdateMessage : UserMessageBase, IBaseMessage
@@ -38,6 +39,7 @@ public class UserInfoMessage : UserMessageBase, IBaseMessage
                 B = (byte)(u.Color >> 0 & 0xff)
             },
             Character = u.Character,
+            Prefix = u.Prefix,
             IsAdmin = u.IsAdmin,
 
             IsMe = u.Id == myRawId,

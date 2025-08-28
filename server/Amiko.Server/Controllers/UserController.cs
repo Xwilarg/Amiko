@@ -33,7 +33,7 @@ public class UserController : ControllerBase
 
         if (UserQuery.DoesUserFillClaim(_dbContext, claimId, userId))
         {
-            if (UserQuery.UpdateUser(_dbContext, userId, msg.Color, msg.Character, msg.Username))
+            if (UserQuery.UpdateUser(_dbContext, userId, msg.Color, msg.Character, msg.Username, msg.Prefix))
             {
                 msg.Id = userId;
                 msg.UpdateType = UpdateType.Edition;

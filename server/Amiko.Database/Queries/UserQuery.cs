@@ -167,7 +167,7 @@ public static class UserQuery
     }
 
     public static bool UpdateUser(SqliteContext ctx, int userId,
-        Color? color, string? character, string? username)
+        Color? color, string? character, string? username, string? prefix)
     {
         var u = GetUserInternal(ctx, userId, UserIncludes.None);
 
@@ -176,6 +176,7 @@ public static class UserQuery
         if (color != null) u.Color = color.R << 16 | color.G << 8 | color.B;
         if (character != null) u.Character = character;
         if (username != null) u.Username = username;
+        if (prefix != null) u.Prefix = prefix;
 
         ctx.SaveChanges();
         return true;
