@@ -38,7 +38,8 @@ public static class UserQuery
     /// </summary>
     public static UserDao? GetUserFromPrefix(SqliteContext ctx, string prefix, int claimId, UserIncludes includes)
     {
-        var u = GetUsersAsQueryable(ctx, includes).AsEnumerable().FirstOrDefault(x => x.Prefix == prefix && DoesUserFillClaim(ctx, x.Id, claimId));
+        var users = GetUsersAsQueryable(ctx, includes).Where(x => x.Prefix == prefix).AsEnumerable();
+        var u = users.FirstOrDefault(x => DoesUserFillClaim(ctx, x.Id, claimId));
         return u == null ? null : UserDao.From(u);
     }
 
@@ -184,7 +185,7 @@ public static class UserQuery
 
     /// <summary>
     /// Does the identity given (who the user pretend to be) allowed by current claim
-    /// This mean targetted account is either us or an account that depends on us
+    /// This mean targeted account is either us or an account that depends on us
     /// </summary>
     public static bool DoesUserFillClaim(SqliteContext ctx, int claimId, int identity)
     {
