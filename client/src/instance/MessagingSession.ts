@@ -181,6 +181,7 @@ export default class MessagingSession
             if (msg.color !== null) u.color = msg.color;
             if (msg.character !== null) u.character = msg.character;
             if (msg.username !== null) u.username = msg.username;
+            if (msg.prefix !== null) u.prefix = msg.prefix;
         }
         else { // Deletion
             delete this.users[msg.id];

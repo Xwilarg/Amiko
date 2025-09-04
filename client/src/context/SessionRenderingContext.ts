@@ -344,13 +344,14 @@ export default class SessionRenderingContext
         }, `server/${this.currServ}`, "PATCH");
     }
 
-    updateUserInfo(username: string, color: Color, character: string) { // TODO: handle alters
+    updateUserInfo(id: number, username: string, color: Color, character: string, prefix: string | null) {
         this.getCurrentInstance().sendApiMessage({
             type: 5,
             color: color,
             character: character,
-            username: username
-        }, `user/${this.getCurrentInstance().messaging.mainUser}`, "PATCH");
+            username: username,
+            prefix: prefix
+        }, `user/${id}`, "PATCH");
     }
 
     /* Server / channel management */

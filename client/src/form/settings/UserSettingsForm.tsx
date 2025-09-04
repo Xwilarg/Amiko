@@ -37,7 +37,7 @@ export default function UserSettingsForm () {
     let { t } = useTranslation();
 
     function onSubmit(e: React.MouseEvent<HTMLInputElement>) {
-        ctx.updateUserInfo(username, color, character);
+        ctx.updateUserInfo(ctx.getCurrentInstance().messaging.mainUser!, username, color, character, null);
     }
 
     function prependZero(str: string) {
@@ -81,7 +81,7 @@ export default function UserSettingsForm () {
                     character: user.character,
                     username: user.username,
                     color: user.color,
-                    prefix: ""
+                    prefix: user.prefix ?? ""
                 });
             }
         }
@@ -110,12 +110,21 @@ export default function UserSettingsForm () {
                     setAltUsers([...altUsers]);
                 }} /></td>
                 <td>
-                    <button className="button is-primary">
+                    <button className="button is-primary" onClick={
+                        () => { ctx.updateUserInfo(user.user.id, user.username, user.color, user.character, user.prefix ?? null) }
+                    }>
                         <span className="material-symbols-outlined small-icon">save</span>
                     </button>
                 </td>
                 <td>
-                    <button className="button is-warning">
+                    <button className="button is-warning" onClick={
+                        () => {
+                            user.prefix = user.user.prefix ?? "";
+                            user.color = user.user.color;
+                            user.character = user.user.character;
+                            user.username = user.user.username;
+                        }
+                    }>
                         <span className="material-symbols-outlined small-icon">undo</span>
                     </button>
                 </td>
