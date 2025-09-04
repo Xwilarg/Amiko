@@ -57,7 +57,11 @@ public class UserController : ControllerBase
             {
                 UpdateType = UpdateType.Creation,
                 Id = id,
-                DependsOf = claimId
+                DependsOf = claimId,
+
+                Username = "New User",
+                Character = "N",
+                Color = new() { R = 54, G = 54, B = 54 }
             };
             await _connManager.BroadcastMessageAsync(_dbContext, null, msg, except: null);
             return StatusCode(StatusCodes.Status204NoContent);

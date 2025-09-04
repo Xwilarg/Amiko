@@ -382,6 +382,10 @@ export default class SessionRenderingContext
         this.getCurrentInstance().sendApiMessageNoPayload(`user/alt`, "POST");
     }
 
+    deleteUser(id: number) {
+        this.getCurrentInstance().sendApiMessageNoPayload(`user/${id}`, "DELETE");
+    }
+
     downloadExport() {
         fetch(`${this.getCurrentInstanceName()}/api/export/${this.currServ}/${this.currChannel}`, {
             method: 'GET',

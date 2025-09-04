@@ -162,10 +162,31 @@ export default class MessagingSession
     }
 
     updateUserInfo(msg: any) {
-        let u = this.users[msg.id];
-        if (msg.color !== null) u.color = msg.color;
-        if (msg.character !== null) u.character = msg.character;
-        if (msg.username !== null) u.username = msg.username;
+        if (msg.updateType === 0) { // Creation
+            let user: User = {
+                id: msg.id,
+                username: msg.username,
+                color: msg.color,
+                character: msg.character,
+                isAdmin: false,
+                prefix: msg.prefix
+            };
+            this.users[msg.id] = user;
+            if (msg.dependsOf === this.mainUser) {
+                this.possibleUsers.push(msg.id);
+            }
+        }
+        else if (msg.updateType === 1) { // Edition
+            let u = this.users[msg.id];
+            if (msg.color !== null) u.color = msg.color;
+            if (msg.character !== null) u.character = msg.character;
+            if (msg.username !== null) u.username = msg.username;
+        }
+        else { // Deletion
+            delete this.users[msg.id];
+            const index = this.possibleUsers.indexOf(msg.id);
+            if (index !== -1) this.possibleUsers.splice(index, 1);
+        }
     }
 
     updateChannelInfo(msg: any) {
@@ -251,7 +272,8 @@ export default class MessagingSession
             username: msg.username,
             color: msg.color,
             character: msg.character,
-            isAdmin: msg.isAdmin
+            isAdmin: msg.isAdmin,
+            prefix: msg.prefix
         }
 
         if (msg.isMe) {
@@ -322,7 +344,8 @@ export default class MessagingSession
             username: id.toString(),
             color: { r: 54, g: 54, b: 54 },
             character: '?',
-            isAdmin: false
+            isAdmin: false,
+            prefix: null
         };
     }
 

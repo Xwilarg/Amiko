@@ -309,6 +309,7 @@ export default class NetworkSession
 
                 case 10: // A user settings were modified
                     self.messaging.updateUserInfo(json); // todo: refresh messages
+                    self.renderingContext.refreshUserSettings?.();
                     // @ts-ignore
                     self.renderingContext.refMsg.current.refreshAuthors();
                     break;

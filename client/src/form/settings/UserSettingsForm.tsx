@@ -120,7 +120,9 @@ export default function UserSettingsForm () {
                     </button>
                 </td>
                 <td>
-                    <button className="button is-danger">
+                    <button className="button is-danger" onClick={
+                        () => { ctx.deleteUser(user.user.id); }
+                    }>
                         <span className="material-symbols-outlined small-icon">delete</span>
                     </button>
                 </td>

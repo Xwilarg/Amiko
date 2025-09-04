@@ -16,4 +16,6 @@ export default interface User
     character: string;
 
     isAdmin: boolean;
+
+    prefix: string | null;
 }
