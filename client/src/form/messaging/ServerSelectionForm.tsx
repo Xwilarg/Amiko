@@ -1,11 +1,13 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import { SessionRenderingContextProvider } from '../../context/SessionRenderingContext';
 import { t } from 'i18next';
+import { useNavigate } from 'react-router';
 
 export default function ServerSelectionForm () {
     let [serverListDisplay, setServerListDisplay] = useState<Array<ReactElement>>([]);
     let [channelListDisplay, setChannelListDisplay] = useState<Array<ReactElement>>([]);
     let ctx = useContext(SessionRenderingContextProvider);
+    const navigate = useNavigate();
     
     const [r, forceRefresh] = useState(0);
     const [showChannels, setShowChannels] = useState(false);
@@ -77,6 +79,20 @@ export default function ServerSelectionForm () {
                     </button>
                 );
             }
+        }
+        // @ts-ignore
+        if (configuration.baseUrl() === null)
+        {
+            servs.push(
+                <button key={`instance-new`} className="button profile is-flex is-flex-wrap-wrap" onClick={() => {
+                    navigate("/login");
+                }}>
+                    <div className="pfp">
+                        <span className="material-symbols-outlined small-icon">add</span>
+                    </div>
+                    <p>{t("serverSelection.addInstance")}</p>
+                </button>
+            );
         }
         setServerListDisplay(servs);
         setChannelListDisplay(chans);

@@ -164,7 +164,7 @@ export default function LoginForm() {
                 <div className="control">
                     <input className="input" name="instance" type="text" disabled={
                         // @ts-ignore
-                        configuration.baseUrl() === ""
+                        configuration.baseUrl() !== null
                     }
                         value={instance} onChange={(e) => setInstance(e.target.value)}
                     />
@@ -200,6 +200,12 @@ export default function LoginForm() {
                 }
             </div>
         </div>
+        {
+            // @ts-ignore
+            configuration.baseUrl() === null
+            ? <button className="modal-close is-large" aria-label="close" onClick={_ => { navigate("/"); }}></button>
+            : <></>
+        }
     </div>
     )
 }

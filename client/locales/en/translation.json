@@ -63,7 +63,8 @@
     },
 
     "serverSelection": {
-        "add": "Add Server"
+        "add": "Add Server",
+        "addInstance": "Add Instance"
     },
 
     "settings": {
