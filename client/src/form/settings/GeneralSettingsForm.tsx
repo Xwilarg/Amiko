@@ -38,10 +38,16 @@ export default function GeneralSettingsForm () {
                 <button key={`${u.id}`} className={"button profile is-flex is-flex-wrap-wrap" + (curr.includes(u.id) ? " is-primary" : "")} onClick={() => {
                     if (userMode === "SingleUser") {
                         ctx.setSpeakers([ u.id ]);
-                        setRefresh(x => x + 1);
                     } else {
-                        // TODO: cofronting
+                        const index = curr.indexOf(u.id);
+                        if (index === -1) {
+                            curr.push(u.id);
+                        } else if (curr.length > 1) {
+                            curr.splice(index, 1);
+                        }
+                        ctx.setSpeakers(curr);
                     }
+                    setRefresh(x => x + 1);
                 }}>
                     <div className="pfp" style={{
                         background: `rgb(${u.color.r}, ${u.color.g}, ${u.color.b})`
@@ -52,7 +58,7 @@ export default function GeneralSettingsForm () {
             )
         }
         setUserList(data);
-    }, [r]);
+    }, [r, userMode]);
 
     let refreshChanges = needRefresh ?
     <>
@@ -143,13 +149,12 @@ export default function GeneralSettingsForm () {
                 <div className="select">
                     <select onChange={async (e) => {
                         const mode = e.target.value as UserMode;
-                        setUserMode(mode);
                         await ctx.setUserMode(mode);
 
-                        if (userMode === "SingleUser") {
+                        if (mode === "SingleUser") {
                             ctx.setSpeakers([ ctx.getSpeakers()[0] ]);
-                            setRefresh(x => x + 1);
                         }
+                        setUserMode(mode);
                     }} value={userMode}>
                         <option value="SingleUser">{t("settings.general.userMode.singleUser")}</option>
                         <option value="Cofronting">{t("settings.general.userMode.cofronting")}</option>
