@@ -1,16 +1,21 @@
-import { useContext, useEffect, useState } from "react";
-import { SessionRenderingContextProvider, type DisplayMode, type PingMode } from "../../context/SessionRenderingContext";
+import { useContext, useEffect, useState, type ReactElement } from "react";
+import { SessionRenderingContextProvider, type DisplayMode, type PingMode, type UserMode } from "../../context/SessionRenderingContext";
 import { useTranslation } from "react-i18next";
 
 export default function GeneralSettingsForm () {
     let ctx = useContext(SessionRenderingContextProvider);
     let { t } = useTranslation();
+
     const [displayMode, setDisplayMode] = useState<DisplayMode>("Default");
     const [originalDisplayMode, setOriginalDisplayMode] = useState<DisplayMode>("Default");
     const [needRefresh, setNeedRefresh] = useState<boolean>(false);
     const [isBoldReading, setIsBoldReading] = useState<boolean>(false);
     const [pingMode, setPingMode] = useState<PingMode>("PingOnly");
     const [isHideNotification, setIsHideNotification] = useState<boolean>(false);
+    const [userMode, setUserMode] = useState<UserMode>("SingleUser");
+
+    let [userList, setUserList] = useState<Array<ReactElement>>([]);
+    let [r, setRefresh] = useState<number>(0);
 
     useEffect(() => {
         setOriginalDisplayMode(ctx.getDisplayMode());
@@ -20,6 +25,35 @@ export default function GeneralSettingsForm () {
         setIsHideNotification(ctx.getHideNotification());
     }, []);
 
+    useEffect(() => {
+        let data = [];
+        
+        let m = ctx.getCurrentInstance().messaging;
+        let allAlts = m.getInfoFromIdList(m.possibleUsers);
+
+        let curr = ctx.getSpeakers();
+
+        for (let u of allAlts) {
+            data.push(
+                <button key={`${u.id}`} className={"button profile is-flex is-flex-wrap-wrap" + (curr.includes(u.id) ? " is-primary" : "")} onClick={() => {
+                    if (userMode === "SingleUser") {
+                        ctx.setSpeakers([ u.id ]);
+                        setRefresh(x => x + 1);
+                    } else {
+                        // TODO: cofronting
+                    }
+                }}>
+                    <div className="pfp" style={{
+                        background: `rgb(${u.color.r}, ${u.color.g}, ${u.color.b})`
+                    }}>{u.character}
+                    </div>
+                    <p>{u.username}</p>
+                </button>
+            )
+        }
+        setUserList(data);
+    }, [r]);
+
     let refreshChanges = needRefresh ?
     <>
         <p className="help is-danger">{t("settings.general.refreshNeeded")}</p>
@@ -28,22 +62,6 @@ export default function GeneralSettingsForm () {
     </>
     : <></>
     return <>
-        <div className="field">
-            <label className="label">{t("settings.general.display.title")}</label>
-            <div className="control">
-                <div className="select">
-                    <select onChange={async (e) => {
-                        const mode = e.target.value as DisplayMode;
-                        setDisplayMode(mode);
-                        await ctx.setDisplayModeAsync(mode);
-                        setNeedRefresh(mode != originalDisplayMode);
-                    }} value={displayMode}>
-                        <option value="Default">{t("settings.general.display.default")}</option>
-                        <option value="Minimalist">{t("settings.general.display.minimalist")}</option>
-                    </select>
-                </div>
-            </div>
-        </div>
         <div className="field">
             <label className="label">
                 {t("settings.general.boldReading")}<br/>
@@ -71,6 +89,24 @@ export default function GeneralSettingsForm () {
                 }}>{t("settings.general.exportDesc")}</button>
             </div>
         </div>
+        <div className="field">
+            <label className="label">{t("settings.general.display.title")}</label>
+            <div className="control">
+                <div className="select">
+                    <select onChange={async (e) => {
+                        const mode = e.target.value as DisplayMode;
+                        setDisplayMode(mode);
+                        await ctx.setDisplayModeAsync(mode);
+                        setNeedRefresh(mode != originalDisplayMode);
+                    }} value={displayMode}>
+                        <option value="Default">{t("settings.general.display.default")}</option>
+                        <option value="Minimalist">{t("settings.general.display.minimalist")}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        {refreshChanges}
+        <hr/>
         <div className="field">
             <label className="label">{t("settings.general.notification.title")}</label>
             <div className="control">
@@ -100,6 +136,29 @@ export default function GeneralSettingsForm () {
                 <span className="check"></span>
             </label>
         </div>
-        {refreshChanges}
+        <hr/>
+        <div className="field">
+            <label className="label">{t("settings.general.userMode.title")}</label>
+            <div className="control">
+                <div className="select">
+                    <select onChange={async (e) => {
+                        const mode = e.target.value as UserMode;
+                        setUserMode(mode);
+                        await ctx.setUserMode(mode);
+
+                        if (userMode === "SingleUser") {
+                            ctx.setSpeakers([ ctx.getSpeakers()[0] ]);
+                            setRefresh(x => x + 1);
+                        }
+                    }} value={userMode}>
+                        <option value="SingleUser">{t("settings.general.userMode.singleUser")}</option>
+                        <option value="Cofronting">{t("settings.general.userMode.cofronting")}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div className="is-flex is-flex-wrap-wrap">
+            { userList }
+        </div>
     </>
 }

@@ -116,7 +116,13 @@
             },
 
             "boldReading": "Bold reading",
-            "hideNotification": "Hide notification text"
+            "hideNotification": "Hide notification text",
+
+            "userMode": {
+                "title": "User mode",
+                "singleUser": "Single user",
+                "cofronting": "Cofronting"
+            }
         }
     }
 }

@@ -23,6 +23,8 @@ export default class MessagingSession
     mainUser: number | null;
     // All alt users we can speak with
     possibleUsers: number[];
+    // Users currently speaking
+    currUsers: number[];
 
     // All the servers accessible by this instance
     servers: { [id: number] : Server; };
@@ -49,6 +51,7 @@ export default class MessagingSession
         this.users = [];
         this.mainUser = null;
         this.possibleUsers = [];
+        this.currUsers = [];
 
         this.servers = {};
         this.pendingAcknowledgement = {};
@@ -279,6 +282,7 @@ export default class MessagingSession
 
         if (msg.isMe) {
             this.mainUser = msg.id;
+            this.currUsers = [ msg.id ];
         }
 
         if (msg.isMyGroup) {

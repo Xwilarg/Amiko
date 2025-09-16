@@ -60,7 +60,7 @@ export default function UserSettingsForm () {
     useEffect(() => {
         let m = ctx.getCurrentInstance().messaging;
         let me = m.mainUser;
-        let allAlts = m.getInfoFromIdList(m.possibleUsers.filter(x => x != me)); // TODO: remove the main user
+        let allAlts = m.getInfoFromIdList(m.possibleUsers.filter(x => x != me));
 
         // Update users shown on display
         let currAlts: Array<AltUserDisplay> = [];

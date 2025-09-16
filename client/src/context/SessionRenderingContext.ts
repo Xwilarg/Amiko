@@ -30,6 +30,7 @@ export default class SessionRenderingContext
     isBoldReading: boolean;
     pingMode: PingMode;
     hideNotification: boolean;
+    userMode: UserMode;
 
     refreshServerDisplayState: (() => void) | null;
     refreshNavbar: (() => void) | null;
@@ -51,6 +52,7 @@ export default class SessionRenderingContext
         this.isBoldReading = false;
         this.pingMode = "PingOnly",
         this.hideNotification = false;
+        this.userMode = "SingleUser";
         this.initPreferencesAsync();
 
         DOMPurify.addHook('afterSanitizeAttributes', function (node) {
@@ -257,7 +259,7 @@ export default class SessionRenderingContext
             ackId: ackId,
             serverId: this.currServ,
             channelId: this.currChannel,
-            authors: authors // TODO
+            authors: this.getSpeakers()
         }
 
         this.getCurrentInstance().sendNetworkMessage(newMsg);
@@ -287,6 +289,14 @@ export default class SessionRenderingContext
     setMessages(msgs: Message[]) {
         // @ts-ignore
         this.refMsg.current.setMessages(msgs);
+    }
+
+    getSpeakers(): number[] {
+        return this.getCurrentInstance().messaging.currUsers;
+    }
+
+    setSpeakers(value: number[]) {
+        this.getCurrentInstance().messaging.currUsers = value;
     }
 
     /* NAVBAR */
@@ -418,6 +428,8 @@ export default class SessionRenderingContext
         this.pingMode = await filesystem.readPrefAsync("pingMode", "PingOnly");
         // @ts-ignore
         this.hideNotification = await filesystem.readPrefAsync("hideNotification", "0") === "1";
+        // @ts-ignore
+        this.userMode = await filesystem.readPrefAsync("userMode", "SingleUser");
     }
 
     getDisplayMode(): DisplayMode {
@@ -459,9 +471,20 @@ export default class SessionRenderingContext
         await filesystem.writePrefAsync("hideNotification", value ? "1" : "0");
         this.hideNotification = value;
     }
+
+    getUserMode(): UserMode {
+        return this.userMode;
+    }
+
+    async setUserMode(value: UserMode) {
+        // @ts-ignore
+        await filesystem.writePrefAsync("userMode", value);
+        this.userMode = value;
+    }
 }
 
 export const SessionRenderingContextProvider = createContext<SessionRenderingContext>(new SessionRenderingContext());
 
 export type DisplayMode = 'Default' | 'Minimalist';
 export type PingMode = "None" | "PingOnly" | "AllMessages";
+export type UserMode = "SingleUser" | "Cofronting";
