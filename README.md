@@ -53,6 +53,6 @@ Go in the `client/` folder and run `npm i`
 - If you want to make a build to use the website in an embed, run `npm run embedbuild`
 
 #### Desktop
-- Run `npm run appprep`
+- Run `npm run apprep`
 - If you want to make a build, then run `npm run appbuild`
 - If you want to run the debug version of the app directly, run `npm run appdev`

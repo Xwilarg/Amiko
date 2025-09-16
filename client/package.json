@@ -3,7 +3,7 @@
     "webdev": "vite",
     "webbuild": "vite build",
     "embedbuild": "cross-env EMBED=true vite build",
-    "appprep": "esbuild src/routes.tsx --jsx=automatic --bundle --minify --outfile=js/routes.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
+    "apprep": "esbuild src/routes.tsx --jsx=automatic --bundle --minify --outfile=js/routes.js && esbuild src/platform/desktop.js --minify --sourcemap --outfile=js/platform/desktop.js",
     "appdev": "electron-forge start",
     "appbuild": "electron-forge make"
   },

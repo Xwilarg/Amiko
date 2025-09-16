@@ -162,7 +162,10 @@ export default function LoginForm() {
             <div className="field pb-6">
                 <label className="label">{t("login.website")}</label>
                 <div className="control">
-                    <input className="input" name="instance" type="text" disabled={instance != ""}
+                    <input className="input" name="instance" type="text" disabled={
+                        // @ts-ignore
+                        configuration.baseUrl() === ""
+                    }
                         value={instance} onChange={(e) => setInstance(e.target.value)}
                     />
                 </div>
