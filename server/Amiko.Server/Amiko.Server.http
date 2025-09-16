@@ -1,6 +1,0 @@
-@Amiko.Server_HostAddress = http://localhost:5129
-
-POST {{Amiko.Server_HostAddress}}/api/auth/token/
-Accept: application/json
-
-###

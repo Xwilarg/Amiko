@@ -1,0 +1,10 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Amiko.Server/Dockerfile
+    user: "1000:1000" # User that use the dockerfile
+    ports:
+      - "5129:5129" # Port defined
+    volumes:
+      - ./data:/data # Where the database will be stored
