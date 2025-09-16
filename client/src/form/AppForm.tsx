@@ -8,6 +8,7 @@ import SettingsContainerForm from './settings/SettingsContainerForm';
 import { initReactI18next, useTranslation } from "react-i18next";
 
 import translationEN from "../../locales/en/translation.json"
+import { useNavigate } from 'react-router';
 
 i18n
   .use(initReactI18next) // passes i18n down to react-i18next
@@ -31,6 +32,8 @@ export default function AppForm() {
     const context = useContext(SessionRenderingContextProvider);
     context.refMsg = msgRef
 
+    const navigate = useNavigate();
+
     const settingsRef = React.createRef();
 
     useEffect(() => {
@@ -52,7 +55,7 @@ export default function AppForm() {
                 context.addInstance(key, value, t);
             }
             for (let s of context.sessions) {
-                s.connect();
+                s.connect(navigate);
             }
         });
 

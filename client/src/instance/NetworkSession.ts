@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 import type SessionRenderingContext from "../context/SessionRenderingContext";
 import MessagingSession from "./MessagingSession";
+import type { NavigateFunction } from "react-router";
 
 export default class NetworkSession
 {
@@ -37,7 +38,7 @@ export default class NetworkSession
         this.messaging = new MessagingSession(this);
     }
 
-    connect() {
+    connect(navigate: NavigateFunction) {
         if (this.socket) {
             this.socket.close(); // Socket already exist so we just force it to reconnect
             return;
@@ -47,11 +48,11 @@ export default class NetworkSession
             this.isGuest = true;
             this.#openNetworkConnection();
         } else {
-            this.#checkToken();
+            this.#checkToken(navigate);
         }
     }
 
-    #checkToken() { // As a connected user, we verify that our token is still valid
+    #checkToken(navigate: NavigateFunction) { // As a connected user, we verify that our token is still valid
         fetch(`${this.instance}/api/auth/validate`, {
             method: 'POST',
             headers: {
@@ -67,7 +68,7 @@ export default class NetworkSession
             if (e === 401 && this.renderingContext.sessions.length === 1) {
                 // Session expired and we were only connected to one instance
                 // So only thing we can do is login again
-                window.location.href = "/#/login";
+                navigate("/login");
             }
         });
     }
