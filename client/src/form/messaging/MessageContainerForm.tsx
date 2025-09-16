@@ -49,7 +49,7 @@ const MessageContainerForm = forwardRef((
 
     function createKey(msg: Message): string {
         if (msg.id) return `${msg.id}`;
-        if (msg.ackId) return `${msg.ackId}`;
+        if (msg.ackId) return `ack-${msg.ackId}`;
         return hashCode(msg.content) + hashCode((new Date()).valueOf().toString()).toString();
     }
 
