@@ -116,23 +116,27 @@ export default class MessagingSession
         return msgInst;
     }
 
-    acknowledgeMessage(ackId: number, newId: number, isError: boolean) {
-        const msg = this.pendingAcknowledgement[ackId];
-        msg.id = newId;
+    acknowledgeMessage(json: any) {
+        const msg = this.pendingAcknowledgement[json.ackId];
+        msg.id = json.newId;
         msg.ackId = null;
-        delete this.pendingAcknowledgement[ackId];
 
-         if (isError) {
+        if (json.content) msg.content = json.content;
+        if (json.authors) msg.authors = json.authors;
+
+        delete this.pendingAcknowledgement[json.ackId];
+
+        if (json.isError) {
             msg.flag = "IsError";
 
             // Message wasn't sent so we don't send the attachments
-            this.discardAttachment(ackId);
+            this.discardAttachment(json.ackId);
         } else {
-            const files = this.getAttachment(ackId);
+            const files = this.getAttachment(json.ackId);
             if (files && files.length > 0) {
-                this.session.sendAttachmentOverNetwork(this.session.renderingContext.currServ!, this.session.renderingContext.currChannel!, newId, files);
+                this.session.sendAttachmentOverNetwork(this.session.renderingContext.currServ!, this.session.renderingContext.currChannel!, json.newId, files);
             }
-            this.discardAttachment(ackId);
+            this.discardAttachment(json.ackId);
         }
         // @ts-ignore
         this.session.renderingContext.refMsg.current.updateSingleMessage(newId, msg);

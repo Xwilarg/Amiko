@@ -288,7 +288,7 @@ export default class NetworkSession
                     break;
 
                 case 3: // Acknowledgement of a message sent
-                    self.messaging.acknowledgeMessage(json.ackId, json.newId, json.isError);
+                    self.messaging.acknowledgeMessage(json);
                     break;
 
                 case 7: // A message was modified
