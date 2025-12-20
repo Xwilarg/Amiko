@@ -139,7 +139,7 @@ export default class MessagingSession
             this.discardAttachment(json.ackId);
         }
         // @ts-ignore
-        this.session.renderingContext.refMsg.current.updateSingleMessage(newId, msg);
+        this.session.renderingContext.refMsg.current.updateSingleMessage(json.newId, msg);
     }
 
     sendSystemMessage(text: string) {
