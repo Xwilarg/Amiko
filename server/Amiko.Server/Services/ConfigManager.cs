@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
+﻿using Amiko.Database;
 using Amiko.Server.Models;
+using System.Text.Json;
 
 namespace Amiko.Server.Services;
 
@@ -15,26 +16,28 @@ public class ConfigManager
 
     private JsonSerializerOptions _options;
 
+    private string ConfigPath => $"{RuntimePath.GetPath()}config.json";
+
     public Config GetConfig()
     {
-        return JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), _options)!;
+        return JsonSerializer.Deserialize<Config>(File.ReadAllText(ConfigPath), _options)!;
     }
 
     public void InitConfig()
     {
         Config? config;
-        if (!File.Exists("config.json"))
+        if (!File.Exists(ConfigPath))
         {
             config = new();
         }
         else
         {
-            config = JsonSerializer.Deserialize<Config>(File.ReadAllText("config.json"), _options);
+            config = JsonSerializer.Deserialize<Config>(File.ReadAllText(ConfigPath), _options);
             if (config == null) throw new InvalidOperationException("config.json is in an invalid format");
         }
 
         config.AdminKey ??= Guid.NewGuid().ToString();
         config.SecurityKey ??= Guid.NewGuid().ToString();
-        File.WriteAllText("config.json", JsonSerializer.Serialize(config, _options));
+        File.WriteAllText(ConfigPath, JsonSerializer.Serialize(config, _options));
     }
 }

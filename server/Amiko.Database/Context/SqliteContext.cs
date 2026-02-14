@@ -10,7 +10,7 @@ public class SqliteContext : DbContext
     internal DbSet<AllowedUsersContext> AllowUsers { set; get; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite("Data Source=Sqlite.db");
+        => options.UseSqlite($"Data Source={RuntimePath.GetPath()}Sqlite.db");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
