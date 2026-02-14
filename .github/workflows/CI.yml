@@ -50,7 +50,7 @@ jobs:
     - name: Install JS dependencies
       run: npm i
     - name: Prepare scripts
-      run: npm run appprep
+      run: npm run apprep
     - name: Make executable
       run: npm run appbuild
 
