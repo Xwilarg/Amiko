@@ -16,8 +16,18 @@ Meanwhile you can still go to https://amiko.zirk.eu to try the pre-released vers
 ## Installing from sources
 
 ### Backend
+
+#### Docker
+- Copy all the content of `server/` on your server
+- In `server/Amiko.Server`, run `dotnet tool install --global dotnet-ef` then `dotnet ef database update`
+- Create a `data` folders in `server/` and move the created database file inside
+- Rename `docker-compose.yml.example` to `docker-compose.yml`
+- Run `docker compose up -d`
+- To update, run `docker compose build --no-cache` then `docker compose up -d`
+
+#### Build
 - In `server/`, run `dotnet build Amiko.sln`
-- Run `server/Amiko.Server`, run `dotnet tool install --global dotnet-ef` then `dotnet ef database update`
+- In `server/Amiko.Server`, run `dotnet tool install --global dotnet-ef` then `dotnet ef database update`
 Then move all the files in your server and create the appropriate configuration
 
 #### nginx
